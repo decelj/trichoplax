@@ -1,0 +1,35 @@
+#ifndef __POINT_LIGHT_H__
+#define __POINT_LIGHT_H__
+
+#include <glm/glm.hpp>
+
+#include "ilight.h"
+
+class PointLight : public ILight
+{
+public:
+    PointLight(glm::vec3 pos, glm::vec3 kd, float radius, float bias, float constAtten, float linearAtten, float quadAtten);
+    ~PointLight() { }
+    
+    // ILight
+    glm::vec3 getDir(const glm::vec3& p) const;
+    glm::vec3 getHalf(const glm::vec3& dirToLgt, const glm::vec3& I) const;
+    glm::vec3 getColor() const { return mKd; }
+    void attenuate(const glm::vec3& P, glm::vec3& result) const;
+    bool generateShadowRay(MultiSampleRay& r, float& distTolgt) const;
+    virtual inline void setShadowRays(unsigned int numRays) {
+        mShadowRays = numRays; mSqrtShadowSamples = sqrtf(numRays); } // reimplemented
+    
+private:
+    PointLight() { }
+    
+    void randomPointOnDisk(const glm::vec3& dir, const unsigned int currentSample, glm::vec3& p) const;
+    
+    glm::vec3 mPos, mKd;
+    float mConstAtten, mLinearAtten, mQuadAtten;
+    bool mHasAtten;
+    float mSqrtShadowSamples;
+};
+
+#endif
+
