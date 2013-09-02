@@ -1,12 +1,3 @@
-/*
- *  triangle.cpp
- *  raytracer
- *
- *  Created by Justin DeCell on 4/6/13.
- *  Copyright 2013 __MyCompanyName__. All rights reserved.
- *
- */
-
 #include "triangle.h"
 #include "ray.h"
 #include "hit.h"
@@ -79,9 +70,4 @@ void Triangle::bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const
 bool Triangle::onLeftOfPlane(const float plane, const short axis) const
 {
     return mA[axis] < plane && mB[axis] < plane && mC[axis] < plane;
-    
-    if (mA[axis] < plane)
-        return mB[axis] < plane || mC[axis] < plane;
-    
-    return mB[axis] < plane && mC[axis] < plane;
 }

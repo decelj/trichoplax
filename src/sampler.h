@@ -11,6 +11,7 @@ class Sampler
 public:
     static const int sSamplesPerPixel;
     static const int sSamplesPerAxis;
+    static const float sSubpixelStep;
     
     explicit Sampler(const int width, const int height);
 

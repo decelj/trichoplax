@@ -11,6 +11,7 @@ public:
     explicit MultiSampleRay(const glm::vec3& origin, unsigned int samples);
     
     unsigned int mSample;
+    
 private:
     MultiSampleRay(const MultiSampleRay&) {}
 };

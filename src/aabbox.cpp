@@ -1,12 +1,3 @@
-/*
- *  abbox.cpp
- *  raytracer
- *
- *  Created by Justin DeCell on 5/6/13.
- *  Copyright 2013 __MyCompanyName__. All rights reserved.
- *
- */
-
 #include "aabbox.h"
 #include "ray.h"
 

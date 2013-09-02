@@ -89,12 +89,11 @@ void Scene::render(const std::string& filename)
 		if(mRaytracer->traceAndShade(primary, &result))
             mImgBuffer->commit(s, result);
     } */
+    
     int err = 0;
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    //err = pthread_attr_setstacksize(&attr, THREAD_STACK_SIZE);
-    //if (err) printf("Error setting stacksize: %d\n", err);
     
     unsigned numCpus = sysconf(_SC_NPROCESSORS_ONLN);
     if (numCpus < 1) {
@@ -125,7 +124,7 @@ void Scene::render(const std::string& filename)
     
     mImgBuffer->write(filename);
     mRaytracer->printStats();
-    pthread_exit(NULL); // Needed?
+    pthread_exit(NULL);
 }
 
 void Scene::setShadowRays(int num)

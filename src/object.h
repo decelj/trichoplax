@@ -13,6 +13,8 @@
 class Raytracer;
 class Material;
 
+// Dead code...
+
 class Object {
 public:
     explicit Object(glm::mat4& t, Material* m);
@@ -22,7 +24,6 @@ public:
     bool intersect(Ray& ray);
     bool intersect(Ray& ray, Hit* hit, bool backfacing);
     
-    void computeNormal(Hit* hit);
     void insertPrimitive(IPrimitive* p);
     
     glm::vec3 shadePoint(const glm::vec3& p, const glm::vec3& n, const glm::vec3& I, Raytracer* const rt, const int depth) const;

@@ -1,6 +1,7 @@
-
 #include "object.h"
 #include "debug.h"
+
+// Dead code...
 
 Object::Object(glm::mat4& t, Material* m)
     : mMaterial(m), mT(t)
@@ -25,8 +26,6 @@ void Object::insertPrimitive(IPrimitive* p)
 
 bool Object::intersect(Ray& ray)
 {
-    // TODO: Optimize, return as soon as we hit an object
-    // Maybe not, when we get to arealights...
     return intersect(ray, NULL, false);
 }
 
@@ -36,7 +35,6 @@ bool Object::intersect(Ray& ray, Hit* hit, bool backfacing)
     float minDist = MAXFLOAT;
     
     // Transform ray into this object's space
-    // TODO: Don't pass ray by reference
     Ray rayObjectSpace(ray);
     rayObjectSpace.transform(mTInverse);
     
@@ -55,13 +53,6 @@ bool Object::intersect(Ray& ray, Hit* hit, bool backfacing)
     }
     
     return false;
-}
-
-void Object::computeNormal(Hit* hit)
-{
-    printf("HERE!\n");
-    //hit->prim->computeNormal(hit->p, &(hit->n));
-    hit->n = glm::vec3(mTInverseTranspose * glm::vec4(hit->n, 0));
 }
 
 glm::vec3 Object::shadePoint(const glm::vec3& p, const glm::vec3& n, const glm::vec3& I, Raytracer* const rt, const int depth) const

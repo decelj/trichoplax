@@ -5,6 +5,7 @@
 
 const int Sampler::sSamplesPerPixel = 16;
 const int Sampler::sSamplesPerAxis = sqrtf(Sampler::sSamplesPerPixel);
+const float Sampler::sSubpixelStep = 1.0f / (sSamplesPerAxis + 1);
 
 Sampler::Sampler (const int width, const int height) 
 :   mWidth(width), 
@@ -30,9 +31,8 @@ bool Sampler::getSample(Sample* s)
         }
     }
     
-    const float subPixelStep = 1.0f / (sSamplesPerAxis + 1);
-    s->x = mCurrentX + (((mCurrentSample % sSamplesPerAxis) + 1.0f) * subPixelStep);
-    s->y = mCurrentY + ((floorf(mCurrentSample / sSamplesPerAxis) + 1.0f) * subPixelStep);
+    s->x = mCurrentX + (((mCurrentSample % sSamplesPerAxis) + 1.0f) * sSubpixelStep);
+    s->y = mCurrentY + ((floorf(mCurrentSample / sSamplesPerAxis) + 1.0f) * sSubpixelStep);
     
     ++mCurrentSample;
     pthread_mutex_unlock(&mLock);
