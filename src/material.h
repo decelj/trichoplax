@@ -6,8 +6,7 @@
 #include "brdf.h"
 #include "common.h"
 
-class Raytracer;
-struct Hit;
+class Ray;
 
 class Material {
 public:
@@ -19,8 +18,9 @@ public:
     void setDiffuse(glm::vec3 Kd);
     void setSpecular(glm::vec3 Ks);
     void setShininess(float Kr);
+    void setIor(float Ior);
     
-    glm::vec3 shadePoint(const Hit& hit) const;
+    void shadeRay(const Ray& r, glm::vec4& result) const;
     
 private:
     Material(const Material& other);

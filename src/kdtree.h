@@ -5,7 +5,6 @@
 
 class IPrimitive;
 class AABBox;
-struct Hit;
 class Ray;
 
 class KdTree
@@ -32,14 +31,14 @@ public:
     
     void build();
     
-    bool trace(Ray& ray, Hit& hit, bool backfacing, float& minDistm, bool firstHit) const;
+    bool trace(Ray& ray, bool backfacing, bool firstHit) const;
     
     inline void addPrimitive(IPrimitive *p) { mRoot->mPrims.push_back(p); }
     
 private:
     void build(Node* node, unsigned int depth);
     short findSplitAxis(Node* node) const;
-    bool trace(const Node* n, Ray& ray, Hit& hit, bool backfacing, float& minDist, bool firstHit) const;
+    bool trace(const Node* n, Ray& ray, bool backfacing, bool firstHit) const;
     void destroy(Node* n);
     
     Node* mRoot;

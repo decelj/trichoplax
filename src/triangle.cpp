@@ -15,9 +15,9 @@ Triangle::Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, Material* m)
     mMaterial = m;
 }
 
-bool Triangle::intersect(Ray& ray, glm::vec3& p, bool backfacing) const
+bool Triangle::intersect(Ray& ray, bool backfacing) const
 {
-    float denom = glm::dot(*ray.dir(), mN);
+    const float denom = glm::dot(ray.dir(), mN);
     
     // > 0 -> backface
     if (denom > EPSILON)
@@ -27,32 +27,31 @@ bool Triangle::intersect(Ray& ray, glm::vec3& p, bool backfacing) const
     else if (denom > -EPSILON)
         return false;
     
-    float numerator = glm::dot(mA, mN) - glm::dot(*ray.origin(), mN);
-    float t = numerator / denom;
-    if (t < 0.0f) return false;
+    const float numerator = glm::dot(mA, mN) - glm::dot(ray.origin(), mN);
+    const float t = numerator / denom;
+    if (t < 0.0f || !ray.hits(t)) return false;
     
     // Check if intersection with plane is inside triangle
     // using Barycentric Coordinates
     // http://www.blackpawn.com/texts/pointinpoly/default.html
     
-    glm::vec3 P = ray.point(t);
-    glm::vec3 v0 = mC - mA, v1 = mB - mA, v2 = P - mA;
+    const glm::vec3 P = ray.point(t);
+    const glm::vec3 v0 = mC - mA, v1 = mB - mA, v2 = P - mA;
     
-    float dot00 = glm::dot(v0, v0);
-    float dot01 = glm::dot(v0, v1);
-    float dot02 = glm::dot(v0, v2);
-    float dot11 = glm::dot(v1, v1);
-    float dot12 = glm::dot(v1, v2);
+    const float dot00 = glm::dot(v0, v0);
+    const float dot01 = glm::dot(v0, v1);
+    const float dot02 = glm::dot(v0, v2);
+    const float dot11 = glm::dot(v1, v1);
+    const float dot12 = glm::dot(v1, v2);
     
-    float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
-    float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-    float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+    const float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
+    const float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    const float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
     
     if (u < 0.0f || v < 0.0f || (u + v) > 1.0f)
         return false;
     
-    p = P;
-    
+    ray.hit(this, t, denom > EPSILON);
     return true;
 }
 

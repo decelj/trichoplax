@@ -2,9 +2,9 @@
 
 #include "raytracer.h"
 #include "ray.h"
-#include "hit.h"
 #include "iprimitive.h"
 #include "material.h"
+#include "hit.h"
 
 Raytracer::Raytracer()
  :  mKdTree(new KdTree()),
@@ -27,43 +27,31 @@ void Raytracer::printStats() const
     std::cout << "Shadow rays: " << mShadowRays << std::endl;
 }
 
-bool Raytracer::traceShadow(Ray& ray, const float distToLight)
+bool Raytracer::traceShadow(Ray& ray)
 {
     pthread_mutex_lock(&mStatsMutex);
     mShadowRays++;
     pthread_mutex_unlock(&mStatsMutex);
     
-    // minDist is distToLight^2 because comparisions are to the square of the
-    // distance to avoid sqrt in computation.
-    Hit h;
-    return trace(ray, h, true, distToLight*distToLight, true);
+    return trace(ray, true, true);
 }
 
-bool Raytracer::trace(Ray& ray, Hit& final, bool backfacing, float minDist, bool firstHit) const
+bool Raytracer::trace(Ray& ray, bool backfacing, bool firstHit) const
 {
     // Base case
     if (ray.depth() > mMaxDepth) return false;
     
-    bool didHit = mKdTree->trace(ray, final, backfacing, minDist, firstHit);   
- 
-    if (didHit) {
-        final.n = final.prim->normal(final.p);
-        final.depth = ray.depth();
-        final.I = -(*ray.dir());
-    }
- 
-    return didHit;
+    return mKdTree->trace(ray, backfacing, firstHit);
 }
 
-bool Raytracer::traceAndShade(Ray& ray, glm::vec3* result)
+bool Raytracer::traceAndShade(Ray& ray, glm::vec4& result)
 {
     pthread_mutex_lock(&mStatsMutex);
     mShadingRays++;
     pthread_mutex_unlock(&mStatsMutex);
     
-    Hit final;
-    if (trace(ray, final)) {
-        *result = final.prim->material()->shadePoint(final);
+    if (trace(ray)) {
+        ray.shade(result);
         return true;
     }
     

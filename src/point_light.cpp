@@ -17,14 +17,15 @@ namespace {
     static const float gGoldenAngle = M_PI * (3.0f - sqrtf(5.0f));
 }
 
-PointLight::PointLight(glm::vec3 pos, glm::vec3 kd, float radius, float bias, float constAtten, float linearAtten, float quadAtten) : 
+PointLight::PointLight(glm::vec3 pos, glm::vec3 kd, float radius, float bias,
+                       float constAtten, float linearAtten, float quadAtten) : 
     mPos(pos),
     mConstAtten(constAtten),
     mLinearAtten(linearAtten),
     mQuadAtten(quadAtten) ,
     mSqrtShadowSamples(1.0f)
 {
-    mHasAtten = mLinearAtten > 0.0 || mQuadAtten > 0.0 || mConstAtten != 1.0;
+    mHasAtten = mLinearAtten > 0.0 || mQuadAtten > 0.0 || mConstAtten != 1.f;
     mKd = kd;
     mBias = bias;
     mRadius = radius;
@@ -49,22 +50,22 @@ void PointLight::attenuate(const glm::vec3& P, glm::vec3& result) const
     result /= mConstAtten + mLinearAtten * distance + mQuadAtten * distance * distance;
 }
 
-bool PointLight::generateShadowRay(MultiSampleRay& r, float& distTolgt) const
+bool PointLight::generateShadowRay(MultiSampleRay& r) const
 {
-    if (r.mSample <= 0) return false;
+    if (r.currentSample() <= 0) return false;
     
-    glm::vec3 dirToLgt = mPos - *r.origin();
+    glm::vec3 dirToLgt = mPos - r.origin();
+    r.setMinDistance(glm::length(dirToLgt));
+    
     glm::vec3 samplePoint;
-    randomPointOnDisk(-glm::normalize(dirToLgt), r.mSample, samplePoint);
+    randomPointOnDisk(-glm::normalize(dirToLgt), r.currentSample(),
+                      samplePoint);
     
-    dirToLgt = samplePoint - *r.origin();
+    dirToLgt = samplePoint - r.origin();
     r.setDir(glm::normalize(dirToLgt));
     r.bias(mBias);
     
-    // Bug? dist sqrd?
-    distTolgt = glm::length(dirToLgt);
-    
-    r.mSample--;
+    r.decrementSampleCount();
     
     return true;
 }

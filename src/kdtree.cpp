@@ -7,7 +7,6 @@
 #include "aabbox.h"
 #include "common.h"
 #include "iprimitive.h"
-#include "hit.h"
 #include "ray.h"
 
 namespace {
@@ -130,38 +129,33 @@ short KdTree::findSplitAxis(Node* node) const
     return axis;
 }
 
-bool KdTree::trace(Ray& ray, Hit& hit, bool backfacing, float& minDist, bool firstHit) const
+bool KdTree::trace(Ray& ray, bool backfacing, bool firstHit) const
 {
     if (!mRoot->mBBox->intersect(ray)) return false;
-    return trace(mRoot, ray, hit, backfacing, minDist, firstHit);
+    return trace(mRoot, ray, backfacing, firstHit);
 }
 
-bool KdTree::trace(const Node* n, Ray& ray, Hit& hit, bool backfacing, float& minDist, bool firstHit) const
+bool KdTree::trace(const Node* n, Ray& ray, bool backfacing, bool firstHit) const
 {
     bool ret = false;
     
     // Base case
     if (n->mIsLeaf) {
-        glm::vec3 hitP;
         Node::ConstPrimIterator it = n->mPrims.begin();
         for (; it != n->mPrims.end(); ++it) {
-            if ((*it)->intersect(ray, hitP, backfacing)) {
-                glm::vec3 eyeToPoint = hitP - *ray.origin();
-                float distSqrd = glm::dot(eyeToPoint, eyeToPoint);
-                if (distSqrd < minDist) {
-                    hit.prim = *it;
-                    hit.p = hitP;
-                    minDist = distSqrd;
-                    ret = true;
-                    if (firstHit) break;
-                }
-            }
+            if (firstHit && ret) break;
+            ret |= (*it)->intersect(ray, backfacing);
         }
     } else {
+        /* TODO:
+         If the ray origin is outside of the BBox, and the distance of the ray
+         to the closest point on the box is greater than the minDist, we can
+         skip that entier branch of the tree.
+         */
         if (n->mLeft->mBBox->intersect(ray))
-            ret |= trace(n->mLeft, ray, hit, backfacing, minDist, firstHit);
+            ret |= trace(n->mLeft, ray, backfacing, firstHit);
         if (!(ret && firstHit) && n->mRight->mBBox->intersect(ray))
-            ret |= trace(n->mRight, ray, hit, backfacing, minDist, firstHit);
+            ret |= trace(n->mRight, ray, backfacing, firstHit);
     }
     
     return ret;

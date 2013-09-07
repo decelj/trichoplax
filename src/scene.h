@@ -30,8 +30,8 @@ public:
     inline Sampler* sampler() { return mSampler; }
     inline ImageBuffer* imageBuffer() { return mImgBuffer; }
     
-    inline bool traceShadow(Ray& r, float maxDistance) const { return mRaytracer->traceShadow(r, maxDistance); }
-    inline bool traceAndShade(Ray& r, glm::vec3* result) const { return mRaytracer->traceAndShade(r, result); }
+    inline bool traceShadow(Ray& r) const { return mRaytracer->traceShadow(r); }
+    inline bool traceAndShade(Ray& r, glm::vec4& result) const { return mRaytracer->traceAndShade(r, result); }
     
     inline std::vector<ILight*>::const_iterator lightsBegin() const { return mLights.begin(); }
     inline std::vector<ILight*>::const_iterator lightsEnd() const { return mLights.end(); }

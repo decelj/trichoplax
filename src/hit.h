@@ -3,15 +3,25 @@
 
 #include <glm/glm.hpp>
 
-class IPrimitive;
+#include "iprimitive.h"
 
-struct Hit
+class Ray;
+class Material;
+
+class Hit
 {
-    const IPrimitive *prim;
-    glm::vec3 p;
-    glm::vec3 I;
-    glm::vec3 n;
-    short int depth;
+public:
+    explicit Hit(const Ray& r);
+    
+    // All public for speed
+    const glm::vec3 P;
+    const glm::vec3 N;
+    const glm::vec3 I;
+
+private:
+    Hit(const Hit& h) { } // Not copyable
+    
+    const IPrimitive *mPrim;
 };
 
 #endif

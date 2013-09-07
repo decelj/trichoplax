@@ -9,7 +9,6 @@
 
 class Ray;
 class IPrimitive;
-struct Hit;
 
 class Raytracer
 {
@@ -17,8 +16,8 @@ public:
 	explicit Raytracer();
 	~Raytracer();
 	
-    bool traceAndShade(Ray& ray, glm::vec3* result);
-    bool traceShadow(Ray& ray, const float distToLight);
+    bool traceAndShade(Ray& ray, glm::vec4& result);
+    bool traceShadow(Ray& ray);
     
 	inline void addPrimitive(IPrimitive* p) { mKdTree->addPrimitive(p); }
     inline void setMaxDepth(int depth) { mMaxDepth = depth; }
@@ -27,7 +26,7 @@ public:
     void printStats() const;
 	
 private:
-    bool trace(Ray& ray, Hit& final, bool backfacing = false, float minDist = MAXFLOAT, bool firstHit = false) const;
+    bool trace(Ray& ray, bool backfacing = false, bool firstHit = false) const;
     
     KdTree* mKdTree;
     int mMaxDepth;

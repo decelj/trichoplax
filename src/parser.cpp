@@ -133,6 +133,9 @@ void readFile(const char* file, std::string &outputImage)
         } else if (cmd == "shininess") {
             if (readValues(str, s, 1, values))
                 currMaterial->setShininess(values[0]);
+        } else if (cmd == "ior") {
+            if (readValues(str, s, 1, values))
+                currMaterial->setIor(values[0]);
         } else if (cmd == "radius") {
             if (readValues(str, s, 1, values))
                 pointLgtRadius = values[0];

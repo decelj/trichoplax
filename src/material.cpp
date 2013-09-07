@@ -11,9 +11,11 @@
 
 Material::Material()
 {
-    mBrdf.Kd = mBrdf.Ks = mBrdf.Ke = glm::vec3(0,0,0);
-    mBrdf.Ka = glm::vec3(.2,.2,.2);
-    mBrdf.Kr = 0;
+    mBrdf.Kd = mBrdf.Ks = mBrdf.Ke = glm::vec3(0.f, 0.f, 0.f);
+    mBrdf.Ka = glm::vec3(.2f, .2f, .2f);
+    mBrdf.Kt = glm::vec3(1.f, 1.f, 1.f);
+    mBrdf.Kr = 0.0f;
+    mBrdf.ior = 1.0f;
 }
 
 Material::Material(const Material& other)
@@ -51,54 +53,71 @@ void Material::setShininess(float Kr)
     mBrdf.Kr = Kr;
 }
 
-glm::vec3 Material::shadePoint(const Hit& hit) const
+void Material::setIor(float Ior)
+{
+    mBrdf.ior = Ior;
+}
+
+void Material::shadeRay(const Ray& r, glm::vec4& result) const
 {
     // Ambient and emissive
-    glm::vec3 result = mBrdf.Ka + mBrdf.Ke;
+    glm::vec3 color = mBrdf.Ka + mBrdf.Ke;
     
     const Scene* s = Scene::instance();
     const bool hasDiffuse = !VEC3_IS_REL_ZERO(mBrdf.Kd);
     const bool hasSpecular = !VEC3_IS_REL_ZERO(mBrdf.Ks);
+    const Hit hit(r);
     
-    for (std::vector<ILight*>::const_iterator it = s->lightsBegin(); 
-         it != s->lightsEnd() && (hasDiffuse || hasSpecular); ++it) {
-        const ILight* lgt = *it;
-        glm::vec3 lightColor = lgt->getColor();
-        lgt->attenuate(hit.p, lightColor);
-        
-        // Check for zero contribution
-        if (VEC3_IS_REL_ZERO(lightColor))
-            continue;
-        
-        float distToLgt = 0.0f;
-        MultiSampleRay shadow(hit.p, lgt->shadowRays());
-        while (lgt->generateShadowRay(shadow, distToLgt)) {
-            if (!s->traceShadow(shadow, distToLgt)) {
-                // Diffuse
-                if (hasDiffuse)
-                    result += mBrdf.Kd * MAX(glm::dot(hit.n, *shadow.dir()), 0.0f) * lightColor;
-                // Specular
-                if (hasSpecular)
-                    result += mBrdf.Ks * powf(MAX(glm::dot(lgt->getHalf(*shadow.dir(), hit.I), hit.n), 0.0f), mBrdf.Kr) * lightColor;
+    if (hasDiffuse || hasSpecular) {
+        for (std::vector<ILight*>::const_iterator it = s->lightsBegin(); 
+             it != s->lightsEnd(); ++it) {
+            const ILight* lgt = *it;
+            glm::vec3 lightColor = lgt->getColor();
+            lgt->attenuate(hit.P, lightColor);
+            
+            // Check for zero contribution
+            if (VEC3_IS_REL_ZERO(lightColor))
+                continue;
+            
+            MultiSampleRay shadow(r, lgt->shadowRays());
+            while (lgt->generateShadowRay(shadow)) {
+                if (!s->traceShadow(shadow)) {
+                    // Diffuse
+                    if (hasDiffuse)
+                        color += mBrdf.Kd * MAX(glm::dot(hit.N, shadow.dir()), 0.0f) * lightColor;
+                    // Specular
+                    if (hasSpecular)
+                        color += mBrdf.Ks * powf(MAX(glm::dot(lgt->getHalf(shadow.dir(), hit.I), hit.N), 0.0f), mBrdf.Kr) * lightColor;
+                }
             }
+            
+            color /= lgt->shadowRays();
         }
-        
-        result /= lgt->shadowRays();
     }
+    
+    // Apply transparency
+    result = glm::vec4(color * mBrdf.Kt, glm::length(mBrdf.Kt));
     
     // Reflection
     if (hasSpecular) {
-        glm::vec3 IProjN = hit.n * glm::dot(hit.I, hit.n);
-        glm::vec3 IOrthogonalN = hit.I - IProjN;
-        IOrthogonalN *= -1.0;
-        Ray reflected(hit.p, IOrthogonalN + IProjN, hit.depth+1);
-        reflected.bias(.01);
+        Ray reflected;
+        r.reflected(hit, reflected);
+        reflected.bias(.01f);
         
-        glm::vec3 reflection(0,0,0);
-        s->traceAndShade(reflected, &reflection);
-        result += reflection * mBrdf.Ks;
+        glm::vec4 reflection(0.f,0.f,0.f, 0.f);
+        s->traceAndShade(reflected, reflection);
+        result += reflection * glm::vec4(mBrdf.Ks, glm::length(mBrdf.Ks));
     }
     
-    return result;
+    // Refraction
+    if (mBrdf.ior != 1.f) {
+        Ray refracted;
+        r.refracted(hit, refracted);
+        refracted.bias(.01f);
+        
+        glm::vec4 refraction(0.f, 0.f, 0.f, 0.f);
+        s->traceAndShade(refracted, refraction);
+        result += refraction;
+    }
 }
     

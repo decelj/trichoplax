@@ -8,7 +8,8 @@
 class PointLight : public ILight
 {
 public:
-    PointLight(glm::vec3 pos, glm::vec3 kd, float radius, float bias, float constAtten, float linearAtten, float quadAtten);
+    PointLight(glm::vec3 pos, glm::vec3 kd, float radius, float bias,
+               float constAtten, float linearAtten, float quadAtten);
     ~PointLight() { }
     
     // ILight
@@ -16,16 +17,18 @@ public:
     glm::vec3 getHalf(const glm::vec3& dirToLgt, const glm::vec3& I) const;
     glm::vec3 getColor() const { return mKd; }
     void attenuate(const glm::vec3& P, glm::vec3& result) const;
-    bool generateShadowRay(MultiSampleRay& r, float& distTolgt) const;
-    virtual inline void setShadowRays(unsigned int numRays) {
+    bool generateShadowRay(MultiSampleRay& r) const;
+    inline void setShadowRays(unsigned int numRays) {
         mShadowRays = numRays; mSqrtShadowSamples = sqrtf(numRays); } // reimplemented
     
 private:
     PointLight() { }
     
-    void randomPointOnDisk(const glm::vec3& dir, const unsigned int currentSample, glm::vec3& p) const;
+    void randomPointOnDisk(const glm::vec3& dir, 
+                           const unsigned int currentSample,
+                           glm::vec3& p) const;
     
-    glm::vec3 mPos, mKd;
+    glm::vec3 mPos;
     float mConstAtten, mLinearAtten, mQuadAtten;
     bool mHasAtten;
     float mSqrtShadowSamples;

@@ -21,8 +21,8 @@ void *worker(void*)
     while (scene->sampler()->getSample(&s)) {
         Ray primary;
         scene->camera()->generateRay(s, &primary);
-		glm::vec3 result(0,0,0);
-		if(scene->raytracer()->traceAndShade(primary, &result))
+		glm::vec4 result(0.f, 0.f, 0.f, 0.f);
+		if(scene->raytracer()->traceAndShade(primary, result))
             scene->imageBuffer()->commit(s, result);
     }
     pthread_exit(NULL);
@@ -68,7 +68,10 @@ Scene* Scene::instance()
 
 void Scene::destroy()
 {
-    if (mInstance != NULL) delete mInstance;
+    if (mInstance != NULL) {
+        delete mInstance;
+        mInstance = NULL;
+    }
 }
 
 void Scene::createBuffer(const int width, const int height)

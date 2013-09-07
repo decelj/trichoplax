@@ -12,7 +12,7 @@ public:
     virtual glm::vec3 getHalf(const glm::vec3& dirToLgt, const glm::vec3& I) const = 0;
     virtual glm::vec3 getColor() const = 0;
     virtual void attenuate(const glm::vec3& P, glm::vec3& result) const = 0;
-    virtual bool generateShadowRay(MultiSampleRay& r, float& distTolgt) const = 0;
+    virtual bool generateShadowRay(MultiSampleRay& r) const = 0;
     
     inline float bias() const { return mBias; }
     inline unsigned int shadowRays() const { return mShadowRays; }

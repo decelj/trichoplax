@@ -6,14 +6,16 @@
 
 class MultiSampleRay : public Ray {
 public:
-    explicit MultiSampleRay(unsigned int samples);
-    explicit MultiSampleRay(const glm::vec3& orign, const glm::vec3& dir, const int depth, unsigned int samples);
-    explicit MultiSampleRay(const glm::vec3& origin, unsigned int samples);
+    explicit MultiSampleRay(const Ray& r, unsigned int samples);
     
-    unsigned int mSample;
+    inline unsigned int currentSample() { return mSamples; }
+    inline void decrementSampleCount() { mSamples--; }
+    inline void zeroSampleCount() { mSamples = 0; }
     
 private:
-    MultiSampleRay(const MultiSampleRay&) {}
+    MultiSampleRay(const MultiSampleRay&) { }
+    
+    unsigned int mSamples;
 };
 
 #endif

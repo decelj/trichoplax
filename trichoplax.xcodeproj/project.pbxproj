@@ -24,6 +24,7 @@
 		2B7B683A1710D326002C830F /* ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B68391710D326002C830F /* ray.cpp */; };
 		2BB1AC321738AF9A00336221 /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BB1AC311738AF9A00336221 /* kdtree.cpp */; };
 		2BB1AC351738B14D00336221 /* aabbox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BB1AC341738B14D00336221 /* aabbox.cpp */; };
+		2BCF178D17DBAE5B00C35CC3 /* hit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF178C17DBAE5B00C35CC3 /* hit.cpp */; };
 		2BD9523F17AE089C000576EB /* multi_sample_ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BD9523E17AE089C000576EB /* multi_sample_ray.cpp */; };
 		8DD76F650486A84900D96B5E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 08FB7796FE84155DC02AAC07 /* main.cpp */; settings = {ATTRIBUTES = (); }; };
 		8DD76F6A0486A84900D96B5E /* raytracer.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* raytracer.1 */; };
@@ -86,6 +87,7 @@
 		2BB1AC311738AF9A00336221 /* kdtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kdtree.cpp; sourceTree = "<group>"; };
 		2BB1AC331738B14D00336221 /* aabbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aabbox.h; sourceTree = "<group>"; };
 		2BB1AC341738B14D00336221 /* aabbox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aabbox.cpp; sourceTree = "<group>"; };
+		2BCF178C17DBAE5B00C35CC3 /* hit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hit.cpp; sourceTree = "<group>"; };
 		2BD9523D17AE089C000576EB /* multi_sample_ray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = multi_sample_ray.h; sourceTree = "<group>"; };
 		2BD9523E17AE089C000576EB /* multi_sample_ray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = multi_sample_ray.cpp; sourceTree = "<group>"; };
 		8DD76F6C0486A84900D96B5E /* trichoplax */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = trichoplax; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -122,6 +124,7 @@
 				2B7B647A170FBCBD002C830F /* camera.h */,
 				2B7B6483170FBCBD002C830F /* camera.cpp */,
 				2B7B647B170FBCBD002C830F /* hit.h */,
+				2BCF178C17DBAE5B00C35CC3 /* hit.cpp */,
 				2BB1AC331738B14D00336221 /* aabbox.h */,
 				2BB1AC341738B14D00336221 /* aabbox.cpp */,
 				2BB1AC301738AF9A00336221 /* kdtree.h */,
@@ -266,6 +269,7 @@
 				2BB1AC321738AF9A00336221 /* kdtree.cpp in Sources */,
 				2BB1AC351738B14D00336221 /* aabbox.cpp in Sources */,
 				2BD9523F17AE089C000576EB /* multi_sample_ray.cpp in Sources */,
+				2BCF178D17DBAE5B00C35CC3 /* hit.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

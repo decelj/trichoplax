@@ -11,41 +11,48 @@ Sphere::Sphere(const glm::vec3& center, const float radius, Material *m, glm::ma
     mMaterial = m;
 }
 
-bool Sphere::intersect(Ray& ray, glm::vec3& p, bool backfacing) const
+bool Sphere::intersect(Ray& ray, bool backfacing) const
 {
     // Transform the ray and extract the direction
     // and origin
-    Ray transformed(ray);
-    transformed.transform(mTInverse);
-    const glm::vec3* ro = transformed.origin();
-    const glm::vec3* rd = transformed.dir();
+    Ray transformed;
+    ray.transformed(mTInverse, transformed);
+    const glm::vec3 ro = transformed.origin();
+    const glm::vec3 rd = transformed.dir();
  
     // t^2(P1 . P1) + 2tP1 . (Po - C) + (Po - C) . (Po - C) - r^2 = 0
-    glm::vec3 rToCenter = *ro - mCenter;
-    float a = glm::dot(*rd, *rd);
-    float b = 2.0 * glm::dot(*rd, rToCenter);
-    float c = glm::dot(rToCenter, rToCenter) - mRadius * mRadius;
+    const glm::vec3 rToCenter = ro - mCenter;
+    const float a = glm::dot(rd, rd);
+    const float b = 2.f * glm::dot(rd, rToCenter);
+    const float c = glm::dot(rToCenter, rToCenter) - mRadius * mRadius;
 
-    float discriminat = b * b - 4.0 * a * c;
-    if (discriminat < 0) return false; // Non-real roots, doesn't hit sphere
+    const float discriminat = b * b - 4.f * a * c;
+    if (discriminat < 0.f) return false; // Non-real roots, doesn't hit sphere
 
-    float sqrtDisc = sqrtf(discriminat);
-    float sln1 = (-1.0 * b + sqrtDisc) / (2.0 * a);
-    float sln2 = (-1.0 * b - sqrtDisc) / (2.0 * a);
+    const float sqrtDisc = sqrtf(discriminat);
+    const float sln1 = (-1.f * b + sqrtDisc) / (2.f * a);
+    const float sln2 = (-1.f * b - sqrtDisc) / (2.f * a);
 
+    // Two negative roots -> sphere behind point
+    // One negative, one positive root -> point inside sphere, hit backface
+    // Two positive roots -> point outside sphere
     float t;
-    if (sln1 < 0) {
-        if (sln2 < 0) return false; // Negative roots, sphere behind point
+    if (sln1 < 0.f) {
+        if (!backfacing || sln2 < 0.f) return false;
         t = sln2;
-    } else if (sln2 < 0) {
+    } else if (sln2 < 0.f) {
+        if (!backfacing) return false;
         t = sln1;
     } else {
         t = sln1 < sln2 ? sln1 : sln2;
     }
-
-    p = glm::vec3(mT * glm::vec4(transformed.point(t), 1.0));
     
-    return true;
+    if (ray.hits(t)) {
+        ray.hit(this, t, sln1 < 0.f || sln2 < 0.f);
+        return true;
+    }
+    
+    return false;
 }
 
 glm::vec3 Sphere::normal(const glm::vec3& p) const

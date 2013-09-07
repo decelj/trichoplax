@@ -13,8 +13,8 @@ public:
     explicit ImageBuffer(const int width, const int height);
     ~ImageBuffer();
 
-    void commit(const Sample& sample, const glm::vec3& color);
-    void write(const std::string& filename);
+    void commit(const Sample& sample, const glm::vec4& color);
+    void write(const std::string& filename) const;
 
 private:
     

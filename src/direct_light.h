@@ -15,12 +15,12 @@ public:
     glm::vec3 getHalf(const glm::vec3& dirToLgt, const glm::vec3& I) const;
     glm::vec3 getColor() const { return mKd; }
     void attenuate(const glm::vec3& P, glm::vec3& result) const;
-    bool generateShadowRay(MultiSampleRay& r, float& distTolgt) const;
+    bool generateShadowRay(MultiSampleRay& r) const;
     
 private:
     DirectLight() { }
     
-    glm::vec3 mDir, mKd;
+    glm::vec3 mDir;
 };
 
 #endif

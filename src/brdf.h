@@ -4,8 +4,8 @@
 #include <glm/glm.hpp>
 
 struct BRDF {
-    glm::vec3 Kd, Ks, Ka, Ke;
-    float Kr;
+    glm::vec3 Kd, Ks, Ka, Ke, Kt;
+    float Kr, ior;
 };
 
 #endif
