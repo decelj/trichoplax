@@ -12,7 +12,7 @@ public:
     explicit Sphere(const glm::vec3& center, const float radius, Material *m, glm::mat4 t);
 
     // IPrimitive
-    bool intersect(Ray& ray, bool backfacing) const;
+    bool intersect(Ray& ray) const;
     glm::vec3 normal(const glm::vec3& p) const;
     void bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const;
     bool onLeftOfPlane(const float plane, const short axis) const;

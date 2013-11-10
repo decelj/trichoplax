@@ -17,6 +17,7 @@ public:
     void setEmissive(glm::vec3 Ke);
     void setDiffuse(glm::vec3 Kd);
     void setSpecular(glm::vec3 Ks);
+    void setTransparency(glm::vec3 Kt);
     void setShininess(float Kr);
     void setIor(float Ior);
     

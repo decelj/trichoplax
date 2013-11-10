@@ -11,26 +11,33 @@ class Ray
 public:
     explicit Ray();
     explicit Ray(const Ray& r);
-    explicit Ray(const glm::vec3& origin, const float ior, const short depth);
+    explicit Ray(const glm::vec3& origin, const float ior);
     
     inline void setDir(glm::vec3 d) { mDir = d; mInverseDir = 1.0f / d; }
     inline void setOrigin(glm::vec3 o) { mOrigin = o; }
     inline void bias(const float bias) { mOrigin += mDir * bias; }
     inline void setMinDistance(const float dist) { mHitT = dist; }
+    inline void shouldHitBackFaces(bool value) { mHitBack = value; }
 
     inline const glm::vec3& origin() const { return mOrigin; }
     inline const glm::vec3& dir() const { return mDir; }
     inline const glm::vec3& inverseDir() const { return mInverseDir; }
     inline glm::vec3 point(const float t) const { return mOrigin + mDir * t; }
     inline short depth() const { return mDepth; }
+    inline bool shouldHitBackFaces() const { return mHitBack; }
+    inline float ior() const { return mIor; }
     
     inline void hit(const IPrimitive* prim, const float t, bool hit_back)
     { mHitT = t; mHitPrim = prim; mHitBack = hit_back; }
     inline bool hits(const float t) const { return t < mHitT; }
     
+    // This method is bad and should go away. Assumes we already know p
+    // lies on the ray.
+    inline float t(const glm::vec3& p) { return glm::length(p - mOrigin); }
+    
     void transformed(const glm::mat4& m, Ray& outRay) const;
     void reflected(const Hit& h, Ray& r) const;
-    void refracted(const Hit& h, Ray& r) const;
+    bool refracted(const Hit& h, Ray& r) const;
     
     void shade(glm::vec4& result) const;
 
@@ -42,6 +49,7 @@ private:
     float mIor;
     float mHitT;
     bool mHitBack;
+    bool mShouldHitBack;
     const IPrimitive *mHitPrim;
 };
 

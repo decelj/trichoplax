@@ -54,15 +54,12 @@ bool PointLight::generateShadowRay(MultiSampleRay& r) const
 {
     if (r.currentSample() <= 0) return false;
     
-    glm::vec3 dirToLgt = mPos - r.origin();
-    r.setMinDistance(glm::length(dirToLgt));
-    
     glm::vec3 samplePoint;
-    randomPointOnDisk(-glm::normalize(dirToLgt), r.currentSample(),
-                      samplePoint);
+    randomPointOnDisk(r.origin(), r.currentSample(), samplePoint);
     
-    dirToLgt = samplePoint - r.origin();
-    r.setDir(glm::normalize(dirToLgt));
+    glm::vec3 dirToLgtSample = samplePoint - r.origin();
+    r.setDir(glm::normalize(dirToLgtSample));
+    r.setMinDistance(glm::length(dirToLgtSample));
     r.bias(mBias);
     
     r.decrementSampleCount();
@@ -70,7 +67,7 @@ bool PointLight::generateShadowRay(MultiSampleRay& r) const
     return true;
 }
 
-void PointLight::randomPointOnDisk(const glm::vec3& dir, const unsigned int currentSample, glm::vec3& result) const
+void PointLight::randomPointOnDisk(const glm::vec3& P, const unsigned int currentSample, glm::vec3& result) const
 {
     // Spread points on disk
     // http://blog.marmakoide.org/?p=1
@@ -86,6 +83,7 @@ void PointLight::randomPointOnDisk(const glm::vec3& dir, const unsigned int curr
     // Plane eqn, slove for z
     // Nx(X-X0) + Ny(Y-Y0) + Nz(Z-Z0) = 0
     // (Nx(X-X0) + Ny(Y-Y0)) / -Nz + Z0 = Z
-    result.z = ((dir.x * x + dir.y * y) / (-1.0f * dir.z)) + mPos.z;
+    glm::vec3 dirToLgt = glm::normalize(P - mPos);
+    result.z = ((dirToLgt.x * x + dirToLgt.y * y) / (-1.0f * dirToLgt.z)) + mPos.z;
 }
 

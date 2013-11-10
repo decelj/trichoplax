@@ -9,9 +9,10 @@
 #include "iprimitive.h"
 #include "ray.h"
 
+#define MAX_PRIMS_PER_NODE 10
+
 namespace {
     static const float sMinFloat = -std::numeric_limits<float>::max();
-#define MAX_PRIMS_PER_NODE 10
 }
 
 KdTree::KdTree() : 
@@ -129,13 +130,13 @@ short KdTree::findSplitAxis(Node* node) const
     return axis;
 }
 
-bool KdTree::trace(Ray& ray, bool backfacing, bool firstHit) const
+bool KdTree::trace(Ray& ray, bool firstHit) const
 {
     if (!mRoot->mBBox->intersect(ray)) return false;
-    return trace(mRoot, ray, backfacing, firstHit);
+    return trace(mRoot, ray, firstHit);
 }
 
-bool KdTree::trace(const Node* n, Ray& ray, bool backfacing, bool firstHit) const
+bool KdTree::trace(const Node* n, Ray& ray, bool firstHit) const
 {
     bool ret = false;
     
@@ -144,7 +145,7 @@ bool KdTree::trace(const Node* n, Ray& ray, bool backfacing, bool firstHit) cons
         Node::ConstPrimIterator it = n->mPrims.begin();
         for (; it != n->mPrims.end(); ++it) {
             if (firstHit && ret) break;
-            ret |= (*it)->intersect(ray, backfacing);
+            ret |= (*it)->intersect(ray);
         }
     } else {
         /* TODO:
@@ -153,9 +154,9 @@ bool KdTree::trace(const Node* n, Ray& ray, bool backfacing, bool firstHit) cons
          skip that entier branch of the tree.
          */
         if (n->mLeft->mBBox->intersect(ray))
-            ret |= trace(n->mLeft, ray, backfacing, firstHit);
+            ret |= trace(n->mLeft, ray, firstHit);
         if (!(ret && firstHit) && n->mRight->mBBox->intersect(ray))
-            ret |= trace(n->mRight, ray, backfacing, firstHit);
+            ret |= trace(n->mRight, ray, firstHit);
     }
     
     return ret;

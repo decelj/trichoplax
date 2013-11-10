@@ -11,7 +11,7 @@ public:
     Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, Material *m);
     
     // IPrimitive
-    bool intersect(Ray& ray, bool backfacing) const;
+    bool intersect(Ray& ray) const;
     glm::vec3 normal(const glm::vec3&) const { return mN; }
     void bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const;
     bool onLeftOfPlane(const float plane, const short axis) const;

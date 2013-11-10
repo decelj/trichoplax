@@ -11,7 +11,7 @@ Sphere::Sphere(const glm::vec3& center, const float radius, Material *m, glm::ma
     mMaterial = m;
 }
 
-bool Sphere::intersect(Ray& ray, bool backfacing) const
+bool Sphere::intersect(Ray& ray) const
 {
     // Transform the ray and extract the direction
     // and origin
@@ -38,15 +38,20 @@ bool Sphere::intersect(Ray& ray, bool backfacing) const
     // Two positive roots -> point outside sphere
     float t;
     if (sln1 < 0.f) {
-        if (!backfacing || sln2 < 0.f) return false;
+        if (!ray.shouldHitBackFaces() || sln2 < 0.f) return false;
         t = sln2;
     } else if (sln2 < 0.f) {
-        if (!backfacing) return false;
+        if (!ray.shouldHitBackFaces()) return false;
         t = sln1;
     } else {
         t = sln1 < sln2 ? sln1 : sln2;
     }
     
+    // TODO: This is bad. AKA, slow.
+    //       Try to find transformation for mHitT by mTInverse;
+    //       test against transformed t, if hit transform t by mT
+    glm::vec3 hitP = glm::vec3(mT * glm::vec4(transformed.point(t), 1.f));
+    t = ray.t(hitP);
     if (ray.hits(t)) {
         ray.hit(this, t, sln1 < 0.f || sln2 < 0.f);
         return true;

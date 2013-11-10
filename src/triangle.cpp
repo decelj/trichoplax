@@ -15,17 +15,18 @@ Triangle::Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, Material* m)
     mMaterial = m;
 }
 
-bool Triangle::intersect(Ray& ray, bool backfacing) const
+bool Triangle::intersect(Ray& ray) const
 {
     const float denom = glm::dot(ray.dir(), mN);
     
     // > 0 -> backface
-    if (denom > EPSILON)
-        if (!backfacing) return false;
+    if (denom > EPSILON) {
+        if (!ray.shouldHitBackFaces()) return false;
         
     // 0 -> parallel
-    else if (denom > -EPSILON)
+    } else if (denom > -EPSILON) {
         return false;
+    }
     
     const float numerator = glm::dot(mA, mN) - glm::dot(ray.origin(), mN);
     const float t = numerator / denom;

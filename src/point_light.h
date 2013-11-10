@@ -24,7 +24,7 @@ public:
 private:
     PointLight() { }
     
-    void randomPointOnDisk(const glm::vec3& dir, 
+    void randomPointOnDisk(const glm::vec3& P,
                            const unsigned int currentSample,
                            glm::vec3& p) const;
     

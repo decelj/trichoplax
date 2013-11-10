@@ -33,15 +33,15 @@ bool Raytracer::traceShadow(Ray& ray)
     mShadowRays++;
     pthread_mutex_unlock(&mStatsMutex);
     
-    return trace(ray, true, true);
+    return trace(ray, true);
 }
 
-bool Raytracer::trace(Ray& ray, bool backfacing, bool firstHit) const
+bool Raytracer::trace(Ray& ray, bool firstHit) const
 {
     // Base case
     if (ray.depth() > mMaxDepth) return false;
     
-    return mKdTree->trace(ray, backfacing, firstHit);
+    return mKdTree->trace(ray, firstHit);
 }
 
 bool Raytracer::traceAndShade(Ray& ray, glm::vec4& result)

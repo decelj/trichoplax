@@ -8,6 +8,7 @@ class MultiSampleRay;
 class ILight
 {
 public:
+    virtual ~ILight() { }
     virtual glm::vec3 getDir(const glm::vec3& p) const = 0;
     virtual glm::vec3 getHalf(const glm::vec3& dirToLgt, const glm::vec3& I) const = 0;
     virtual glm::vec3 getColor() const = 0;

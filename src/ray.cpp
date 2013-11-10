@@ -1,6 +1,7 @@
+#include <iostream>
+
 #include "ray.h"
 #include "hit.h"
-
 #include "iprimitive.h"
 #include "material.h"
 
@@ -11,9 +12,9 @@ Ray::Ray()
   mHitPrim(NULL)
 { }
 
-Ray::Ray(const glm::vec3& origin, const float ior, const short depth)
+Ray::Ray(const glm::vec3& origin, const float ior)
 : mOrigin(origin),
-  mDepth(depth),
+  mDepth(1),
   mIor(ior),
   mHitT(MAXFLOAT),
   mHitPrim(NULL)
@@ -38,6 +39,11 @@ void Ray::transformed(const glm::mat4& m, Ray& outRay) const
     
     // Apply upper 3x3 rotation to direction
     outRay.mDir = glm::normalize(glm::vec3(m * glm::vec4(mDir, 0.0)));
+    
+    // Scale hitT
+    if (mHitT < MAXFLOAT)
+        outRay.mHitT = mHitT * 
+                       glm::length(glm::vec3(m[0][0], m[1][1], m[2][2]));
 }
 
 /* Reflected ray = Iparallel - Iorthogonal
@@ -48,26 +54,38 @@ void Ray::reflected(const Hit& hit, Ray& r) const
 {
     r.mDepth = mDepth+1;
     r.mOrigin = hit.P;
-    r.mDir = hit.I - 2.f * hit.N * glm::dot(hit.I, hit.N);
-    r.mInverseDir = 1.f / mDir;
+    r.setDir(hit.I - 2.f * hit.N * glm::dot(hit.I, hit.N));
 }
 
-void Ray::refracted(const Hit& hit, Ray& r) const
+bool Ray::refracted(const Hit& h, Ray& r) const
 {
-    r.mDepth = mDepth + 1;
-    r.mOrigin = hit.P;
+    float cosThetaIn = glm::dot(mDir, h.N);
     
-    float ior_quotient = mIor / r.mIor;
-    float cos_theta_in = glm::dot(hit.I, hit.N);
-    float cos_theta_out = sqrtf(1.f - powf(ior_quotient, 2.f) * 
-                                (1.f - powf(cos_theta_in, 2.f)));
-    if (cos_theta_in > 0)
-        r.mDir = ior_quotient * hit.I + 
-                 (ior_quotient * cos_theta_in - cos_theta_out) * hit.N;
-    else
-        r.mDir = ior_quotient * hit.I +
-                 (ior_quotient * cos_theta_in + cos_theta_out) * hit.N;
-
+    float iorQuotient;
+    if (cosThetaIn > 0.f) {
+        iorQuotient = r.mIor / mIor;
+        r.shouldHitBackFaces(true);
+    } else {
+        // Assume we're going back to air if we've hit
+        // a back face.
+        iorQuotient = mIor;
+    }
+    float sinSqrdThetaOut = powf(iorQuotient, 2.f) *
+                            (1.f - powf(cosThetaIn, 2.f));
+    
+    // Total internal reflection
+    // TODO: Handle this
+    if (sinSqrdThetaOut > 1.f)
+        return false;
+    
+    float cosThetaOut = sqrtf(1.f - sinSqrdThetaOut);
+    r.setDir(iorQuotient * mDir +
+             (iorQuotient * cosThetaIn - cosThetaOut) * h.N);
+    
+    r.setDir(glm::normalize(r.dir()));
+    
+    r.mDepth = mDepth+1;
+    return true;
 }
 
 void Ray::shade(glm::vec4& result) const

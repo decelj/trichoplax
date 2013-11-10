@@ -130,6 +130,9 @@ void readFile(const char* file, std::string &outputImage)
         } else if (cmd == "specular") {
             if (readValues(str, s, 3, values))
                 currMaterial->setSpecular(glm::vec3(values[0], values[1], values[2]));
+        } else if (cmd == "transparency") {
+            if (readValues(str, s, 3, values))
+                currMaterial->setTransparency(glm::vec3(values[0], values[1], values[2]));
         } else if (cmd == "shininess") {
             if (readValues(str, s, 1, values))
                 currMaterial->setShininess(values[0]);

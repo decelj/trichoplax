@@ -26,7 +26,7 @@ public:
     void printStats() const;
 	
 private:
-    bool trace(Ray& ray, bool backfacing = false, bool firstHit = false) const;
+    bool trace(Ray& ray, bool firstHit = false) const;
     
     KdTree* mKdTree;
     int mMaxDepth;

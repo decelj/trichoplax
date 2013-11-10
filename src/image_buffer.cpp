@@ -29,7 +29,8 @@ void ImageBuffer::commit(const Sample& sample, const glm::vec4& color)
     const unsigned int offset = 
         (static_cast<int>(sample.y) * mWidth + static_cast<int>(sample.x)) * 4;
     
-    mPixels[offset+3] += MIN(color.a, 1.0f);
+    assert(color.a <= 1.f);
+    mPixels[offset+3] += color.a;
     mPixels[offset+2] += color.r;
     mPixels[offset+1] += color.g;
     mPixels[offset] += color.b;
@@ -51,9 +52,9 @@ void ImageBuffer::write(const std::string& filename) const
         for (unsigned int x = 0; x < mWidth; ++x) {
             const unsigned int offset = (y * mWidth + x) * 4;
             bits[FI_RGBA_ALPHA] = MIN((mPixels[offset+3] / Sampler::sSamplesPerPixel), 1.0f) * 255;
-            bits[FI_RGBA_RED] = MIN((mPixels[offset] / Sampler::sSamplesPerPixel), 1.0f) * 255;
+            bits[FI_RGBA_RED] = MIN((mPixels[offset+2] / Sampler::sSamplesPerPixel), 1.0f) * 255;
             bits[FI_RGBA_GREEN] = MIN((mPixels[offset+1] / Sampler::sSamplesPerPixel), 1.0f) * 255;
-            bits[FI_RGBA_BLUE] = MIN((mPixels[offset+2] / Sampler::sSamplesPerPixel), 1.0f) * 255;
+            bits[FI_RGBA_BLUE] = MIN((mPixels[offset] / Sampler::sSamplesPerPixel), 1.0f) * 255;
             
             bits += bytespp;
         }
