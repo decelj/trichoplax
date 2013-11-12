@@ -72,8 +72,7 @@ void Material::shadeRay(const Ray& r, glm::vec4& result) const
     const float transparencyFactor = (mBrdf.Kt.r + mBrdf.Kt.g + mBrdf.Kt.b) / 3.f;
     const float opaqueFactor = 1.f - transparencyFactor;
     const float specularFactor = (mBrdf.Ks.r + mBrdf.Ks.g + mBrdf.Ks.b) / 3.f;
-    const float diffuseFactor = (mBrdf.Kd.r + mBrdf.Kd.g + mBrdf.Kd.b) / 3.f;
-    const bool hasDiffuse = !relEq(diffuseFactor, 0.f);
+    const bool hasDiffuse = !relEq(mBrdf.Kd.r + mBrdf.Kd.g + mBrdf.Kd.b, 0.f);
     const bool hasSpecular = !relEq(specularFactor, 0.f);
     const Hit hit(r);
     
@@ -86,12 +85,11 @@ void Material::shadeRay(const Ray& r, glm::vec4& result) const
             glm::vec4 refraction(0.f, 0.f, 0.f, 0.f);
             s->traceAndShade(refracted, refraction);
             result += refraction * glm::vec4(mBrdf.Kt, transparencyFactor);
-            result.a = std::min<float>(result.a, 1.f);
         }
     }
 
     // Reflection
-    if (hasSpecular && transparencyFactor < 1.f) {
+    if (hasSpecular && opaqueFactor > 0.f) {
         Ray reflected;
         r.reflected(hit, reflected);
         reflected.bias(.01f);
@@ -139,12 +137,9 @@ void Material::shadeRay(const Ray& r, glm::vec4& result) const
                     
                     // Diffuse
                     if (hasDiffuse) {
-                        color += mBrdf.Kd *
-                                 lightColor *
-                                 (1.f - (specularFactor / 2.f +
-                                         specularPower)) *
-                                 std::max<float>(glm::dot(hit.N, shadow.dir()),
-                                                 0.f);
+                        color += mBrdf.Kd * lightColor *
+                                (1.f - std::max<float>((specularFactor / 2.f + specularPower + transparencyFactor),0.f)) *
+                                 std::max<float>(glm::dot(hit.N, shadow.dir()), 0.f);
                     }
                 }
             }
@@ -153,7 +148,7 @@ void Material::shadeRay(const Ray& r, glm::vec4& result) const
         }
     }
     
-    result += glm::vec4(color, 1.f - transparencyFactor);
+    result += glm::vec4(color, opaqueFactor);
     result.a = std::min<float>(result.a, 1.f);
 }
     
