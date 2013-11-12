@@ -69,12 +69,13 @@ void Material::shadeRay(const Ray& r, glm::vec4& result) const
     glm::vec3 color = mBrdf.Ka + mBrdf.Ke;
     
     const Scene* s = Scene::instance();
-    const float transparencyFactor = (mBrdf.Kt.r + mBrdf.Kt.g + mBrdf.Kt.b) / 3.f;
-    const float opaqueFactor = 1.f - transparencyFactor;
     const float specularFactor = (mBrdf.Ks.r + mBrdf.Ks.g + mBrdf.Ks.b) / 3.f;
     const bool hasDiffuse = !relEq(mBrdf.Kd.r + mBrdf.Kd.g + mBrdf.Kd.b, 0.f);
     const bool hasSpecular = !relEq(specularFactor, 0.f);
     const Hit hit(r);
+    
+    float transparencyFactor = (mBrdf.Kt.r + mBrdf.Kt.g + mBrdf.Kt.b) / 3.f;
+    float opaqueFactor = 1.f - transparencyFactor;
     
     // Refraction
     if (transparencyFactor > 0.f) {
@@ -85,6 +86,9 @@ void Material::shadeRay(const Ray& r, glm::vec4& result) const
             glm::vec4 refraction(0.f, 0.f, 0.f, 0.f);
             s->traceAndShade(refracted, refraction);
             result += refraction * glm::vec4(mBrdf.Kt, transparencyFactor);
+        } else {
+            transparencyFactor = 0.f;
+            opaqueFactor = 1.f;
         }
     }
 

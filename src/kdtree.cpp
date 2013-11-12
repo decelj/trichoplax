@@ -1,13 +1,13 @@
 #include <sys/ioctl.h>
-#include <stdio.h>
+#include <iostream>
 #include <limits>
-#include <time.h>
 
 #include "kdtree.h"
 #include "aabbox.h"
 #include "common.h"
 #include "iprimitive.h"
 #include "ray.h"
+#include "timer.h"
 
 #define MAX_PRIMS_PER_NODE 10
 
@@ -41,17 +41,18 @@ void KdTree::destroy(Node* n)
 
 void KdTree::build()
 {
-    clock_t time;
-    time = clock();
+    Timer t;
+    t.start();
     mRoot->updateBBox();
     build(mRoot, 0);
-    time = clock() - time;
-    printf("KdTree: Max depth:                 %u\n", mMaxDepth);
-    printf("KdTree: Min depth:                 %u\n", mMinDepth);
-    printf("KdTree: Max primitives per node:   %u\n", mMaxPrimsPerNode);
-    printf("KdTree: Total nodes:               %u\n", mTotalNodes);
-    printf("KdTree: Large nodes (> %d prims):  %d\n", MAX_PRIMS_PER_NODE, mLargeNodes);
-    printf("KdTree: Build time:                %fs\n", static_cast<float>(time)/CLOCKS_PER_SEC);
+    std::cout << "KdTree: Max depth:                 " << mMaxDepth << std::endl;
+    std::cout << "KdTree: Min depth:                 " << mMinDepth << std::endl;
+    std::cout << "KdTree: Max primitives per node:   " << mMaxPrimsPerNode << std::endl;
+    std::cout << "KdTree: Total nodes:               " << mTotalNodes << std::endl;
+    std::cout << "KdTree: Large nodes (> " << MAX_PRIMS_PER_NODE << " prims):  "
+        << mLargeNodes << std::endl;
+    std::cout << "KdTree: Build time:                " << t.elapsed()
+        << " seconds" << std::endl;
 }
 
 void KdTree::build(Node* n, unsigned int depth)

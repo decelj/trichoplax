@@ -1,6 +1,7 @@
 #include <pthread.h>
 #include <errno.h>
 #include <unistd.h>
+#include <iostream>
 
 #include "scene.h"
 #include "image_buffer.h"
@@ -10,6 +11,7 @@
 #include "ray.h"
 #include "ilight.h"
 #include "common.h"
+#include "timer.h"
 
 // Global static pointer for singleton
 Scene* Scene::mInstance = NULL;
@@ -93,6 +95,9 @@ void Scene::render(const std::string& filename)
             mImgBuffer->commit(s, result);
     } */
     
+    Timer t;
+    t.start();
+    
     int err = 0;
     pthread_attr_t attr;
     pthread_attr_init(&attr);
@@ -127,6 +132,8 @@ void Scene::render(const std::string& filename)
     
     mImgBuffer->write(filename);
     mRaytracer->printStats();
+    std::cout << "Render time: " << t.elapsed() << " seconds" << std::endl;
+    
     pthread_exit(NULL);
 }
 
