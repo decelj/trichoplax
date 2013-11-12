@@ -69,9 +69,38 @@ void Material::shadeRay(const Ray& r, glm::vec4& result) const
     glm::vec3 color = mBrdf.Ka + mBrdf.Ke;
     
     const Scene* s = Scene::instance();
-    const bool hasDiffuse = !VEC3_IS_REL_ZERO(mBrdf.Kd);
-    const bool hasSpecular = !VEC3_IS_REL_ZERO(mBrdf.Ks);
+    const float transparencyFactor = (mBrdf.Kt.r + mBrdf.Kt.g + mBrdf.Kt.b) / 3.f;
+    const float opaqueFactor = 1.f - transparencyFactor;
+    const float specularFactor = (mBrdf.Ks.r + mBrdf.Ks.g + mBrdf.Ks.b) / 3.f;
+    const float diffuseFactor = (mBrdf.Kd.r + mBrdf.Kd.g + mBrdf.Kd.b) / 3.f;
+    const bool hasDiffuse = !relEq(diffuseFactor, 0.f);
+    const bool hasSpecular = !relEq(specularFactor, 0.f);
     const Hit hit(r);
+    
+    // Refraction
+    if (transparencyFactor > 0.f) {
+        Ray refracted(hit.P, mBrdf.ior);
+        if (r.refracted(hit, refracted)) {
+            refracted.bias(.01f);
+            
+            glm::vec4 refraction(0.f, 0.f, 0.f, 0.f);
+            s->traceAndShade(refracted, refraction);
+            result += refraction * glm::vec4(mBrdf.Kt, transparencyFactor);
+            result.a = std::min<float>(result.a, 1.f);
+        }
+    }
+
+    // Reflection
+    if (hasSpecular && transparencyFactor < 1.f) {
+        Ray reflected;
+        r.reflected(hit, reflected);
+        reflected.bias(.01f);
+        
+        glm::vec4 reflection(0.f, 0.f, 0.f, 0.f);
+        s->traceAndShade(reflected, reflection);
+        result += reflection * glm::vec4(mBrdf.Ks * opaqueFactor,
+                                         specularFactor * opaqueFactor * .5f);
+    }
     
     if (hasDiffuse || hasSpecular) {
         for (std::vector<ILight*>::const_iterator it = s->lightsBegin(); 
@@ -96,47 +125,35 @@ void Material::shadeRay(const Ray& r, glm::vec4& result) const
             shadow.shouldHitBackFaces(true);
             while (lgt->generateShadowRay(shadow)) {
                 if (!s->traceShadow(shadow)) {
+                    float specularPower = 0.f;
+                    if(hasSpecular) {
+                        specularPower = powf(
+                                std::max<float>(glm::dot(lgt->getHalf(shadow.dir(),
+                                                                      hit.I),
+                                                         hit.N),
+                                                0.f),
+                                               mBrdf.Kr);
+                        specularPower *= specularFactor * .5f;
+                        color += mBrdf.Ks * specularPower * lightColor;
+                    }
+                    
                     // Diffuse
-                    if (hasDiffuse)
-                        color += mBrdf.Kd * MAX(glm::dot(hit.N, shadow.dir()), 0.0f) * lightColor;
-                    // Specular
-                    if (hasSpecular)
-                        color += mBrdf.Ks * powf(MAX(glm::dot(lgt->getHalf(shadow.dir(), hit.I), hit.N), 0.0f), mBrdf.Kr) * lightColor;
+                    if (hasDiffuse) {
+                        color += mBrdf.Kd *
+                                 lightColor *
+                                 (1.f - (specularFactor / 2.f +
+                                         specularPower)) *
+                                 std::max<float>(glm::dot(hit.N, shadow.dir()),
+                                                 0.f);
+                    }
                 }
             }
             
-            color /= lgt->shadowRays();
+            color *= (1.f / lgt->shadowRays()) * opaqueFactor;
         }
     }
     
-    // Apply transparency
-    float transparencyFactor = (mBrdf.Kt.r + mBrdf.Kt.g + mBrdf.Kt.b) / 3.f;
-    result = glm::vec4(color * (glm::vec3(1.f, 1.f, 1.f) - mBrdf.Kt),
-                       1.f - transparencyFactor);
-    
-    // Reflection
-    if (hasSpecular) {
-        Ray reflected;
-        r.reflected(hit, reflected);
-        reflected.bias(.01f);
-        
-        glm::vec4 reflection(0.f, 0.f, 0.f, 0.f);
-        s->traceAndShade(reflected, reflection);
-        result += reflection * glm::vec4(mBrdf.Ks, (mBrdf.Ks.r + mBrdf.Ks.g + mBrdf.Ks.b) / 3.f);
-    }
-    
-    // Refraction
-    if (transparencyFactor > 0.f) {
-        Ray refracted(hit.P, mBrdf.ior);
-        if (r.refracted(hit, refracted)) {
-            refracted.bias(.01f);
-            
-            glm::vec4 refraction(0.f, 0.f, 0.f, 0.f);
-            s->traceAndShade(refracted, refraction);
-            result += refraction * glm::vec4(mBrdf.Kt, (mBrdf.Kt.r + mBrdf.Kt.g + mBrdf.Kt.b) / 3.f);
-        }
-    }
-    
-    result.a = MIN(result.a, 1.f);
+    result += glm::vec4(color, 1.f - transparencyFactor);
+    result.a = std::min<float>(result.a, 1.f);
 }
     
