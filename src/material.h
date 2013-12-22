@@ -7,6 +7,7 @@
 #include "common.h"
 
 class Ray;
+class Raytracer;
 
 class Material {
 public:
@@ -21,7 +22,7 @@ public:
     void setShininess(float Kr);
     void setIor(float Ior);
     
-    void shadeRay(const Ray& r, glm::vec4& result) const;
+    void shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result) const;
     
 private:
     Material(const Material& other);

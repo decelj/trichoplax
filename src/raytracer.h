@@ -5,33 +5,44 @@
 #include <vector>
 #include <pthread.h>
 
-#include "kdtree.h"
-
 class Ray;
 class IPrimitive;
+class KdTree;
+class Camera;
+class Sampler;
+class ImageBuffer;
+class Stats;
+class StatsCollector;
 
 class Raytracer
 {
 public:
-	explicit Raytracer();
+	explicit Raytracer(const KdTree* tree, const Camera* cam, Sampler* sampler,
+                       ImageBuffer* imgBuffer, const unsigned int maxDepth);
 	~Raytracer();
-	
-    bool traceAndShade(Ray& ray, glm::vec4& result);
-    bool traceShadow(Ray& ray);
     
-	inline void addPrimitive(IPrimitive* p) { mKdTree->addPrimitive(p); }
-    inline void setMaxDepth(int depth) { mMaxDepth = depth; }
-    inline void finalize() { mKdTree->build(); }
+    void registerStatsCollector(StatsCollector* c) const;
+    bool start();
+    bool join() const;
+    void cancel();
     
-    void printStats() const;
+    bool traceAndShade(Ray& ray, glm::vec4& result) const;
+    bool traceShadow(Ray& ray) const;
 	
 private:
+    static void* _run(void* arg);
+    void run() const;
+    
     bool trace(Ray& ray, bool firstHit = false) const;
     
-    KdTree* mKdTree;
-    int mMaxDepth;
-    unsigned int mShadowRays, mShadingRays;
-    pthread_mutex_t mStatsMutex;
+    const KdTree* mKdTree;
+    const Camera* mCamera;
+    ImageBuffer* mImgBuffer;
+    Sampler* mSampler;
+    Stats* mStats;
+    const unsigned int mMaxDepth;
+    pthread_t mThreadId;
+    bool mIsCanceled;
 };
 
 #endif

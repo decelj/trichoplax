@@ -5,7 +5,7 @@
 #include <vector>
 #include <assert.h>
 
-#include "raytracer.h"
+#include "kdtree.h"
 
 class Camera;
 class Sampler;
@@ -13,28 +13,23 @@ class ImageBuffer;
 class ILight;
 class Ray;
 class IPrimitive;
+class Raytracer;
 
 class Scene
 {
 public:
     void createBuffer(const int width, const int height);
     void render(const std::string& filename);
-    void setCamera(const Camera* cam) { mCam = cam; }
-    inline void addPrimitive(IPrimitive* prim) { mRaytracer->addPrimitive(prim); }
+    void setCamera(Camera* cam) { mCam = cam; }
+    inline void addPrimitive(IPrimitive* prim) { mKdTree->addPrimitive(prim); }
     inline void addLight(ILight* lgt) { mLights.push_back(lgt); }
-    inline void setMaxDepth(int depth) const { mRaytracer->setMaxDepth(depth); }
+    inline void setMaxDepth(unsigned int depth) { mMaxTraceDepth = depth; }
     void setShadowRays(int num);
     
-    inline const Camera* camera() const { return mCam; }
-    inline Raytracer* raytracer() { return mRaytracer; }
-    inline Sampler* sampler() { return mSampler; }
-    inline ImageBuffer* imageBuffer() { return mImgBuffer; }
-    
-    inline bool traceShadow(Ray& r) const { return mRaytracer->traceShadow(r); }
-    inline bool traceAndShade(Ray& r, glm::vec4& result) const { return mRaytracer->traceAndShade(r, result); }
-    
-    inline std::vector<ILight*>::const_iterator lightsBegin() const { return mLights.begin(); }
-    inline std::vector<ILight*>::const_iterator lightsEnd() const { return mLights.end(); }
+    inline std::vector<ILight*>::const_iterator lightsBegin() const
+    { return mLights.begin(); }
+    inline std::vector<ILight*>::const_iterator lightsEnd() const
+    { return mLights.end(); }
     
     static Scene* instance();
     static void destroy();
@@ -42,13 +37,16 @@ public:
 private:
     explicit Scene() {}
     void setup();
+    void cleanupThreads(bool force=false);
     ~Scene();
 
-    const Camera* mCam;
+    Camera* mCam;
     Sampler* mSampler;
     ImageBuffer* mImgBuffer;
-	Raytracer* mRaytracer;
+    KdTree* mKdTree;
     std::vector<ILight*> mLights;
+    std::vector<Raytracer*> mTracers;
+    unsigned int mMaxTraceDepth;
     
     static Scene* mInstance;
 };

@@ -2,7 +2,9 @@
 #include "ray.h"
 
 
-MultiSampleRay::MultiSampleRay(const Ray& r, unsigned int samples)
-: Ray(r),
+MultiSampleRay::MultiSampleRay(const Ray::TYPE t, const Ray& r,
+                               unsigned int samples)
+: Ray(r, t),
   mSamples(samples)
-{ }
+{
+}

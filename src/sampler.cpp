@@ -1,4 +1,5 @@
 #include <math.h>
+#include <iostream>
 
 #include "sampler.h"
 #include "sample.h"
@@ -11,32 +12,33 @@ Sampler::Sampler (const int width, const int height)
 :   mWidth(width), 
     mHeight(height), 
     mCurrentX(0), 
-    mCurrentY(0), 
-    mCurrentSample(0) 
+    mCurrentY(0) 
 {
     pthread_mutex_init(&mLock, NULL);
 }
 
-bool Sampler::getSample(Sample* s)
+bool Sampler::buildSamplePacket(SamplePacket *packet)
 {
     pthread_mutex_lock(&mLock);
-    if (mCurrentSample == sSamplesPerPixel) {
-        ++mCurrentX;
-        mCurrentSample = 0;
-        if (mCurrentX >= mWidth) {
-            mCurrentX = 0;
-            ++mCurrentY;
-            if (mCurrentY % 10 == 0)
-                printf("scanline %i\n", mCurrentY);
-        }
+    ++mCurrentX;
+    if (mCurrentX >= mWidth) {
+        mCurrentX = 0;
+        ++mCurrentY;
+        if (mCurrentY % 10 == 0)
+            std::cout << "scanline " << mCurrentY << std::endl;
     }
     
-    s->x = mCurrentX + (((mCurrentSample % sSamplesPerAxis) + 1.0f) * sSubpixelStep);
-    s->y = mCurrentY + ((floorf(mCurrentSample / sSamplesPerAxis) + 1.0f) * sSubpixelStep);
-    
-    ++mCurrentSample;
+    // Copy the values to local variables so I can release the mutex
+    int localX = mCurrentX;
+    int localY = mCurrentY;
     pthread_mutex_unlock(&mLock);
     
-    return mCurrentY < mHeight;
+    for (int i = 0; i < sSamplesPerPixel; ++i) {
+        float x = localX + (((i % sSamplesPerAxis) + 1.0f) * sSubpixelStep);
+        float y = localY + ((floorf(i / sSamplesPerAxis) + 1.0f) * sSubpixelStep);
+        packet->addSample(x, y);
+    }
+    
+    return localY < mHeight;
 }
 

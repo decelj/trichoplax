@@ -5,13 +5,23 @@
 
 class Hit;
 class IPrimitive;
+class Raytracer;
 
 class Ray
 {
 public:
-    explicit Ray();
+    enum TYPE {
+        PRIMARY = 0,
+        REFLECTED,
+        REFRACTED,
+        SHADOW,
+        TYPE_COUNT
+    };
+    
+    explicit Ray(const TYPE t);
     explicit Ray(const Ray& r);
-    explicit Ray(const glm::vec3& origin, const float ior);
+    explicit Ray(const Ray& r, const TYPE t);
+    explicit Ray(const TYPE t, const glm::vec3& origin, const float ior);
     
     inline void setDir(glm::vec3 d) { mDir = d; mInverseDir = 1.0f / d; }
     inline void setOrigin(glm::vec3 o) { mOrigin = o; }
@@ -26,6 +36,7 @@ public:
     inline short depth() const { return mDepth; }
     inline bool shouldHitBackFaces() const { return mHitBack; }
     inline float ior() const { return mIor; }
+    inline TYPE type() const { return mType; }
     
     inline void hit(const IPrimitive* prim, const float t, bool hit_back)
     { mHitT = t; mHitPrim = prim; mHitBack = hit_back; }
@@ -39,10 +50,14 @@ public:
     void reflected(const Hit& h, Ray& r) const;
     bool refracted(const Hit& h, Ray& r) const;
     
-    void shade(glm::vec4& result) const;
+    void shade(const Raytracer* tracer, glm::vec4& result) const;
 
     friend class Hit;
+protected:
+    Ray() : mType(PRIMARY) {}
+    
 private:
+    const TYPE mType;
     glm::vec3 mOrigin;
     glm::vec3 mDir, mInverseDir;
     short mDepth;

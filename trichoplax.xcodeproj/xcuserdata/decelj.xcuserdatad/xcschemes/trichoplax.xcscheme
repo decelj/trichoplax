@@ -61,11 +61,15 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "$(SRCROOT)/scene4-diffuse.test"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "$(SRCROOT)/scene4-diffuse-area.test"
-            isEnabled = "YES">
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "$(SRCROOT)/scene7.test"
+            isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
       <AdditionalOptions>

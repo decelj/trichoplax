@@ -6,7 +6,8 @@
 
 class MultiSampleRay : public Ray {
 public:
-    explicit MultiSampleRay(const Ray& r, unsigned int samples);
+    explicit MultiSampleRay(const Ray::TYPE t, const Ray& r,
+                            unsigned int samples);
     
     inline unsigned int currentSample() { return mSamples; }
     inline void decrementSampleCount() { mSamples--; }

@@ -15,7 +15,7 @@ bool Sphere::intersect(Ray& ray) const
 {
     // Transform the ray and extract the direction
     // and origin
-    Ray transformed;
+    Ray transformed(ray.type());
     ray.transformed(mTInverse, transformed);
     const glm::vec3 ro = transformed.origin();
     const glm::vec3 rd = transformed.dir();

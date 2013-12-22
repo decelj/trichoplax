@@ -8,6 +8,7 @@
 #include "ilight.h"
 #include "common.h"
 #include "hit.h"
+#include "raytracer.h"
 
 Material::Material()
 {
@@ -63,7 +64,7 @@ void Material::setIor(float Ior)
     mBrdf.ior = Ior;
 }
 
-void Material::shadeRay(const Ray& r, glm::vec4& result) const
+void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result) const
 {
     // Ambient and emissive
     glm::vec3 color = mBrdf.Ka + mBrdf.Ke;
@@ -79,12 +80,12 @@ void Material::shadeRay(const Ray& r, glm::vec4& result) const
     
     // Refraction
     if (transparencyFactor > 0.f) {
-        Ray refracted(hit.P, mBrdf.ior);
+        Ray refracted(Ray::REFRACTED, hit.P, mBrdf.ior);
         if (r.refracted(hit, refracted)) {
             refracted.bias(.01f);
             
             glm::vec4 refraction(0.f, 0.f, 0.f, 0.f);
-            s->traceAndShade(refracted, refraction);
+            tracer->traceAndShade(refracted, refraction);
             result += refraction * glm::vec4(mBrdf.Kt, transparencyFactor);
         } else {
             transparencyFactor = 0.f;
@@ -94,12 +95,12 @@ void Material::shadeRay(const Ray& r, glm::vec4& result) const
 
     // Reflection
     if (hasSpecular && opaqueFactor > 0.f) {
-        Ray reflected;
+        Ray reflected(Ray::REFLECTED);
         r.reflected(hit, reflected);
         reflected.bias(.01f);
         
         glm::vec4 reflection(0.f, 0.f, 0.f, 0.f);
-        s->traceAndShade(reflected, reflection);
+        tracer->traceAndShade(reflected, reflection);
         result += reflection * glm::vec4(mBrdf.Ks * opaqueFactor,
                                          specularFactor * opaqueFactor * .5f);
     }
@@ -122,11 +123,11 @@ void Material::shadeRay(const Ray& r, glm::vec4& result) const
             // TODO: Can we early out if say half the shadow rays are coherent?
             //       Won't work with current non-random area sampling...
             // TODO: We don't support transparent shadow rays :(
-            MultiSampleRay shadow(r, lgt->shadowRays());
+            MultiSampleRay shadow(Ray::SHADOW, r, lgt->shadowRays());
             shadow.setOrigin(hit.P);
             shadow.shouldHitBackFaces(true);
             while (lgt->generateShadowRay(shadow)) {
-                if (!s->traceShadow(shadow)) {
+                if (!tracer->traceShadow(shadow)) {
                     float specularPower = 0.f;
                     if(hasSpecular) {
                         specularPower = powf(

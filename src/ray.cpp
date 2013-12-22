@@ -4,16 +4,19 @@
 #include "hit.h"
 #include "iprimitive.h"
 #include "material.h"
+#include "raytracer.h"
 
-Ray::Ray()
-: mDepth(1),
+Ray::Ray(const TYPE t)
+: mType(t),
+  mDepth(1),
   mIor(1.0f),
   mHitT(MAXFLOAT),
   mHitPrim(NULL)
 { }
 
-Ray::Ray(const glm::vec3& origin, const float ior)
-: mOrigin(origin),
+Ray::Ray(const TYPE t, const glm::vec3& origin, const float ior)
+: mType(t),
+  mOrigin(origin),
   mDepth(1),
   mIor(ior),
   mHitT(MAXFLOAT),
@@ -22,7 +25,8 @@ Ray::Ray(const glm::vec3& origin, const float ior)
 
 // Copy constructor
 Ray::Ray(const Ray& r)
-: mOrigin(r.mOrigin),
+: mType(r.mType),
+  mOrigin(r.mOrigin),
   mDir(r.mDir),
   mInverseDir(r.mInverseDir),
   mDepth(r.mDepth),
@@ -30,6 +34,19 @@ Ray::Ray(const Ray& r)
   mHitT(r.mHitT),
   mHitBack(r.mHitBack),
   mHitPrim(r.mHitPrim)
+{ }
+
+// Copy constructor w/ type change
+Ray::Ray(const Ray& r, TYPE t)
+: mType(t),
+mOrigin(r.mOrigin),
+mDir(r.mDir),
+mInverseDir(r.mInverseDir),
+mDepth(r.mDepth),
+mIor(r.mIor),
+mHitT(r.mHitT),
+mHitBack(r.mHitBack),
+mHitPrim(r.mHitPrim)
 { }
 
 void Ray::transformed(const glm::mat4& m, Ray& outRay) const
@@ -88,9 +105,9 @@ bool Ray::refracted(const Hit& h, Ray& r) const
     return true;
 }
 
-void Ray::shade(glm::vec4& result) const
+void Ray::shade(const Raytracer* tracer, glm::vec4& result) const
 {
     assert(mHitPrim != NULL);
-    mHitPrim->material()->shadeRay(*this, result);
+    mHitPrim->material()->shadeRay(tracer, *this, result);
 }
 
