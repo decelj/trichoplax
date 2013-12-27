@@ -16,7 +16,7 @@ public:
     virtual bool generateShadowRay(MultiSampleRay& r) const = 0;
     
     inline float bias() const { return mBias; }
-    inline unsigned int shadowRays() const { return mShadowRays; }
+    inline unsigned int shadowRays() const { return mRadius > 0.f ? mShadowRays : 1; }
     virtual inline void setShadowRays(unsigned int numRays) { mShadowRays = numRays; }
     
 protected:

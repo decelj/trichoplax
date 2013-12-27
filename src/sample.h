@@ -4,15 +4,17 @@
 #include <vector>
 
 struct Sample {
-    Sample(float _x, float _y) { x = _x; y = _y; }
-    Sample() {}
+    Sample(float _x, float _y) : x(_x), y(_y) { }
+    Sample() : x(0), y(0) { }
     float x, y;
 };
 
 class SamplePacket {
 public:
-    explicit SamplePacket() { mSamples.clear(); mCurrSample = 0; }
-    void addSample(float x, float y) {
+    explicit SamplePacket() : mCurrSample(0)
+    { mSamples.clear(); }
+    
+    inline void addSample(float x, float y) {
         mSamples.push_back(Sample(x, y));
     }
     
@@ -23,9 +25,14 @@ public:
         return true;
     }
     
+    inline void clear() {
+        mSamples.clear();
+        mCurrSample = 0;
+    }
+    
 private:
     std::vector<Sample> mSamples;
-    int mCurrSample;
+    unsigned int mCurrSample;
 };
 
 #endif

@@ -13,12 +13,14 @@ class Sampler;
 class ImageBuffer;
 class Stats;
 class StatsCollector;
+class EnvSphere;
 
 class Raytracer
 {
 public:
-	explicit Raytracer(const KdTree* tree, const Camera* cam, Sampler* sampler,
-                       ImageBuffer* imgBuffer, const unsigned int maxDepth);
+	explicit Raytracer(const KdTree* tree, const Camera* cam, const EnvSphere* env,
+                       Sampler* const sampler, ImageBuffer* const imgBuffer,
+                       const unsigned int maxDepth);
 	~Raytracer();
     
     void registerStatsCollector(StatsCollector* c) const;
@@ -37,8 +39,9 @@ private:
     
     const KdTree* mKdTree;
     const Camera* mCamera;
-    ImageBuffer* mImgBuffer;
-    Sampler* mSampler;
+    const EnvSphere* mEnv;
+    ImageBuffer* const mImgBuffer;
+    Sampler* const mSampler;
     Stats* mStats;
     const unsigned int mMaxDepth;
     pthread_t mThreadId;

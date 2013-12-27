@@ -12,6 +12,7 @@
 #include "common.h"
 #include "timer.h"
 #include "stats_collector.h"
+#include "env_sphere.h"
 
 // Global static pointer for singleton
 Scene* Scene::mInstance = NULL;
@@ -21,6 +22,7 @@ void Scene::setup()
     mCam = NULL;
     mSampler = NULL;
     mImgBuffer = NULL;
+    mEnvSphere = NULL;
 	mKdTree = new KdTree();
     mLights.clear();
     mTracers.clear();
@@ -35,6 +37,8 @@ Scene::~Scene()
         delete mSampler;
     if (mImgBuffer != NULL)
         delete mImgBuffer;
+    if (mEnvSphere != NULL)
+        delete mEnvSphere;
     
     for (auto it = mLights.begin(); it != mLights.end(); ++it)
         delete *it;
@@ -68,6 +72,15 @@ void Scene::createBuffer(const int width, const int height)
     mImgBuffer = new ImageBuffer(width, height);
 }
 
+void Scene::setEnvSphereImage(const std::string& file)
+{
+    if (mEnvSphere != NULL) {
+        std::cerr << "Warning: overriding existing env sphere" << std::endl;
+        delete mEnvSphere;
+    }
+    mEnvSphere = new EnvSphere(file);
+}
+
 void Scene::render(const std::string& filename)
 {
     assert(mCam != NULL);
@@ -86,8 +99,8 @@ void Scene::render(const std::string& filename)
     std::cout << "Using " << numCpus << " CPUs" << std::endl;
     
     for (unsigned int i = 0; i < numCpus; ++i) {
-        Raytracer* tracer = new Raytracer(mKdTree, mCam, mSampler,
-                                         mImgBuffer, mMaxTraceDepth);
+        Raytracer* tracer = new Raytracer(mKdTree, mCam, mEnvSphere, mSampler,
+                                          mImgBuffer, mMaxTraceDepth);
         mTracers.push_back(tracer);
         tracer->registerStatsCollector(&collector);
         if (!tracer->start()) {

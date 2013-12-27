@@ -9,10 +9,10 @@ const int Sampler::sSamplesPerAxis = sqrtf(Sampler::sSamplesPerPixel);
 const float Sampler::sSubpixelStep = 1.0f / (sSamplesPerAxis + 1);
 
 Sampler::Sampler (const int width, const int height) 
-:   mWidth(width), 
-    mHeight(height), 
-    mCurrentX(0), 
-    mCurrentY(0) 
+:   mWidth(width),
+    mHeight(height),
+    mCurrentX(0),
+    mCurrentY(0)
 {
     pthread_mutex_init(&mLock, NULL);
 }
@@ -33,6 +33,7 @@ bool Sampler::buildSamplePacket(SamplePacket *packet)
     int localY = mCurrentY;
     pthread_mutex_unlock(&mLock);
     
+    packet->clear();
     for (int i = 0; i < sSamplesPerPixel; ++i) {
         float x = localX + (((i % sSamplesPerAxis) + 1.0f) * sSubpixelStep);
         float y = localY + ((floorf(i / sSamplesPerAxis) + 1.0f) * sSubpixelStep);

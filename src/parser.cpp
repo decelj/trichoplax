@@ -109,6 +109,10 @@ void readFile(const char* file, std::string &outputImage)
                                                     tStack.transformPoint(verticies[values[2]]),
                                                     currMaterial->clone())
                                          );
+        } else if (cmd == "envsphere") {
+            string file;
+            s >> file;
+            Scene::instance()->setEnvSphereImage(file);
         } else if (cmd == "translate") {
             if (readValues(str, s, 3, values))
                 tStack.translate(values[0], values[1], values[2]);

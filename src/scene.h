@@ -14,6 +14,7 @@ class ILight;
 class Ray;
 class IPrimitive;
 class Raytracer;
+class EnvSphere;
 
 class Scene
 {
@@ -24,6 +25,7 @@ public:
     inline void addPrimitive(IPrimitive* prim) { mKdTree->addPrimitive(prim); }
     inline void addLight(ILight* lgt) { mLights.push_back(lgt); }
     inline void setMaxDepth(unsigned int depth) { mMaxTraceDepth = depth; }
+    void setEnvSphereImage(const std::string& file);
     void setShadowRays(int num);
     
     inline std::vector<ILight*>::const_iterator lightsBegin() const
@@ -44,6 +46,7 @@ private:
     Sampler* mSampler;
     ImageBuffer* mImgBuffer;
     KdTree* mKdTree;
+    EnvSphere* mEnvSphere;
     std::vector<ILight*> mLights;
     std::vector<Raytracer*> mTracers;
     unsigned int mMaxTraceDepth;

@@ -60,7 +60,11 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "$(SRCROOT)/scene4-refract.test"
+            argument = "$(SRCROOT)/scene4-diffuse.test"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "$(SRCROOT)/dragon-refract.test"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
