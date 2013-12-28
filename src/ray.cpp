@@ -71,7 +71,7 @@ void Ray::reflected(const Hit& hit, Ray& r) const
 {
     r.mDepth = mDepth+1;
     r.mOrigin = hit.P;
-    r.setDir(hit.I - 2.f * hit.N * glm::dot(hit.I, hit.N));
+    r.setDir(mDir - 2.f * glm::dot(mDir, hit.N) * hit.N);
 }
 
 bool Ray::refracted(const Hit& h, Ray& r) const

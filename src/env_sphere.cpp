@@ -44,7 +44,7 @@ void EnvSphere::sample(const Ray& ray, glm::vec4& result) const
     sphericalCoordinates(ray.dir(), r, theta, phi);
     
     float u = (phi + M_PI) / (M_PI * 2.f);
-    float v = 1.f - theta / M_PI;
+    float v = theta / M_PI;
     assert(u <= 1.f && u >= 0.f);
     assert(v <= 1.f && v >= 0.f);
     
