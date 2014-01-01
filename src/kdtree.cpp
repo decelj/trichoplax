@@ -1,6 +1,10 @@
 #include <sys/ioctl.h>
 #include <iostream>
 #include <limits>
+#include <algorithm>
+#include <glm/glm.hpp>
+#include <sstream>
+#include <string>
 
 #include "kdtree.h"
 #include "aabbox.h"
@@ -13,6 +17,12 @@
 
 namespace {
     static const float sMinFloat = -std::numeric_limits<float>::max();
+    
+    std::string vec3ToString(const glm::vec3& v) {
+        std::stringstream s;
+        s << v[0] << ", " << v[1] << ", " << v[2];
+        return s.str();
+    }
 }
 
 KdTree::KdTree() : 
@@ -41,9 +51,10 @@ void KdTree::destroy(Node* n)
 
 void KdTree::build()
 {
+    std::cout << "Building KdTree..." << std::endl;
     Timer t;
     t.start();
-    mRoot->updateBBox();
+    mRoot->updateBBox(); // TODO: Move this to after build.
     build(mRoot, 0);
     std::cout << "KdTree: Max depth:                 " << mMaxDepth << std::endl;
     std::cout << "KdTree: Min depth:                 " << mMinDepth << std::endl;
@@ -58,6 +69,14 @@ void KdTree::build()
 void KdTree::build(Node* n, unsigned int depth)
 {
     mTotalNodes++;
+    
+    // TODO: TMP, unique?
+    /*
+    for (unsigned int i = 0; i != n->mPrims.size(); ++i)
+    {
+        for (unsigned int j = i+1; j != n->mPrims.size(); ++j)
+            assert(n->mPrims[i] != n->mPrims[j]);
+    } */
     
     // Base case
     if (n->mPrims.size() <= MAX_PRIMS_PER_NODE) {
@@ -74,19 +93,9 @@ void KdTree::build(Node* n, unsigned int depth)
     n->mLeft = left;
     n->mRight = right;
     
-    const short axis = findSplitAxis(n);
-    const float splitValue = n->mBBox->split(axis);
-    
-    Node::ConstPrimIterator it = n->mPrims.begin();
-    for (; it != n->mPrims.end(); ++it) {
-        if ((*it)->onLeftOfPlane(splitValue, axis))
-            left->mPrims.push_back(*it);
-        else
-            right->mPrims.push_back(*it);
-    }
-    
-    // All primitives span the split plane and/or are on the right
-    if (right->mPrims.size() == 0 || left->mPrims.size() == 0) {
+    // If we can't figure out how to split the node, just
+    // make it a leaf.
+    if (!splitNode(n, left, right)) {
         n->mIsLeaf = true;
         left->mPrims.clear();
         right->mPrims.clear();
@@ -98,37 +107,93 @@ void KdTree::build(Node* n, unsigned int depth)
         
         delete left;
         delete right;
-        return;
+    } else {
+        n->mPrims.clear();
+        
+        assert(left->mPrims.size() > 0);
+        assert(right->mPrims.size() > 0);
+        
+        // TODO: Don't update BBox until after we recurse
+        // Improve updateBBox to exapnd node's BBox using child nodes if it's
+        // not a leaf node.
+        left->updateBBox();
+        right->updateBBox();
+        
+        build(left, depth+1);
+        build(right, depth+1);
     }
-    
-    n->mPrims.clear();
-    
-    left->updateBBox();
-    right->updateBBox();
-    
-    build(left, depth+1);
-    build(right, depth+1);
 }
 
-short KdTree::findSplitAxis(Node* node) const
-{
-    short initialAxis = node->mBBox->longestAxis();
+bool KdTree::splitNode(Node* node, Node* left, Node* right) const {
+    const short initialAxis = node->mBBox->longestAxis();
+    const unsigned int idealSplit = node->mPrims.size() / 2;
     short axis = initialAxis;
-    float splitValue = node->mBBox->split(axis);
-    Node::ConstPrimIterator it;
+    
     do {
-        it = node->mPrims.begin();
-        while (it != node->mPrims.end() && !(*it)->onLeftOfPlane(splitValue, axis))
-            ++it;
+        left->mPrims.clear();
+        right->mPrims.clear();
         
-        if (it != node->mPrims.end())
-            break;
+        _NodeCompare comp(axis);
+        std::sort(node->mPrims.begin(), node->mPrims.end(), comp);
+        
+        KdTree::Node::ConstPrimIterator it = node->mPrims.begin();
+        unsigned int i = 0; // TODO: remove
+        
+        glm::vec3 ll, ur;
+        (*(--node->mPrims.end()))->bounds(ll, ur);
+        const float maxRightMost = ll[axis];
+        (*it)->bounds(ll, ur);
+        const float minRightMost = ur[axis];
+        float rightMost = ur[axis];
+        
+        if (minRightMost > maxRightMost) {
+            axis = (axis + 1) % 3;
+            continue;
+        }
+        
+        for (; it != node->mPrims.end() &&
+             (i < idealSplit || ll[axis] < minRightMost);
+             ++i, ++it) {
+            (*it)->bounds(ll, ur);
+            if (ur[axis] > maxRightMost)
+                break;
+            
+            rightMost = MAX(ur[axis], rightMost);
+            left->mPrims.push_back(*it);
+        }
+        
+        if (it == node->mPrims.end() || it == node->mPrims.begin()) {
+            axis = (axis + 1) % 3;
+            continue;
+        }
+        
+        while (it != node->mPrims.end()) {
+            (*it)->bounds(ll, ur);
+            if (ur[axis] - rightMost > EPSILON || ur[axis] > maxRightMost)
+                break;
+            
+            left->mPrims.push_back(*it);
+            ++it;
+        }
+        
+        if (it != node->mPrims.end()) {
+            while (it != node->mPrims.end()) {
+                (*it)->bounds(ll, ur);
+                if (ll[axis] < rightMost)
+                    left->mPrims.push_back(*it);
+                else
+                    right->mPrims.push_back(*it);
+                ++it;
+            }
+            
+            if (right->mPrims.size() !=0)
+                return true;
+        }
         
         axis = (axis + 1) % 3;
-        splitValue = node->mBBox->split(axis);
     } while (axis != initialAxis);
     
-    return axis;
+    return false;
 }
 
 bool KdTree::trace(Ray& ray, bool firstHit) const
@@ -163,6 +228,20 @@ bool KdTree::trace(const Node* n, Ray& ray, bool firstHit) const
     return ret;
 }
 
+void KdTree::printSizes(const Node* n)
+{
+    if (n->mLeft->mIsLeaf)
+        std::cout << "Left: " << n->mLeft->mPrims.size() << std::endl;
+    if (n->mRight->mIsLeaf)
+        std::cout << "Right: " << n->mRight->mPrims.size() << std::endl;
+    
+    if (!n->mLeft->mIsLeaf)
+        printSizes(n->mLeft);
+    if (!n->mRight->mIsLeaf)
+        printSizes(n->mRight);
+    
+}
+
 KdTree::Node::Node() :
 mLeft(NULL), mRight(NULL), mBBox(new AABBox()), mIsLeaf(false) 
 { 
@@ -192,3 +271,24 @@ void KdTree::Node::updateBBox()
     
     mBBox->update(ll, ur);
 }
+
+void KdTree::Node::print() const
+{
+    glm::vec3 ll, ur;
+    int i = 0;
+    for (auto it = mPrims.begin(); it != mPrims.end(); ++it, ++i)
+    {
+        (*it)->bounds(ll, ur);
+        std::cout << i << " LL: " << vec3ToString(ll) << std::endl;
+        std::cout << i << " UR: " << vec3ToString(ur) << std::endl;
+    }
+}
+
+inline bool KdTree::_NodeCompare::operator()(const IPrimitive* l, const IPrimitive* r)
+{
+    glm::vec3 lLL, lUR, rLL, rUR;
+    l->bounds(lLL, lUR);
+    r->bounds(rLL, rUR);
+    return lLL[mAxis] < rLL[mAxis];
+}
+
