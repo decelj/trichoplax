@@ -23,7 +23,6 @@
 		2B7B6605170FD3CC002C830F /* raytracer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B6604170FD3CC002C830F /* raytracer.cpp */; };
 		2B7B673D171086CE002C830F /* material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B673C171086CE002C830F /* material.cpp */; };
 		2B7B67691710A3DA002C830F /* triangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B67681710A3DA002C830F /* triangle.cpp */; };
-		2B7B67861710A6F6002C830F /* parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B67851710A6F6002C830F /* parser.cpp */; };
 		2B7B67891710A857002C830F /* transform_stack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B67881710A857002C830F /* transform_stack.cpp */; };
 		2B7B683A1710D326002C830F /* ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B68391710D326002C830F /* ray.cpp */; };
 		2BAEAF001933A994002605AF /* parser_factory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BAEAEFE1933A994002605AF /* parser_factory.cpp */; };
@@ -92,8 +91,6 @@
 		2B7B674F171089A0002C830F /* object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = object.cpp; sourceTree = "<group>"; };
 		2B7B67671710A3DA002C830F /* triangle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = triangle.h; sourceTree = "<group>"; };
 		2B7B67681710A3DA002C830F /* triangle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = triangle.cpp; sourceTree = "<group>"; };
-		2B7B67841710A6F6002C830F /* parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parser.h; sourceTree = "<group>"; };
-		2B7B67851710A6F6002C830F /* parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parser.cpp; sourceTree = "<group>"; };
 		2B7B67871710A857002C830F /* transform_stack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = transform_stack.h; sourceTree = "<group>"; };
 		2B7B67881710A857002C830F /* transform_stack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = transform_stack.cpp; sourceTree = "<group>"; };
 		2B7B68391710D326002C830F /* ray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = ray.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -170,8 +167,6 @@
 				2B7B67881710A857002C830F /* transform_stack.cpp */,
 				2B2D9C561713C85C0098D2C6 /* debug.h */,
 				2B2D9D8B171521940098D2C6 /* debug.cpp */,
-				2B7B67841710A6F6002C830F /* parser.h */,
-				2B7B67851710A6F6002C830F /* parser.cpp */,
 				2B7B647E170FBCBD002C830F /* ray.h */,
 				2B7B68391710D326002C830F /* ray.cpp */,
 				2BD9523D17AE089C000576EB /* multi_sample_ray.h */,
@@ -297,7 +292,6 @@
 				2B7B6605170FD3CC002C830F /* raytracer.cpp in Sources */,
 				2B7B673D171086CE002C830F /* material.cpp in Sources */,
 				2B7B67691710A3DA002C830F /* triangle.cpp in Sources */,
-				2B7B67861710A6F6002C830F /* parser.cpp in Sources */,
 				2B7B67891710A857002C830F /* transform_stack.cpp in Sources */,
 				2B1283EE1831F963009DCC0E /* timer.cpp in Sources */,
 				2B7B683A1710D326002C830F /* ray.cpp in Sources */,
