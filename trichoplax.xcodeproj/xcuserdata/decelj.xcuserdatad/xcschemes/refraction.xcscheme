@@ -64,7 +64,7 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "$(SRCROOT)/dragon-refract.test"
+            argument = "$(SRCROOT)/scene4-refract.test"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

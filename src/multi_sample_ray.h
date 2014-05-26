@@ -10,8 +10,10 @@ public:
                             unsigned int samples);
     
     inline unsigned int currentSample() { return mSamples; }
-    inline void decrementSampleCount() { mSamples--; }
+    inline void decrementSampleCount() { --mSamples; }
     inline void zeroSampleCount() { mSamples = 0; }
+    
+    inline MultiSampleRay &operator--() { --mSamples; return *this; }
     
 private:
     MultiSampleRay(const MultiSampleRay&) { }

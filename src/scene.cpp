@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <iostream>
+#include <stdexcept>
 
 #include "scene.h"
 #include "image_buffer.h"
@@ -27,6 +28,7 @@ void Scene::setup()
     mLights.clear();
     mTracers.clear();
     mInstance = this;
+    mMaxTraceDepth = 3;
 }
 
 Scene::~Scene()
@@ -105,7 +107,7 @@ void Scene::render(const std::string& filename)
         tracer->registerStatsCollector(&collector);
         if (!tracer->start()) {
             cleanupThreads(true);
-            return;
+            throw std::runtime_error("error creating threads!");
         }
     }
     

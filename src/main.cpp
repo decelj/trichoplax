@@ -3,7 +3,8 @@
 
 #include "FreeImage.h"
 #include "scene.h"
-#include "parser.h"
+#include "parser_factory.h"
+#include "iparser.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -13,8 +14,12 @@ int main(int argc, char** argv) {
     
     FreeImage_Initialise();
     
-    std::string outputImage;
-    readFile(argv[1], outputImage);
+    std::string sceneFile(argv[1]);
+    ParserFactory factory;
+    IParser* parser = factory.create(sceneFile);
+    std::string outputImage = parser->parse(sceneFile, Scene::instance());
+    delete parser;
+
     Scene::instance()->render(outputImage);
     Scene::destroy();
     

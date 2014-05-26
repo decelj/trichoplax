@@ -15,12 +15,15 @@ public:
     void generateRay(const Sample& s, Ray* ray) const;
 
 private:
-    explicit Camera() { } // Don't use this
+    explicit Camera() :
+        mPos(glm::vec3(0.f)), mLookAt(glm::vec3(0.f)), mUp(glm::vec3(0.f)),
+        mWidth(0), mHeight(0), mFov(0.f)
+    { } // Don't use this
 
-    float mFov;
+    const glm::vec3 mPos, mLookAt, mUp;
+    const unsigned short mWidth, mHeight;
+    const float mFov;
     float mAlpha, mBeta;
-    int mWidth, mHeight;
-    glm::vec3 mPos, mLookAt, mUp;
     glm::vec3 mU, mV, mW;
 };
 

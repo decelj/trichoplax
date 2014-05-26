@@ -26,6 +26,8 @@
 		2B7B67861710A6F6002C830F /* parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B67851710A6F6002C830F /* parser.cpp */; };
 		2B7B67891710A857002C830F /* transform_stack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B67881710A857002C830F /* transform_stack.cpp */; };
 		2B7B683A1710D326002C830F /* ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B68391710D326002C830F /* ray.cpp */; };
+		2BAEAF001933A994002605AF /* parser_factory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BAEAEFE1933A994002605AF /* parser_factory.cpp */; };
+		2BAEAF0B1933AC52002605AF /* simple_parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BAEAF091933AC52002605AF /* simple_parser.cpp */; };
 		2BB1AC321738AF9A00336221 /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BB1AC311738AF9A00336221 /* kdtree.cpp */; };
 		2BB1AC351738B14D00336221 /* aabbox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BB1AC341738B14D00336221 /* aabbox.cpp */; };
 		2BCF178D17DBAE5B00C35CC3 /* hit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF178C17DBAE5B00C35CC3 /* hit.cpp */; };
@@ -95,6 +97,11 @@
 		2B7B67871710A857002C830F /* transform_stack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = transform_stack.h; sourceTree = "<group>"; };
 		2B7B67881710A857002C830F /* transform_stack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = transform_stack.cpp; sourceTree = "<group>"; };
 		2B7B68391710D326002C830F /* ray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = ray.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		2BAEAEFE1933A994002605AF /* parser_factory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parser_factory.cpp; sourceTree = "<group>"; };
+		2BAEAEFF1933A994002605AF /* parser_factory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parser_factory.h; sourceTree = "<group>"; };
+		2BAEAF081933AB51002605AF /* iparser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iparser.h; sourceTree = "<group>"; };
+		2BAEAF091933AC52002605AF /* simple_parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = simple_parser.cpp; sourceTree = "<group>"; };
+		2BAEAF0A1933AC52002605AF /* simple_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = simple_parser.h; sourceTree = "<group>"; };
 		2BB1AC301738AF9A00336221 /* kdtree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kdtree.h; sourceTree = "<group>"; };
 		2BB1AC311738AF9A00336221 /* kdtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kdtree.cpp; sourceTree = "<group>"; };
 		2BB1AC331738B14D00336221 /* aabbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aabbox.h; sourceTree = "<group>"; };
@@ -184,6 +191,11 @@
 				2B7B6482170FBCBD002C830F /* sphere.h */,
 				2B7B65E4170FC938002C830F /* sphere.cpp */,
 				08FB7796FE84155DC02AAC07 /* main.cpp */,
+				2BAEAF091933AC52002605AF /* simple_parser.cpp */,
+				2BAEAF0A1933AC52002605AF /* simple_parser.h */,
+				2BAEAEFE1933A994002605AF /* parser_factory.cpp */,
+				2BAEAEFF1933A994002605AF /* parser_factory.h */,
+				2BAEAF081933AB51002605AF /* iparser.h */,
 				2B7B673A17108606002C830F /* brdf.h */,
 			);
 			path = src;
@@ -293,11 +305,13 @@
 				2B2D9E3417164FB10098D2C6 /* point_light.cpp in Sources */,
 				2B2DA0F7171E63EE0098D2C6 /* direct_light.cpp in Sources */,
 				2BB1AC321738AF9A00336221 /* kdtree.cpp in Sources */,
+				2BAEAF0B1933AC52002605AF /* simple_parser.cpp in Sources */,
 				2B1BCAEC186A93DC004F0635 /* env_sphere.cpp in Sources */,
 				2BB1AC351738B14D00336221 /* aabbox.cpp in Sources */,
 				2B05D3CF18665F57005082A9 /* stats_collector.cpp in Sources */,
 				2BD9523F17AE089C000576EB /* multi_sample_ray.cpp in Sources */,
 				2BCF178D17DBAE5B00C35CC3 /* hit.cpp in Sources */,
+				2BAEAF001933A994002605AF /* parser_factory.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -314,13 +328,17 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GENERATE_PROFILING_CODE = NO;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/include";
+				GENERATE_PROFILING_CODE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/include",
+					/usr/local/include,
+				);
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(SRCROOT)/lib",
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
+					/usr/local/lib,
 				);
 				PRODUCT_NAME = trichoplax;
 			};
@@ -376,12 +394,16 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GENERATE_PROFILING_CODE = NO;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/include";
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/include",
+					/usr/local/include,
+				);
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(SRCROOT)/lib",
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
+					/usr/local/lib,
 				);
 				PREBINDING = YES;
 				PRODUCT_NAME = trichoplax;
@@ -425,12 +447,16 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GENERATE_PROFILING_CODE = YES;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/include";
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/include",
+					/usr/local/include,
+				);
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(SRCROOT)/lib",
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
+					/usr/local/lib,
 				);
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				PREBINDING = YES;

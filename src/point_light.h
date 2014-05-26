@@ -2,6 +2,7 @@
 #define __POINT_LIGHT_H__
 
 #include <glm/glm.hpp>
+#include <random>
 
 #include "ilight.h"
 
@@ -24,14 +25,16 @@ public:
 private:
     PointLight() { }
     
-    void randomPointOnDisk(const glm::vec3& P,
-                           const unsigned int currentSample,
-                           glm::vec3& p) const;
+    void pointOnDisk(const glm::vec3& P,
+                     const unsigned int currentSample,
+                     glm::vec3& result) const;
+    void randomPointOnDisk(const glm::vec3& P, glm::vec3& result) const;
     
     glm::vec3 mPos;
     float mConstAtten, mLinearAtten, mQuadAtten;
     bool mHasAtten;
     float mSqrtShadowSamples;
+    mutable std::ranlux24_base mRandEngine;
 };
 
 #endif

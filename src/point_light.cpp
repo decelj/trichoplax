@@ -1,14 +1,5 @@
-/*
- *  point_light.cpp
- *  raytracer
- *
- *  Created by Justin DeCell on 4/10/13.
- *  Copyright 2013 __MyCompanyName__. All rights reserved.
- *
- */
-
-#include <stdlib.h>
-#include <cstdlib>
+#include <cmath>
+#include <random>
 
 #include "point_light.h"
 #include "multi_sample_ray.h"
@@ -22,7 +13,7 @@ PointLight::PointLight(glm::vec3 pos, glm::vec3 kd, float radius, float bias,
     mPos(pos),
     mConstAtten(constAtten),
     mLinearAtten(linearAtten),
-    mQuadAtten(quadAtten) ,
+    mQuadAtten(quadAtten),
     mSqrtShadowSamples(1.0f)
 {
     mHasAtten = mLinearAtten > 0.0 || mQuadAtten > 0.0 || mConstAtten != 1.f;
@@ -30,6 +21,7 @@ PointLight::PointLight(glm::vec3 pos, glm::vec3 kd, float radius, float bias,
     mBias = bias;
     mRadius = radius;
     mShadowRays = 1;
+    mRandEngine.seed(glm::dot(pos, pos));
 }
 
 glm::vec3 PointLight::getDir(const glm::vec3& p) const
@@ -55,35 +47,50 @@ bool PointLight::generateShadowRay(MultiSampleRay& r) const
     if (r.currentSample() <= 0) return false;
     
     glm::vec3 samplePoint;
-    randomPointOnDisk(r.origin(), r.currentSample(), samplePoint);
+    //pointOnDisk(r.origin(), r.currentSample(), samplePoint);
+    randomPointOnDisk(r.origin(), samplePoint);
     
     glm::vec3 dirToLgtSample = samplePoint - r.origin();
     r.setDir(glm::normalize(dirToLgtSample));
     r.setMinDistance(glm::length(dirToLgtSample));
     r.bias(mBias);
     
-    r.decrementSampleCount();
+    --r;
     
     return true;
 }
 
-void PointLight::randomPointOnDisk(const glm::vec3& P, const unsigned int currentSample, glm::vec3& result) const
+void PointLight::pointOnDisk(const glm::vec3& P, const unsigned int currentSample, glm::vec3& result) const
 {
     // Spread points on disk
     // http://blog.marmakoide.org/?p=1
-    float r = sqrtf(static_cast<float>(currentSample)) * mRadius / mSqrtShadowSamples;
-    float theta = currentSample * gGoldenAngle;
+    const float r = sqrtf(static_cast<float>(currentSample)) * mRadius / mSqrtShadowSamples;
+    const float theta = currentSample * gGoldenAngle;
     
-    float x = r * cosf(theta);
-    float y = r * sinf(theta);
+    const float x = r * cosf(theta);
+    const float y = r * sinf(theta);
     
     result.x = x + mPos.x;
     result.y = y + mPos.y;
     
-    // Plane eqn, slove for z
+    // Plane eqn, solve for z
     // Nx(X-X0) + Ny(Y-Y0) + Nz(Z-Z0) = 0
     // (Nx(X-X0) + Ny(Y-Y0)) / -Nz + Z0 = Z
-    glm::vec3 dirToLgt = glm::normalize(P - mPos);
+    const glm::vec3 dirToLgt = glm::normalize(P - mPos);
     result.z = ((dirToLgt.x * x + dirToLgt.y * y) / (-1.0f * dirToLgt.z)) + mPos.z;
+}
+
+void PointLight::randomPointOnDisk(const glm::vec3& P, glm::vec3& result) const
+{
+    const float r = std::generate_canonical<float, 16>(mRandEngine) * mRadius;
+    const float angle = std::generate_canonical<float, 16>(mRandEngine) * 360.f;
+    const float x = r * cosf(angle);
+    const float y = r * cosf(angle);
+    
+    result.x = x + mPos.x;
+    result.y = y + mPos.y;
+    
+    const glm::vec3 dirToLgt = glm::normalize(P - mPos);
+    result.z = ((dirToLgt.x * x + dirToLgt.y * y) / (-1.f * dirToLgt.z)) + mPos.z;
 }
 

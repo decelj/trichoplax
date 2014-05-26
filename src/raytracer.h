@@ -6,7 +6,6 @@
 #include <pthread.h>
 
 class Ray;
-class IPrimitive;
 class KdTree;
 class Camera;
 class Sampler;

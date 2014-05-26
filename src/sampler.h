@@ -1,5 +1,5 @@
 #ifndef __SAMPLER_H__
-#define __SMAPLER_H__
+#define __SAMPLER_H__
 
 #include <pthread.h>
 

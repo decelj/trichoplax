@@ -24,7 +24,7 @@ Raytracer::Raytracer(const KdTree* tree, const Camera* cam, const EnvSphere* env
     mImgBuffer(imgBuffer),
     mSampler(sampler),
     mStats(new Stats),
-    mMaxDepth(5),
+    mMaxDepth(maxDepth),
     mThreadId(0),
     mIsCanceled(false)
 {
