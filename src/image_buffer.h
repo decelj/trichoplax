@@ -10,7 +10,7 @@ struct Sample;
 class ImageBuffer
 {
 public:
-    explicit ImageBuffer(const int width, const int height);
+    explicit ImageBuffer(const unsigned short width, const unsigned short height);
     ~ImageBuffer();
 
     void commit(const Sample& sample, const glm::vec4& color);
@@ -19,7 +19,7 @@ public:
 private:
     
     float *mPixels;
-    const int mWidth, mHeight;
+    const unsigned short mWidth, mHeight;
     
     pthread_mutex_t mBufferLock;
 };

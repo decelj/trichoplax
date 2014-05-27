@@ -32,7 +32,7 @@ public:
     
 private:
     std::vector<Sample> mSamples;
-    unsigned int mCurrSample;
+    unsigned short mCurrSample;
 };
 
 #endif

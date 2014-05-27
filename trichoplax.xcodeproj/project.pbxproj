@@ -27,6 +27,8 @@
 		2B7B683A1710D326002C830F /* ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B68391710D326002C830F /* ray.cpp */; };
 		2BAEAF001933A994002605AF /* parser_factory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BAEAEFE1933A994002605AF /* parser_factory.cpp */; };
 		2BAEAF0B1933AC52002605AF /* simple_parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BAEAF091933AC52002605AF /* simple_parser.cpp */; };
+		2BAEAF111933C192002605AF /* assimp_parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BAEAF0F1933C192002605AF /* assimp_parser.cpp */; };
+		2BAEAF131933C566002605AF /* libassimp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2BAEAF121933C565002605AF /* libassimp.dylib */; };
 		2BB1AC321738AF9A00336221 /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BB1AC311738AF9A00336221 /* kdtree.cpp */; };
 		2BB1AC351738B14D00336221 /* aabbox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BB1AC341738B14D00336221 /* aabbox.cpp */; };
 		2BCF178D17DBAE5B00C35CC3 /* hit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF178C17DBAE5B00C35CC3 /* hit.cpp */; };
@@ -99,6 +101,10 @@
 		2BAEAF081933AB51002605AF /* iparser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iparser.h; sourceTree = "<group>"; };
 		2BAEAF091933AC52002605AF /* simple_parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = simple_parser.cpp; sourceTree = "<group>"; };
 		2BAEAF0A1933AC52002605AF /* simple_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = simple_parser.h; sourceTree = "<group>"; };
+		2BAEAF0F1933C192002605AF /* assimp_parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = assimp_parser.cpp; sourceTree = "<group>"; };
+		2BAEAF101933C192002605AF /* assimp_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = assimp_parser.h; sourceTree = "<group>"; };
+		2BAEAF121933C565002605AF /* libassimp.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libassimp.dylib; path = /usr/local/lib/libassimp.dylib; sourceTree = "<absolute>"; };
+		2BAEAF16193404BF002605AF /* scoped_lock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scoped_lock.h; sourceTree = "<group>"; };
 		2BB1AC301738AF9A00336221 /* kdtree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kdtree.h; sourceTree = "<group>"; };
 		2BB1AC311738AF9A00336221 /* kdtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kdtree.cpp; sourceTree = "<group>"; };
 		2BB1AC331738B14D00336221 /* aabbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aabbox.h; sourceTree = "<group>"; };
@@ -116,6 +122,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2B7B648C170FBD0F002C830F /* libfreeimage.a in Frameworks */,
+				2BAEAF131933C566002605AF /* libassimp.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +132,7 @@
 		08FB7794FE84155DC02AAC07 /* raytracer */ = {
 			isa = PBXGroup;
 			children = (
+				2BAEAF141933C57B002605AF /* dylibs */,
 				2B7B648D170FBD1A002C830F /* include */,
 				2B7B6485170FBD01002C830F /* lib */,
 				08FB7795FE84155DC02AAC07 /* src */,
@@ -174,6 +182,7 @@
 				2B7B647F170FBCBD002C830F /* sample.h */,
 				2B7B6480170FBCBD002C830F /* sampler.h */,
 				2B7B65E2170FC938002C830F /* sampler.cpp */,
+				2BAEAF16193404BF002605AF /* scoped_lock.h */,
 				2B2DA1A6171FA0D10098D2C6 /* common.h */,
 				2B7B6481170FBCBD002C830F /* scene.h */,
 				2B7B65E3170FC938002C830F /* scene.cpp */,
@@ -192,6 +201,8 @@
 				2BAEAEFF1933A994002605AF /* parser_factory.h */,
 				2BAEAF081933AB51002605AF /* iparser.h */,
 				2B7B673A17108606002C830F /* brdf.h */,
+				2BAEAF0F1933C192002605AF /* assimp_parser.cpp */,
+				2BAEAF101933C192002605AF /* assimp_parser.h */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -218,6 +229,14 @@
 				2B7B648F170FBD29002C830F /* FreeImage.h */,
 			);
 			name = include;
+			sourceTree = "<group>";
+		};
+		2BAEAF141933C57B002605AF /* dylibs */ = {
+			isa = PBXGroup;
+			children = (
+				2BAEAF121933C565002605AF /* libassimp.dylib */,
+			);
+			name = dylibs;
 			sourceTree = "<group>";
 		};
 		C6859E8C029090F304C91782 /* Documentation */ = {
@@ -299,6 +318,7 @@
 				2B2D9E3417164FB10098D2C6 /* point_light.cpp in Sources */,
 				2B2DA0F7171E63EE0098D2C6 /* direct_light.cpp in Sources */,
 				2BB1AC321738AF9A00336221 /* kdtree.cpp in Sources */,
+				2BAEAF111933C192002605AF /* assimp_parser.cpp in Sources */,
 				2BAEAF0B1933AC52002605AF /* simple_parser.cpp in Sources */,
 				2B1BCAEC186A93DC004F0635 /* env_sphere.cpp in Sources */,
 				2BB1AC351738B14D00336221 /* aabbox.cpp in Sources */,
@@ -341,9 +361,11 @@
 		1DEB923608733DC60010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
@@ -357,9 +379,11 @@
 		2B2DA13D171E6C930098D2C6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
 				GCC_AUTO_VECTORIZATION = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_ENABLE_SSE41_EXTENSIONS = YES;
 				GCC_ENABLE_SSE42_EXTENSIONS = YES;
@@ -407,10 +431,12 @@
 		2BB1AF5C173F594200336221 /* Release Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
 				GCC_AUTO_VECTORIZATION = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_ENABLE_SSE41_EXTENSIONS = YES;
 				GCC_ENABLE_SSE42_EXTENSIONS = YES;

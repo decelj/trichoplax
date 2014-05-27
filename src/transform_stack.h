@@ -11,7 +11,8 @@ public:
     void push();
     void pop();
     void transform(const glm::mat4& m);
-    glm::vec3 transformPoint(glm::vec3& p) const;
+    glm::vec3 transformPoint(const glm::vec3& p) const;
+    glm::vec3 transformNormal(const glm::vec3& n) const;
     
     void translate(const float x, const float y, const float z);
     void rotate(const glm::vec3& axis, const float degrees);

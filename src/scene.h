@@ -19,7 +19,6 @@ class EnvSphere;
 class Scene
 {
 public:
-    void createBuffer(const int width, const int height);
     void render(const std::string& filename);
     void setCamera(Camera* cam) { mCam = cam; }
     inline void addPrimitive(IPrimitive* prim) { mKdTree->addPrimitive(prim); }
@@ -40,6 +39,7 @@ private:
     explicit Scene() {}
     void setup();
     void cleanupThreads(bool force=false);
+    void createBuffer();
     ~Scene();
 
     Camera* mCam;

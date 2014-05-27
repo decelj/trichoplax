@@ -6,8 +6,9 @@
 #include "sample.h"
 #include "common.h"
 #include "debug.h"
+#include "scoped_lock.h"
 
-ImageBuffer::ImageBuffer(const int width, const int height)
+ImageBuffer::ImageBuffer(const unsigned short width, const unsigned short height)
     : mWidth(width),
       mHeight(height)
 {
@@ -24,7 +25,7 @@ ImageBuffer::~ImageBuffer()
 
 void ImageBuffer::commit(const Sample& sample, const glm::vec4& color)
 {
-    pthread_mutex_lock(&mBufferLock);
+    ScopedLock lock(&mBufferLock);
     
     const unsigned int offset = 
         (static_cast<int>(sample.y) * mWidth + static_cast<int>(sample.x)) * 4;
@@ -37,8 +38,6 @@ void ImageBuffer::commit(const Sample& sample, const glm::vec4& color)
     mPixels[offset+2] = color.r;
     mPixels[offset+1] = color.g;
     mPixels[offset] = color.b;
-    
-    pthread_mutex_unlock(&mBufferLock);
 }
 
 void ImageBuffer::write(const std::string& filename) const

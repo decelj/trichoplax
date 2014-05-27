@@ -12,7 +12,10 @@ class Camera
 public:
     explicit Camera(const float fov, const glm::vec3& pos, const glm::vec3& lookAt,
                     const glm::vec3& up, const int width, const int height);
+    
     void generateRay(const Sample& s, Ray* ray) const;
+    unsigned short width() const { return mWidth; }
+    unsigned short height() const { return mHeight; }
 
 private:
     explicit Camera() :

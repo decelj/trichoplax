@@ -19,6 +19,13 @@ Material::Material()
     mBrdf.ior = 1.0f;
 }
 
+Material::Material(const glm::vec3& Ka, const glm::vec3& Ke,
+         const glm::vec3& Kd, const glm::vec3& Ks,
+         const glm::vec3& Kt, const float Kr, const float ior)
+: mBrdf(Ka, Ke, Kd, Ks, Kt, Kr, ior)
+{
+}
+
 Material::Material(const Material& other)
 {
     memcpy(&mBrdf, &other.mBrdf, sizeof(BRDF));

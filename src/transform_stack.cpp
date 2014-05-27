@@ -27,7 +27,13 @@ void TransformStack::transform(const glm::mat4& m)
     t = t * m;
 }
 
-glm::vec3 TransformStack::transformPoint(glm::vec3& p) const
+glm::vec3 TransformStack::transformNormal(const glm::vec3& n) const
+{
+    glm::mat4 tmp = glm::transpose(glm::inverse(mStack.top()));
+    return glm::normalize(glm::vec3(tmp * glm::vec4(n, 0.f)));
+}
+
+glm::vec3 TransformStack::transformPoint(const glm::vec3& p) const
 {
     return glm::vec3(mStack.top() * glm::vec4(p, 1.0));
 }

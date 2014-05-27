@@ -33,14 +33,17 @@ void Scene::setup()
 
 Scene::~Scene()
 {
-    if (mCam != NULL)
-        delete mCam;
-    if (mSampler != NULL)
-        delete mSampler;
-    if (mImgBuffer != NULL)
-        delete mImgBuffer;
-    if (mEnvSphere != NULL)
-        delete mEnvSphere;
+    delete mCam;
+    mCam = NULL;
+    
+    delete mSampler;
+    mSampler = NULL;
+    
+    delete mImgBuffer;
+    mImgBuffer = NULL;
+    
+    delete mEnvSphere;
+    mEnvSphere = NULL;
     
     for (auto it = mLights.begin(); it != mLights.end(); ++it)
         delete *it;
@@ -68,10 +71,13 @@ void Scene::destroy()
     }
 }
 
-void Scene::createBuffer(const int width, const int height)
+void Scene::createBuffer()
 {
-    mSampler = new Sampler(width, height);
-    mImgBuffer = new ImageBuffer(width, height);
+    delete mSampler;
+    delete mImgBuffer;
+    
+    mSampler = new Sampler(mCam->width(), mCam->height());
+    mImgBuffer = new ImageBuffer(mCam->width(), mCam->height());
 }
 
 void Scene::setEnvSphereImage(const std::string& file)
@@ -86,6 +92,7 @@ void Scene::setEnvSphereImage(const std::string& file)
 void Scene::render(const std::string& filename)
 {
     assert(mCam != NULL);
+    createBuffer();
     mKdTree->build();
     
     Timer t;

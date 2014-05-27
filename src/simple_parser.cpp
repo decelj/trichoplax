@@ -53,16 +53,14 @@ std::string SimpleParser::parse(const std::string& file, Scene* const scene)
     float quadAtten = 0.0f;
     float bias = 0.001f;
     float pointLgtRadius = 0.0f;
+    unsigned short w = 0, h = 0;
     
-    // TODO: Fix me
-    int w, h;
-    
-    getline(in, line);
-    while (in) {
+    do {
+        getline(in, line);
+        
         // Ignore empty lines and comments
         if ((line[0] == '#') ||
             (line.find_first_not_of(" \t\r\n") == std::string::npos)) {
-            getline(in, line);
             continue;
         }
         
@@ -70,10 +68,8 @@ std::string SimpleParser::parse(const std::string& file, Scene* const scene)
         s >> cmd;
         
         if (cmd == "size") {
-            if (readValues(line, s, 2, values)) {
+            if (readValues(line, s, 2, values))
                 w = values[0]; h = values[1];
-                scene->createBuffer(w, h);
-            }
         } else if (cmd == "output") {
             s >> outputImage;
         } else if (cmd == "maxdepth") {
@@ -83,6 +79,9 @@ std::string SimpleParser::parse(const std::string& file, Scene* const scene)
             if (readValues(line, s, 1, values))
                 scene->setShadowRays(values[0]);
         } else if (cmd == "camera") {
+            if (w == 0 || h == 0)
+                throw std::runtime_error("zero image height and/or width!");
+            
             if (readValues(line, s, 10, values)) {
                 scene->setCamera(new Camera(values[9], // fov
                                             glm::vec3(values[0], values[1], values[2]), // pos
@@ -176,9 +175,7 @@ std::string SimpleParser::parse(const std::string& file, Scene* const scene)
         } else {
             std::cerr << "Unknown command: " << cmd << std::endl;
         }
-        
-        getline(in, line);
-    }
+    } while (in);
     
     delete currMaterial;
     return outputImage;
