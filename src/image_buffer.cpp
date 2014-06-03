@@ -1,5 +1,6 @@
 #include <iostream>
 #include <FreeImage.h>
+#include <assert.h>
 
 #include "image_buffer.h"
 #include "sampler.h"
@@ -12,7 +13,6 @@ ImageBuffer::ImageBuffer(const unsigned short width, const unsigned short height
     : mWidth(width),
       mHeight(height)
 {
-    pthread_mutex_init(&mBufferLock, NULL);
     mPixels = new float[mWidth*mHeight*4];
     bzero(mPixels, sizeof(mPixels));
 }
@@ -20,16 +20,15 @@ ImageBuffer::ImageBuffer(const unsigned short width, const unsigned short height
 ImageBuffer::~ImageBuffer()
 {
     delete [] mPixels;
-    pthread_mutex_destroy(&mBufferLock);
 }
 
 void ImageBuffer::commit(const Sample& sample, const glm::vec4& color)
 {
-    ScopedLock lock(&mBufferLock);
-    
     const unsigned int offset = 
         (static_cast<int>(sample.y) * mWidth + static_cast<int>(sample.x)) * 4;
     
+    // Note: No thread locking needed here since each thread executes and commits
+    // a unique pixel as controlled via sampler in Sampler::buildSamplePacket
     assert(color.a <= 1.f);
     assert(mPixels[offset] == 0.f &&
            mPixels[offset+2] == 0.f &&

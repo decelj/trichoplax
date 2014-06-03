@@ -3,7 +3,6 @@
 
 #include <glm/glm.hpp>
 #include <string.h>
-#include <pthread.h>
 
 struct Sample;
 
@@ -20,8 +19,6 @@ private:
     
     float *mPixels;
     const unsigned short mWidth, mHeight;
-    
-    pthread_mutex_t mBufferLock;
 };
 
 #endif

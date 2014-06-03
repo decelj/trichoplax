@@ -1,4 +1,5 @@
 #include <iostream>
+#include <unistd.h>
 
 #include "raytracer.h"
 #include "ray.h"
@@ -67,17 +68,17 @@ void* Raytracer::_run(void *arg) {
 void Raytracer::run() const
 {
     SamplePacket packet;
-    Sample sample;
-    while (!mIsCanceled && mSampler->buildSamplePacket(&packet)) {
+    while (!mIsCanceled && mSampler->buildSamplePacket(packet)) {
+        const Sample* sample;
         glm::vec4 packetResult(0.f, 0.f, 0.f, 0.f);
         while (!mIsCanceled && packet.nextSample(sample)) {
             Ray primary(Ray::PRIMARY);
-            mCamera->generateRay(sample, &primary);
+            mCamera->generateRay(*sample, &primary);
             glm::vec4 rayColor(0.f, 0.f, 0.f, 0.f);
             traceAndShade(primary, rayColor);
             packetResult += rayColor;
         }
-        mImgBuffer->commit(sample, packetResult / Sampler::sSamplesPerPixel);
+        mImgBuffer->commit(*sample, packetResult / Sampler::sSamplesPerPixel);
     }
 }
 

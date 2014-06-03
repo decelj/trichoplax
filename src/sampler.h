@@ -14,7 +14,7 @@ public:
     
     explicit Sampler(const unsigned short width, const unsigned short height);
 
-    bool buildSamplePacket(SamplePacket* packet);
+    bool buildSamplePacket(SamplePacket& packet);
 
 private:
     explicit Sampler() { } // Don't use default constructor

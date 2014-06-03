@@ -2,37 +2,43 @@
 #define __SAMPLE_H__
 
 #include <vector>
+#include <iostream>
+#include "sampler.h"
 
 struct Sample {
-    Sample(float _x, float _y) : x(_x), y(_y) { }
-    Sample() : x(0), y(0) { }
+    explicit Sample(float _x, float _y) : x(_x), y(_y) { }
+    explicit Sample() : x(0), y(0) { }
+
     float x, y;
 };
 
 class SamplePacket {
 public:
-    explicit SamplePacket() : mCurrSample(0)
-    { mSamples.clear(); }
-    
-    inline void addSample(float x, float y) {
-        mSamples.push_back(Sample(x, y));
+    explicit SamplePacket()
+    {
+        clear();
     }
     
-    bool nextSample(Sample& s) {
-        if (mCurrSample >= mSamples.size()) return false;
-        s = mSamples[mCurrSample];
+    inline void addSample(float x, float y) {
+        mSamples.emplace_back(x, y);
+    }
+    
+    bool nextSample(const Sample*& s) {
+        if (mCurrSample == mSamples.end()) return false;
+        s = &(*mCurrSample);
         ++mCurrSample;
         return true;
     }
     
     inline void clear() {
         mSamples.clear();
-        mCurrSample = 0;
+        mSamples.reserve(Sampler::sSamplesPerPixel);
+        mCurrSample = mSamples.begin();
     }
     
 private:
     std::vector<Sample> mSamples;
-    unsigned short mCurrSample;
+    std::vector<Sample>::const_iterator mCurrSample;
 };
 
 #endif
