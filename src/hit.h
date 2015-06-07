@@ -19,9 +19,9 @@ public:
     const glm::vec3 I;
 
 private:
-    Hit(const Hit& h) { } // Not copyable
-    
-    const IPrimitive *mPrim;
+    // Not copyable
+    Hit(const Hit&) = delete;
+    Hit& operator=(const Hit&) = delete;
 };
 
 #endif

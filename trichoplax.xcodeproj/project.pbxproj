@@ -14,6 +14,7 @@
 		2B2D9D8C171521940098D2C6 /* debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2D9D8B171521940098D2C6 /* debug.cpp */; };
 		2B2D9E3417164FB10098D2C6 /* point_light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2D9E3317164FB10098D2C6 /* point_light.cpp */; };
 		2B2DA0F7171E63EE0098D2C6 /* direct_light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2DA0F6171E63EE0098D2C6 /* direct_light.cpp */; };
+		2B3BEB1119B984C100CB4EEC /* glm.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B3BEB1019B984C100CB4EEC /* glm.framework */; };
 		2B7B648C170FBD0F002C830F /* libfreeimage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B7B648B170FBD0F002C830F /* libfreeimage.a */; };
 		2B7B64A1170FBDE0002C830F /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B6483170FBCBD002C830F /* camera.cpp */; };
 		2B7B64A2170FBDE0002C830F /* image_buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B6484170FBCBD002C830F /* image_buffer.cpp */; };
@@ -68,6 +69,7 @@
 		2B2DA0F5171E63EE0098D2C6 /* direct_light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = direct_light.h; sourceTree = "<group>"; };
 		2B2DA0F6171E63EE0098D2C6 /* direct_light.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = direct_light.cpp; sourceTree = "<group>"; };
 		2B2DA1A6171FA0D10098D2C6 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
+		2B3BEB1019B984C100CB4EEC /* glm.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = glm.framework; path = ../../../Library/Frameworks/glm.framework; sourceTree = "<group>"; };
 		2B7B647A170FBCBD002C830F /* camera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = camera.h; sourceTree = "<group>"; };
 		2B7B647B170FBCBD002C830F /* hit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hit.h; sourceTree = "<group>"; };
 		2B7B647C170FBCBD002C830F /* image_buffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = image_buffer.h; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 			files = (
 				2B7B648C170FBD0F002C830F /* libfreeimage.a in Frameworks */,
 				2BAEAF131933C566002605AF /* libassimp.dylib in Frameworks */,
+				2B3BEB1119B984C100CB4EEC /* glm.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,6 +135,7 @@
 		08FB7794FE84155DC02AAC07 /* raytracer */ = {
 			isa = PBXGroup;
 			children = (
+				2B3BEB1019B984C100CB4EEC /* glm.framework */,
 				2BAEAF141933C57B002605AF /* dylibs */,
 				2B7B648D170FBD1A002C830F /* include */,
 				2B7B6485170FBD01002C830F /* lib */,
@@ -151,13 +155,15 @@
 				2B05D3CE18665F57005082A9 /* stats_collector.h */,
 				2B7B647A170FBCBD002C830F /* camera.h */,
 				2B7B6483170FBCBD002C830F /* camera.cpp */,
-				2B7B647B170FBCBD002C830F /* hit.h */,
-				2BCF178C17DBAE5B00C35CC3 /* hit.cpp */,
 				2BB1AC331738B14D00336221 /* aabbox.h */,
 				2BB1AC341738B14D00336221 /* aabbox.cpp */,
 				2BB1AC301738AF9A00336221 /* kdtree.h */,
 				2BB1AC311738AF9A00336221 /* kdtree.cpp */,
 				2B7B647C170FBCBD002C830F /* image_buffer.h */,
+				2B7B647E170FBCBD002C830F /* ray.h */,
+				2B7B68391710D326002C830F /* ray.cpp */,
+				2B7B647B170FBCBD002C830F /* hit.h */,
+				2BCF178C17DBAE5B00C35CC3 /* hit.cpp */,
 				2B7B6484170FBCBD002C830F /* image_buffer.cpp */,
 				2B1BCAEB186A93DC004F0635 /* env_sphere.h */,
 				2B1BCAEA186A93DC004F0635 /* env_sphere.cpp */,
@@ -175,8 +181,6 @@
 				2B7B67881710A857002C830F /* transform_stack.cpp */,
 				2B2D9C561713C85C0098D2C6 /* debug.h */,
 				2B2D9D8B171521940098D2C6 /* debug.cpp */,
-				2B7B647E170FBCBD002C830F /* ray.h */,
-				2B7B68391710D326002C830F /* ray.cpp */,
 				2BD9523D17AE089C000576EB /* multi_sample_ray.h */,
 				2BD9523E17AE089C000576EB /* multi_sample_ray.cpp */,
 				2B7B647F170FBCBD002C830F /* sample.h */,
@@ -336,8 +340,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = "/Library/Frameworks/**";
+				FRAMEWORK_SEARCH_PATHS = (
+					"/Library/Frameworks/**",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
@@ -407,7 +413,10 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = "/Library/Frameworks/**";
+				FRAMEWORK_SEARCH_PATHS = (
+					"/Library/Frameworks/**",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
@@ -462,7 +471,10 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = "/Library/Frameworks/**";
+				FRAMEWORK_SEARCH_PATHS = (
+					"/Library/Frameworks/**",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;

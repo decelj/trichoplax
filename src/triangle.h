@@ -5,6 +5,7 @@
 #include <math.h>
 
 #include "iprimitive.h"
+#include "kdtree.h"
 
 class Triangle : public IPrimitive {
 public:
@@ -14,7 +15,7 @@ public:
     bool intersect(Ray& ray) const;
     glm::vec3 normal(const glm::vec3&) const { return mN; }
     void bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const;
-    bool onLeftOfPlane(const float plane, const short axis) const;
+    KdTree::PartitionResult partition(const float plane, const short axis) const;
     
 private:
     Triangle();

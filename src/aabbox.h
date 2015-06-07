@@ -9,7 +9,12 @@ class AABBox {
 public:
     AABBox() { };
     
-    inline void update(glm::vec3& ll, glm::vec3 ur) { mBounds[0] = ll; mBounds[1] = ur; }
+    const inline glm::vec3& ll() const
+    { return mBounds[0]; }
+    const inline glm::vec3& ur() const
+    { return mBounds[1]; }
+    
+    inline void update(const glm::vec3& ll, const glm::vec3& ur) { mBounds[0] = ll; mBounds[1] = ur; }
     bool intersect(const Ray& ray) const;
     
     short longestAxis() const;

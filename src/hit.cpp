@@ -4,8 +4,7 @@
 #include "ray.h"
 
 Hit::Hit(const Ray& r) :
-    mPrim(r.mHitPrim),
-    P(r.point(r.mHitT)),
+    P(r.point(r.mMaxT)),
     N(r.mHitPrim->normal(P)),
     I(-r.mDir)
 { }

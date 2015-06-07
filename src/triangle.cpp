@@ -1,15 +1,19 @@
+#include <algorithm>
+
 #include "triangle.h"
 #include "ray.h"
 #include "hit.h"
 #include "common.h"
+#include "kdtree.h"
 
-Triangle::Triangle()
+Triangle::Triangle() :
+    IPrimitive()
 {
     mA = mB = mC = mN = glm::vec3(0.0f,0.0f,0.0f);
 }
 
 Triangle::Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, Material* m)
-    : mA(a), mB(b), mC(c)
+    : IPrimitive(), mA(a), mB(b), mC(c)
 {
     mN = glm::normalize(glm::cross(mA - mB, mA - mC));
     mMaterial = m;
@@ -67,7 +71,11 @@ void Triangle::bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const
     upperRight[2] = MAX(MAX(mA[2], mB[2]), mC[2]);
 }
 
-bool Triangle::onLeftOfPlane(const float plane, const short axis) const
+KdTree::PartitionResult Triangle::partition(const float plane, const short axis) const
 {
-    return mA[axis] < plane && mB[axis] < plane && mC[axis] < plane;
+    if (mA[axis] <= plane && mB[axis] <= plane && mC[axis] <= plane)
+        return KdTree::LEFT;
+    if (mA[axis] >= plane && mB[axis] >= plane && mC[axis] >= plane)
+        return KdTree::RIGHT;
+    return KdTree::BOTH;
 }

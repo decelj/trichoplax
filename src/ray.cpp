@@ -1,4 +1,6 @@
 #include <iostream>
+#include <limits>
+#include <assert.h>
 
 #include "ray.h"
 #include "hit.h"
@@ -10,7 +12,8 @@ Ray::Ray(const TYPE t)
 : mType(t),
   mDepth(1),
   mIor(1.0f),
-  mHitT(MAXFLOAT),
+  mMinT(0.f),
+  mMaxT(std::numeric_limits<float>::max()),
   mHitPrim(NULL)
 { }
 
@@ -19,7 +22,8 @@ Ray::Ray(const TYPE t, const glm::vec3& origin, const float ior)
   mOrigin(origin),
   mDepth(1),
   mIor(ior),
-  mHitT(MAXFLOAT),
+  mMinT(0.f),
+  mMaxT(std::numeric_limits<float>::max()),
   mHitPrim(NULL)
 { }
 
@@ -31,7 +35,8 @@ Ray::Ray(const Ray& r)
   mInverseDir(r.mInverseDir),
   mDepth(r.mDepth),
   mIor(r.mIor),
-  mHitT(r.mHitT),
+  mMinT(r.mMinT),
+  mMaxT(r.mMaxT),
   mHitBack(r.mHitBack),
   mHitPrim(r.mHitPrim)
 { }
@@ -39,28 +44,24 @@ Ray::Ray(const Ray& r)
 // Copy constructor w/ type change
 Ray::Ray(const Ray& r, TYPE t)
 : mType(t),
-mOrigin(r.mOrigin),
-mDir(r.mDir),
-mInverseDir(r.mInverseDir),
-mDepth(r.mDepth),
-mIor(r.mIor),
-mHitT(r.mHitT),
-mHitBack(r.mHitBack),
-mHitPrim(r.mHitPrim)
+  mOrigin(r.mOrigin),
+  mDir(r.mDir),
+  mInverseDir(r.mInverseDir),
+  mDepth(r.mDepth),
+  mIor(r.mIor),
+  mMinT(r.mMinT),
+  mMaxT(r.mMaxT),
+  mHitBack(r.mHitBack),
+  mHitPrim(r.mHitPrim)
 { }
 
 void Ray::transformed(const glm::mat4& m, Ray& outRay) const
 {    
     // Apply translation to origin
-    outRay.mOrigin = glm::vec3(m * glm::vec4(mOrigin, 1.0));
+    outRay.setOrigin(glm::vec3(m * glm::vec4(mOrigin, 1.0)));
     
     // Apply upper 3x3 rotation to direction
-    outRay.mDir = glm::normalize(glm::vec3(m * glm::vec4(mDir, 0.0)));
-    
-    // Scale hitT
-    if (mHitT < MAXFLOAT)
-        outRay.mHitT = mHitT * 
-                       glm::length(glm::vec3(m[0][0], m[1][1], m[2][2]));
+    outRay.setDir(glm::normalize(glm::vec3(m * glm::vec4(mDir, 0.0))));
 }
 
 /* Reflected ray = Iparallel - Iorthogonal

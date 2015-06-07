@@ -14,6 +14,7 @@ int main(int argc, char** argv) {
     }
     
     FreeImage_Initialise();
+    Scene::create();
     
     std::string sceneFile(argv[1]);
     std::string outputImage;

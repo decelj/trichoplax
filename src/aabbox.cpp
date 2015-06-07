@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "aabbox.h"
 #include "ray.h"
 
@@ -18,35 +20,32 @@ short AABBox::longestAxis() const
 
 float AABBox::split(const short axis) const
 {
-    return ((mBounds[1][axis] - mBounds[0][axis]) / 2.0) + mBounds[0][axis];
+    return ((mBounds[1][axis] - mBounds[0][axis]) / 2.f) + mBounds[0][axis];
 }
 
 bool AABBox::intersect(const Ray& ray) const
 {
-    const glm::vec3 invDir = ray.inverseDir();
-    unsigned short signX = invDir.x < 0.0f ? 1 : 0;
-    unsigned short signY = invDir.y < 0.0f ? 1 : 0;
+    const glm::vec3 llToOrigin = mBounds[0] - ray.origin();
+    const glm::vec3 urToOrigin = mBounds[1] - ray.origin();
+    const glm::vec3 nearTs = llToOrigin * ray.inverseDir();
+    const glm::vec3 farTs = urToOrigin * ray.inverseDir();
+    float tMin = ray.minT();
+    float tMax = ray.maxT();
     
-    float tMin = (mBounds[signX].x - ray.origin().x) * invDir.x;
-    float tMax = (mBounds[1-signX].x - ray.origin().x) * invDir.x;
-    float tyMin = (mBounds[signY].y - ray.origin().y) * invDir.y;
-    float tyMax = (mBounds[1-signY].y - ray.origin().y) * invDir.y;
-    
-    if ((tMin > tyMax) || (tyMin > tMax))
-        return false;
-    
-    if (tyMin > tMin)
-        tMin = tyMin;
-    
-    if (tyMax > tMax)
-        tMax = tyMax;
-    
-    unsigned short signZ = invDir.z < 0.0f ? 1 : 0;
-    float tzMin = (mBounds[signZ].z - ray.origin().z) * invDir.z;
-    float tzMax = (mBounds[1-signZ].z - ray.origin().z) * invDir.z;
-    
-    if ((tMin > tzMax) || (tzMin > tMax))
-        return false;
+    for (int i = 0; i < 3; ++i) {
+        float nearT = nearTs[i];
+        float farT = farTs[i];
+        if (nearT > farT) {
+            float tmp = nearT;
+            nearT = farT;
+            farT = tmp;
+        }
+        
+        tMin = std::max(nearT, tMin);
+        tMax = std::min(farT, tMax);
+        if (tMin > tMax)
+            return false;
+    }
     
     return true;
 }

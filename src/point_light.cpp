@@ -52,7 +52,7 @@ bool PointLight::generateShadowRay(MultiSampleRay& r) const
     
     glm::vec3 dirToLgtSample = samplePoint - r.origin();
     r.setDir(glm::normalize(dirToLgtSample));
-    r.setMinDistance(glm::length(dirToLgtSample));
+    r.setMaxDistance(glm::length(dirToLgtSample));
     r.bias(mBias);
     
     --r;

@@ -26,7 +26,7 @@ public:
     inline void setDir(glm::vec3 d) { mDir = d; mInverseDir = 1.0f / d; }
     inline void setOrigin(glm::vec3 o) { mOrigin = o; }
     inline void bias(const float bias) { mOrigin += mDir * bias; }
-    inline void setMinDistance(const float dist) { mHitT = dist; }
+    inline void setMaxDistance(const float dist) { mMaxT = dist; }
     inline void shouldHitBackFaces(bool value) { mHitBack = value; }
 
     inline const glm::vec3& origin() const { return mOrigin; }
@@ -39,12 +39,14 @@ public:
     inline TYPE type() const { return mType; }
     
     inline void hit(const IPrimitive* prim, const float t, bool hit_back)
-    { mHitT = t; mHitPrim = prim; mHitBack = hit_back; }
-    inline bool hits(const float t) const { return t < mHitT; }
+    { mMaxT = t; mHitPrim = prim; mHitBack = hit_back; }
+    inline bool hits(const float t) const { return t < mMaxT && t > mMinT; }
     
     // This method is bad and should go away. Assumes we already know p
     // lies on the ray.
     inline float t(const glm::vec3& p) { return glm::length(p - mOrigin); }
+    inline float maxT() const { return mMaxT; }
+    inline float minT() const { return mMinT; }
     
     void transformed(const glm::mat4& m, Ray& outRay) const;
     void reflected(const Hit& h, Ray& r) const;
@@ -62,7 +64,7 @@ private:
     glm::vec3 mDir, mInverseDir;
     short mDepth;
     float mIor;
-    float mHitT;
+    float mMinT, mMaxT;
     bool mHitBack;
     bool mShouldHitBack;
     const IPrimitive *mHitPrim;

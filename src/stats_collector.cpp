@@ -9,8 +9,8 @@ StatsCollector::StatsCollector()
     mStats.clear();
 }
 
-void StatsCollector::addStats(Stats *s) {
-    mStats.push_back(s);
+void StatsCollector::addStats(Stats* s) {
+    mStats.emplace_back(s);
 }
 
 void StatsCollector::print() const {

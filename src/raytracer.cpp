@@ -27,13 +27,15 @@ Raytracer::Raytracer(const KdTree* tree, const Camera* cam, const EnvSphere* env
     mStats(new Stats),
     mMaxDepth(maxDepth),
     mThreadId(0),
-    mIsCanceled(false)
+    mIsCanceled(false),
+    mPrimBuckets(new bool[tree->numberOfPrimitives()])
 {
 }
 
 Raytracer::~Raytracer()
 {
     delete mStats;
+    mStats = NULL;
 }
 
 void Raytracer::registerStatsCollector(StatsCollector* c) const
@@ -109,17 +111,19 @@ bool Raytracer::trace(Ray& ray, bool firstHit) const
     if (ray.depth() > mMaxDepth) return false;
     
     mStats->increment(ray.type());
-    return mKdTree->trace(ray, firstHit);
+    memset(mPrimBuckets, 0, sizeof(bool)*mKdTree->numberOfPrimitives());
+    return mKdTree->trace(ray, firstHit, mPrimBuckets);
 }
 
 bool Raytracer::traceAndShade(Ray& ray, glm::vec4& result) const
 {
+    assert(ray.type() != Ray::SHADOW);
     if (trace(ray)) {
         ray.shade(this, result);
         return true;
     }
     
-    if (mEnv != NULL && ray.type() != Ray::PRIMARY && ray.type() != Ray::SHADOW)
+    if (mEnv != NULL && ray.type() != Ray::PRIMARY)
         mEnv->sample(ray, result);
     
     return false;
