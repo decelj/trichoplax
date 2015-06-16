@@ -6,7 +6,6 @@
 #include "iprimitive.h"
 #include "material.h"
 #include "hit.h"
-#include "stats.h"
 #include "stats_collector.h"
 #include "kdtree.h"
 #include "sampler.h"
@@ -24,23 +23,21 @@ Raytracer::Raytracer(const KdTree* tree, const Camera* cam, const EnvSphere* env
     mEnv(env),
     mImgBuffer(imgBuffer),
     mSampler(sampler),
-    mStats(new Stats),
+    mStats(),
     mMaxDepth(maxDepth),
     mThreadId(0),
     mIsCanceled(false),
-    mPrimBuckets(new bool[tree->numberOfPrimitives()])
+    mMailboxes(tree->numberOfPrimitives())
 {
 }
 
 Raytracer::~Raytracer()
 {
-    delete mStats;
-    mStats = NULL;
 }
 
 void Raytracer::registerStatsCollector(StatsCollector* c) const
 {
-    c->addStats(mStats);
+    c->addStats(&mStats);
 }
 
 bool Raytracer::start()
@@ -101,18 +98,13 @@ void Raytracer::cancel()
     mIsCanceled = true;
 }
 
-bool Raytracer::traceShadow(Ray& ray) const
-{
-    return trace(ray, true);
-}
-
 bool Raytracer::trace(Ray& ray, bool firstHit) const
 {
     if (ray.depth() > mMaxDepth) return false;
     
-    mStats->increment(ray.type());
-    memset(mPrimBuckets, 0, sizeof(bool)*mKdTree->numberOfPrimitives());
-    return mKdTree->trace(ray, firstHit, mPrimBuckets);
+    mStats.increment(ray.type());
+    mMailboxes.IncrementRayId();
+    return mKdTree->trace(ray, firstHit, mMailboxes);
 }
 
 bool Raytracer::traceAndShade(Ray& ray, glm::vec4& result) const

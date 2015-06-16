@@ -15,6 +15,7 @@
 		2B2D9E3417164FB10098D2C6 /* point_light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2D9E3317164FB10098D2C6 /* point_light.cpp */; };
 		2B2DA0F7171E63EE0098D2C6 /* direct_light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2DA0F6171E63EE0098D2C6 /* direct_light.cpp */; };
 		2B3BEB1119B984C100CB4EEC /* glm.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B3BEB1019B984C100CB4EEC /* glm.framework */; };
+		2B794EFF1B2FF06200F6A919 /* mailboxer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B794EFD1B2FF06200F6A919 /* mailboxer.cpp */; };
 		2B7B648C170FBD0F002C830F /* libfreeimage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B7B648B170FBD0F002C830F /* libfreeimage.a */; };
 		2B7B64A1170FBDE0002C830F /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B6483170FBCBD002C830F /* camera.cpp */; };
 		2B7B64A2170FBDE0002C830F /* image_buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B6484170FBCBD002C830F /* image_buffer.cpp */; };
@@ -70,6 +71,9 @@
 		2B2DA0F6171E63EE0098D2C6 /* direct_light.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = direct_light.cpp; sourceTree = "<group>"; };
 		2B2DA1A6171FA0D10098D2C6 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
 		2B3BEB1019B984C100CB4EEC /* glm.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = glm.framework; path = ../../../Library/Frameworks/glm.framework; sourceTree = "<group>"; };
+		2B794EFC1B2FC47000F6A919 /* alligned_allocator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = alligned_allocator.h; sourceTree = "<group>"; };
+		2B794EFD1B2FF06200F6A919 /* mailboxer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mailboxer.cpp; sourceTree = "<group>"; };
+		2B794EFE1B2FF06200F6A919 /* mailboxer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mailboxer.h; sourceTree = "<group>"; };
 		2B7B647A170FBCBD002C830F /* camera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = camera.h; sourceTree = "<group>"; };
 		2B7B647B170FBCBD002C830F /* hit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hit.h; sourceTree = "<group>"; };
 		2B7B647C170FBCBD002C830F /* image_buffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = image_buffer.h; sourceTree = "<group>"; };
@@ -149,6 +153,7 @@
 		08FB7795FE84155DC02AAC07 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				2B794EFC1B2FC47000F6A919 /* alligned_allocator.h */,
 				2B05D3CA18665DF2005082A9 /* stats.cpp */,
 				2B05D3CB18665DF2005082A9 /* stats.h */,
 				2B05D3CD18665F57005082A9 /* stats_collector.cpp */,
@@ -207,6 +212,8 @@
 				2B7B673A17108606002C830F /* brdf.h */,
 				2BAEAF0F1933C192002605AF /* assimp_parser.cpp */,
 				2BAEAF101933C192002605AF /* assimp_parser.h */,
+				2B794EFD1B2FF06200F6A919 /* mailboxer.cpp */,
+				2B794EFE1B2FF06200F6A919 /* mailboxer.h */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -308,6 +315,7 @@
 				2B7B64A1170FBDE0002C830F /* camera.cpp in Sources */,
 				2B05D3CC18665DF2005082A9 /* stats.cpp in Sources */,
 				2B7B64A2170FBDE0002C830F /* image_buffer.cpp in Sources */,
+				2B794EFF1B2FF06200F6A919 /* mailboxer.cpp in Sources */,
 				8DD76F650486A84900D96B5E /* main.cpp in Sources */,
 				2B7B65E6170FC938002C830F /* sampler.cpp in Sources */,
 				2B7B65E7170FC938002C830F /* scene.cpp in Sources */,

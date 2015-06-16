@@ -10,6 +10,7 @@
 #include "iprimitive.h"
 #include "ray.h"
 #include "timer.h"
+#include "mailboxer.h"
 
 #define MAX_PRIMS_PER_NODE 10
 
@@ -84,7 +85,6 @@ void KdTree::build(Node* n, unsigned int depth)
     // Base case
     if (n->mPrims.size() <= MAX_PRIMS_PER_NODE) {
         //std::cout << "build leaf" << std::endl;
-        n->mIsLeaf = true;
         mMaxDepth = std::max(depth, mMaxDepth);
         mMinDepth = std::min(depth, mMinDepth);
         mMaxPrimsPerNode = std::max(n->mPrims.size(), mMaxPrimsPerNode);
@@ -98,7 +98,7 @@ void KdTree::build(Node* n, unsigned int depth)
     n->mRight = right;
     
     const short axis = findSplitAxis(n);
-    const float splitValue = n->mBBox->split(axis);
+    const float splitValue = n->mBBox.split(axis);
     
     Node::ConstPrimIterator it = n->mPrims.begin();
     for (; it != n->mPrims.end(); ++it) {
@@ -124,7 +124,6 @@ void KdTree::build(Node* n, unsigned int depth)
     if (right->mPrims.size() == n->mPrims.size() ||
         left->mPrims.size() == n->mPrims.size()) {
         //std::cout << "Depth " << depth << " left " << left->mPrims.size() << " right " << right->mPrims.size() << "; build leaf" << std::endl;
-        n->mIsLeaf = true;
         n->mLeft = NULL;
         n->mRight = NULL;
         
@@ -155,7 +154,7 @@ void KdTree::build(Node* n, unsigned int depth)
 /* TODO: What was I doing here?? */
 bool KdTree::paritionNode(const Node* const node) const
 {
-    short initialAxis = node->mBBox->longestAxis();
+    short initialAxis = node->mBBox.longestAxis();
     short axis = initialAxis;
     
     std::vector<IPrimitive*> primsForAxis[3];
@@ -174,23 +173,23 @@ bool KdTree::paritionNode(const Node* const node) const
 
 short KdTree::findSplitAxis(const Node* const node) const
 {
-    short initialAxis = node->mBBox->longestAxis();
-    short axis = initialAxis;
-    float splitValue = node->mBBox->split(axis);
     Node::ConstPrimIterator it;
-    do {
-        it = node->mPrims.begin();
+    unsigned lowestAxis = 0;
+    int lowestCost = std::numeric_limits<int>::max();
+    
+    for (unsigned i = 0; i < 3; ++i)
+    {
         int rightNodes = 0, leftNodes = 0, bothNodes = 0;
-        for (; it != node->mPrims.end(); ++it) {
-            switch ((*it)->partition(splitValue, axis)) {
+        const float splitValue = node->mBBox.split(i);
+        for (it = node->mPrims.begin(); it != node->mPrims.end(); ++it)
+        {
+            switch ((*it)->partition(splitValue, i)) {
                 case LEFT:
                     ++leftNodes;
-                    if (rightNodes != 0 && (leftNodes - bothNodes) >= MAX_PRIMS_PER_NODE) return axis;
                     break;
                     
                 case RIGHT:
                     ++rightNodes;
-                    if (leftNodes != 0 && (rightNodes - bothNodes) >= MAX_PRIMS_PER_NODE) return axis;
                     break;
                     
                 default:
@@ -199,45 +198,55 @@ short KdTree::findSplitAxis(const Node* const node) const
             }
         }
         
-        axis = (axis + 1) % 3;
-        splitValue = node->mBBox->split(axis);
-    } while (axis != initialAxis);
+        const int cost = std::abs(leftNodes - rightNodes) + bothNodes;
+        if (cost < lowestCost)
+        {
+            lowestCost = cost;
+            lowestAxis = i;
+        }
+    }
     
-    return axis;
+    return lowestAxis;
 }
 
-bool KdTree::trace(Ray& ray, bool firstHit, bool* primBuckets) const
+bool KdTree::trace(Ray& ray, bool firstHit, Mailboxer& mailboxes) const
 {
-    if (!mRoot->mBBox->intersect(ray)) return false;
+    if (!mRoot->mBBox.intersect(ray)) return false;
     
-    return trace(mRoot, ray, firstHit, primBuckets);
+    return trace(mRoot, ray, firstHit, mailboxes);
 }
 
-bool KdTree::trace(const Node* n, Ray& ray, bool firstHit, bool* primBuckets) const
+bool KdTree::trace(const Node* n, Ray& ray, bool firstHit, Mailboxer& mailboxes) const
 {
     bool ret = false;
     
     // Base case
-    if (n->mIsLeaf) {
+    if (n->isLeaf()) {
         Node::ConstPrimIterator it = n->mPrims.begin();
         for (; it != n->mPrims.end() && !(firstHit && ret); ++it) {
-            if (!primBuckets[(*it)->id()]) {
+            if (!mailboxes.Tested((*it)->id())) {
                 ret |= (*it)->intersect(ray);
-                primBuckets[(*it)->id()] = true;
+                mailboxes.Mark((*it)->id());
             }
         }
     } else {
-        if (n->mLeft->mBBox->intersect(ray))
-            ret |= trace(n->mLeft, ray, firstHit, primBuckets);
-        if (!(ret && firstHit) && n->mRight->mBBox->intersect(ray))
-            ret |= trace(n->mRight, ray, firstHit, primBuckets);
+        if (n->mLeft->mBBox.intersect(ray))
+            ret |= trace(n->mLeft, ray, firstHit, mailboxes);
+        if (!(ret && firstHit) && n->mRight->mBBox.intersect(ray))
+            ret |= trace(n->mRight, ray, firstHit, mailboxes);
     }
     
     return ret;
 }
 
+AllignedAllocator<IPrimitive*> KdTree::Node::s_PrimitivePointerAllocator =
+    AllignedAllocator<IPrimitive*>(64);
+
 KdTree::Node::Node() :
-mLeft(NULL), mRight(NULL), mBBox(new AABBox()), mIsLeaf(false) 
+    mBBox(),
+    mLeft(NULL),
+    mRight(NULL),
+    mPrims(s_PrimitivePointerAllocator)
 { 
     mPrims.clear();
 }
@@ -248,7 +257,8 @@ KdTree::Node::~Node()
     for (; it != mPrims.end(); ++it)
         delete *it;
     mPrims.clear();
-    delete mBBox;
+
+    mLeft = mRight = NULL;
 }
 
 void KdTree::Node::updateBBox()
@@ -266,7 +276,7 @@ void KdTree::Node::updateBBox()
         }
     }
     
-    mBBox->update(ll, ur);
+    mBBox.update(ll, ur);
 }
 
 void KdTree::Node::updateBBox(const short splitAxis, const float value, bool isLeft)
@@ -276,14 +286,14 @@ void KdTree::Node::updateBBox(const short splitAxis, const float value, bool isL
     
     if (isLeft)
     {
-        glm::vec3 ur = mBBox->ur();
+        glm::vec3 ur = mBBox.ur();
         ur[splitAxis] = value;
-        mBBox->update(mBBox->ll(), ur);
+        mBBox.update(mBBox.ll(), ur);
     }
     else
     {
-        glm::vec3 ll = mBBox->ll();
+        glm::vec3 ll = mBBox.ll();
         ll[splitAxis] = value;
-        mBBox->update(ll, mBBox->ur());
+        mBBox.update(ll, mBBox.ur());
     }
 }

@@ -10,13 +10,14 @@ class StatsCollector
 public:
     explicit StatsCollector();
     
-    void addStats(Stats *s);
+    inline void addStats(const Stats *s)
+    { mStats.emplace_back(s); }
     void print() const;
     
 private:
     StatsCollector(StatsCollector& other) {}
     
-    std::vector<Stats*> mStats;
+    std::vector<const Stats*> mStats;
 };
 
 #endif

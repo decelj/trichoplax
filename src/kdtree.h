@@ -2,28 +2,34 @@
 #define __KDTREE_H__
 
 #include <vector>
+#include "alligned_allocator.h"
+#include "aabbox.h"
 
+class Mailboxer;
 class IPrimitive;
-class AABBox;
 class Ray;
 
 class KdTree
 {
     class Node {
+        typedef std::vector<IPrimitive*, AllignedAllocator<IPrimitive*> > PrimitiveVector;
+        
+        static AllignedAllocator<IPrimitive*> s_PrimitivePointerAllocator;
+        
     public:
         explicit Node();
         ~Node();
         
         void updateBBox();
         void updateBBox(const short splitAxis, const float value, bool isLeft);
+        inline bool isLeaf() const { return !mRight; }
         
+        AABBox mBBox;
         Node *mLeft, *mRight;
-        AABBox *mBBox;
-        bool mIsLeaf;
-        std::vector<IPrimitive*> mPrims;
+        PrimitiveVector mPrims;
         
-        typedef std::vector<IPrimitive*>::const_iterator ConstPrimIterator;
-        typedef std::vector<IPrimitive*>::iterator PrimIterator;
+        typedef PrimitiveVector::const_iterator ConstPrimIterator;
+        typedef PrimitiveVector::iterator PrimIterator;
     };
     
 public:
@@ -38,7 +44,7 @@ public:
     
     void build();
     
-    bool trace(Ray& ray, bool firstHit, bool* primBuckets) const;
+    bool trace(Ray& ray, bool firstHit, Mailboxer& mailboxes) const;
     
     inline void addPrimitive(IPrimitive *p) { mRoot->mPrims.emplace_back(p); }
     inline size_t numberOfPrimitives() const { return mTotalNumPrims; }
@@ -47,7 +53,7 @@ private:
     void build(Node* node, unsigned int depth);
     bool paritionNode(const Node* const node) const;
     short findSplitAxis(const Node* const node) const;
-    bool trace(const Node* n, Ray& ray, bool firstHit, bool* primBuckets) const;
+    bool trace(const Node* n, Ray& ray, bool firstHit, Mailboxer& mailboxes) const;
     void destroy(Node* n);
     
     Node* mRoot;

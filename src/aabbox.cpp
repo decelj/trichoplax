@@ -18,11 +18,6 @@ short AABBox::longestAxis() const
     return 2;
 }
 
-float AABBox::split(const short axis) const
-{
-    return ((mBounds[1][axis] - mBounds[0][axis]) / 2.f) + mBounds[0][axis];
-}
-
 bool AABBox::intersect(const Ray& ray) const
 {
     const glm::vec3 llToOrigin = mBounds[0] - ray.origin();

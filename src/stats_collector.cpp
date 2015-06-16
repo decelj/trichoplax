@@ -9,10 +9,6 @@ StatsCollector::StatsCollector()
     mStats.clear();
 }
 
-void StatsCollector::addStats(Stats* s) {
-    mStats.emplace_back(s);
-}
-
 void StatsCollector::print() const {
     for (int i = 0; i < Ray::TYPE_COUNT; ++i) {
         unsigned int sum = 0;

@@ -4,6 +4,9 @@
 #include <glm/glm.hpp>
 #include <pthread.h>
 
+#include "stats.h"
+#include "mailboxer.h"
+
 class Ray;
 class KdTree;
 class Camera;
@@ -28,7 +31,10 @@ public:
     void cancel();
     
     bool traceAndShade(Ray& ray, glm::vec4& result) const;
-    bool traceShadow(Ray& ray) const;
+    inline bool traceShadow(Ray& ray) const
+    {
+        return trace(ray, true);
+    }
 	
 private:
     explicit Raytracer(); // Don't use the default constructor!
@@ -47,12 +53,12 @@ private:
     const EnvSphere* mEnv;
     ImageBuffer* const mImgBuffer;
     Sampler* const mSampler;
-    Stats* mStats;
+    mutable Stats mStats;
     const unsigned int mMaxDepth;
     pthread_t mThreadId;
     bool mIsCanceled;
     
-    mutable bool* mPrimBuckets;
+    mutable Mailboxer mMailboxes;
 };
 
 #endif
