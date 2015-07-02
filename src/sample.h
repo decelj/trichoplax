@@ -23,7 +23,7 @@ public:
         mSamples.emplace_back(x, y);
     }
     
-    bool nextSample(const Sample*& s) {
+    inline bool nextSample(const Sample*& s) {
         if (mCurrSample == mSamples.end()) return false;
         s = &(*mCurrSample);
         ++mCurrSample;
