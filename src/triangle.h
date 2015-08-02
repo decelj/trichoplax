@@ -18,9 +18,11 @@ public:
     KdTree::PartitionResult partition(const float plane, const short axis) const;
     
 private:
-    Triangle();
+    Triangle(const Triangle&) = delete;
+    Triangle& operator=(const Triangle&) = delete;
     
-    glm::vec3 mA, mB, mC, mN;
+    glm::vec3 mA, mB, mC, mN, mCA, mBA;
+    float mDotAN;
 };
 
 #endif
