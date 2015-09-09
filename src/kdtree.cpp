@@ -190,13 +190,6 @@ void KdTree::split(Node* const node, unsigned* axis, float* value) const
     }
 }
 
-bool KdTree::trace(Ray& ray, bool firstHit, Mailboxer& mailboxes) const
-{
-    if (!mRoot->mBBox.intersect(ray)) return false;
-    
-    return trace(mRoot, ray, firstHit, mailboxes);
-}
-
 bool KdTree::trace(const Node* n, Ray& ray, bool firstHit, Mailboxer& mailboxes) const
 {
     bool ret = false;
@@ -220,15 +213,12 @@ bool KdTree::trace(const Node* n, Ray& ray, bool firstHit, Mailboxer& mailboxes)
     return ret;
 }
 
-AllignedAllocator<IPrimitive*> KdTree::Node::s_PrimitivePointerAllocator =
-    AllignedAllocator<IPrimitive*>(64);
-
 KdTree::Node::Node() :
     mBBox(),
     mLeft(NULL),
     mRight(NULL),
-    mPrims(s_PrimitivePointerAllocator)
-{ 
+    mPrims()
+{
     mPrims.clear();
 }
 

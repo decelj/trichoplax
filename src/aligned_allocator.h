@@ -12,10 +12,10 @@
 #include <limits>
 #include <cstddef>
 #include <stdlib.h>
-#include <assert.h>
 
-template<typename T>
-class AllignedAllocator
+
+template<typename T, size_t Alignment=64>
+class AlignedAllocator
 {
 public:
     typedef T value_type;
@@ -29,24 +29,15 @@ public:
     template<typename U>
     struct rebind
     {
-        typedef AllignedAllocator<U> other;
+        typedef AlignedAllocator<U> other;
     };
     
-    inline AllignedAllocator(const unsigned allignment) :
-        m_Allignment(allignment)
-    {
-        assert(((m_Allignment - 1) & m_Allignment) == 0);
-    }
-    inline AllignedAllocator(const AllignedAllocator& other) :
-        m_Allignment(other.m_Allignment)
-    {}
+    AlignedAllocator() {}
+    AlignedAllocator(const AlignedAllocator& other) {}
     template<typename U>
-    inline explicit AllignedAllocator(const AllignedAllocator<U>& other) :
-        m_Allignment(other.allignment)
-    {}
+    AlignedAllocator(const AlignedAllocator<U>& other) {}
     
-    inline ~AllignedAllocator()
-    {}
+    ~AlignedAllocator() {}
     
     inline pointer address(reference r) { return &r; }
     inline const_pointer address(const_refernce r) { return &r; }
@@ -55,9 +46,10 @@ public:
                             typename std::allocator<void>::const_pointer = 0)
     {
         void* data;
-        posix_memalign(&data, m_Allignment, count * sizeof(T));
+        posix_memalign(&data, Alignment, count * sizeof(T));
         return reinterpret_cast<pointer>(data);
     }
+    
     inline void deallocate(pointer p, size_type)
     {
         free(p);
@@ -71,17 +63,14 @@ public:
     inline void construct(pointer p, const T& t) { new(p) T(t); }
     inline void destroy(pointer p) { p->~T(); }
     
-    inline bool operator==(const AllignedAllocator& other)
+    inline bool operator==(const AlignedAllocator& other) const
     {
-        return other.m_Allignment == m_Allignment;
+        return true;
     }
-    inline bool operator!=(const AllignedAllocator& other)
+    inline bool operator!=(const AlignedAllocator& other) const
     {
-        return !(other == *this);
+        return false;
     }
-    
-private:
-    const unsigned m_Allignment;
 };
 
 #endif

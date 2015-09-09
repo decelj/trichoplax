@@ -8,11 +8,9 @@
 
 #include "mailboxer.h"
 
-AllignedAllocator<unsigned> Mailboxer::s_Allocator = AllignedAllocator<unsigned>(64);
-
 Mailboxer::Mailboxer(size_t count) :
     mCurrentRayId(0),
-    mMailboxes(count, 0, s_Allocator)
+    mMailboxes(count, 0)
 {}
 
 Mailboxer::~Mailboxer()

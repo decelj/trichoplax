@@ -2,7 +2,7 @@
 #define __KDTREE_H__
 
 #include <vector>
-#include "alligned_allocator.h"
+#include "aligned_allocator.h"
 #include "aabbox.h"
 
 class Mailboxer;
@@ -12,9 +12,7 @@ class Ray;
 class KdTree
 {
     class Node {
-        typedef std::vector<IPrimitive*, AllignedAllocator<IPrimitive*> > PrimitiveVector;
-        
-        static AllignedAllocator<IPrimitive*> s_PrimitivePointerAllocator;
+        typedef std::vector<IPrimitive*, AlignedAllocator<IPrimitive*> > PrimitiveVector;
         
     public:
         explicit Node();
@@ -60,6 +58,13 @@ private:
     size_t mLargeNodes, mLeafNodes, mTotalNodes;
     size_t mMaxPrimsPerNode, mTotalNumPrims;
 };
+
+inline bool KdTree::trace(Ray& ray, bool firstHit, Mailboxer& mailboxes) const
+{
+    if (!mRoot->mBBox.intersect(ray)) return false;
+    
+    return trace(mRoot, ray, firstHit, mailboxes);
+}
 
 #endif
 

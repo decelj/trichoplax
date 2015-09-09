@@ -48,8 +48,8 @@ void EnvSphere::sample(const Ray& ray, glm::vec4& result) const
     assert(u <= 1.f && u >= 0.f);
     assert(v <= 1.f && v >= 0.f);
     
-    unsigned int x = mWidth * u;
-    unsigned int y = mHeight * v;
+    unsigned int x = (mWidth - 1) * u;
+    unsigned int y = (mHeight - 1) * v;
     RGBQUAD value;
     
     if (!FreeImage_GetPixelColor(mImg, x, y, &value)) {
