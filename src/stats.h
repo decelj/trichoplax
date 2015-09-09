@@ -12,7 +12,7 @@ public:
     
     friend class StatsCollector;
 protected:
-    unsigned int mValues[Ray::TYPE_COUNT];
+    size_t mValues[Ray::TYPE_COUNT];
     
 private:
     Stats(Stats& other) {} // No copy

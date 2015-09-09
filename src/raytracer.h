@@ -16,6 +16,7 @@ class Stats;
 class StatsCollector;
 class EnvSphere;
 class IPrimitive;
+class Noise;
 
 class Raytracer
 {
@@ -35,6 +36,10 @@ public:
     {
         return trace(ray, true);
     }
+    
+    Noise* getNoiseGenerator() const { return mNoiseGen; }
+    
+    unsigned maxDepth() const { return mMaxDepth; }
 	
 private:
     explicit Raytracer(); // Don't use the default constructor!
@@ -51,6 +56,7 @@ private:
     const KdTree* mKdTree;
     const Camera* mCamera;
     const EnvSphere* mEnv;
+    Noise* mNoiseGen;
     ImageBuffer* const mImgBuffer;
     Sampler* const mSampler;
     mutable Stats mStats;
