@@ -65,7 +65,7 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "$(SRCROOT)/scene4-diffuse.test"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "$(SRCROOT)/scene4-ambient.test"
@@ -86,6 +86,10 @@
          <CommandLineArgument
             argument = "$(SRCROOT)/scene7.test"
             isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "$(SRCROOT)/scene7_HD.test"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "$(SRCROOT)/dragon-refract.test"

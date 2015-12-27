@@ -15,6 +15,8 @@
 #define TP_ASSERT(_exp)
 #endif
 
+#define TP_UNUSED(_val) ((void)(_val))
+
 inline bool relEq(const float a, const float b, const float tol=EPSILON)
 {
     return fabsf(a - b) < tol;

@@ -80,11 +80,16 @@ public:
 private:
     void build(Node* node, SHAPlaneEventList& events, unsigned int depth);
     bool paritionNode(const Node* const node) const;
-    void split(SHAPlaneEventList& outLeftEvents, SHAPlaneEventList& outRightEvents, Node& node, const SHASplitPlane& plane, SHAPlaneEventList& events) const;
+    void split(SHAPlaneEventList& outLeftEvents, SHAPlaneEventList& outRightEvents,
+               Node& node, const SHASplitPlane& plane, SHAPlaneEventList& events) const;
     bool trace(const Node* n, Ray& ray, bool firstHit, Mailboxer& mailboxes) const;
     void generateEventsForPrimitive(IPrimitive* primitive, const AABBox& voxel, SHAPlaneEventList& events) const;
-    SHASplitPlane findSplitPlane(float* outCost, const AABBox& voxel, const SHAPlaneEventList& events, unsigned totalNumPrimitives) const;
-    void SHACost(float* lowestCostOut, SHASplitPlane::Side* outSide, float plane, unsigned aaAxis, const AABBox& voxel, unsigned numLeftPrims, unsigned numRightPrims, unsigned numPlanarPrims) const;
+    SHASplitPlane findSplitPlane(float* outCost, const AABBox& voxel,
+                                 const SHAPlaneEventList& events, unsigned totalNumPrimitives) const;
+    void SHACost(float* lowestCostOut, SHASplitPlane::Side* outSide,
+                 float plane, unsigned aaAxis, const AABBox& voxel,
+                 unsigned numLeftPrims, unsigned numRightPrims, unsigned numPlanarPrims) const;
+
     void DumpSplitEvents(SHAPlaneEventList::const_iterator begin, SHAPlaneEventList::const_iterator end, unsigned aaAxis=4) const;
     
     Node* mRoot;
@@ -93,11 +98,24 @@ private:
     size_t mMaxPrimsPerNode, mTotalNumPrims;
 };
 
+
 inline bool KdTree::trace(Ray& ray, bool firstHit, Mailboxer& mailboxes) const
 {
     if (!mRoot->mBBox.intersect(ray)) return false;
     
     return trace(mRoot, ray, firstHit, mailboxes);
+}
+
+inline bool KdTree::SHAPlaneEvent::operator<(const SHAPlaneEvent& rhs) const
+{
+    if (plane == rhs.plane)
+    {
+        return type < rhs.type;
+    }
+    else
+    {
+        return plane < rhs.plane;
+    }
 }
 
 #endif
