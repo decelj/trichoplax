@@ -15,12 +15,8 @@
 #define NUM_GI_SAMPLES 200.f
 
 Material::Material()
+    : mBrdf(glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f), 0.f, 1.f)
 {
-    mBrdf.Kd = mBrdf.Ks = mBrdf.Ke = glm::vec3(0.f, 0.f, 0.f);
-    mBrdf.Ka = glm::vec3(.2f, .2f, .2f);
-    mBrdf.Kt = glm::vec3(0.f, 0.f, 0.f);
-    mBrdf.Kr = 0.0f;
-    mBrdf.ior = 1.0f;
 }
 
 Material::Material(const glm::vec3& Ka, const glm::vec3& Ke,
@@ -31,8 +27,8 @@ Material::Material(const glm::vec3& Ka, const glm::vec3& Ke,
 }
 
 Material::Material(const Material& other)
+    : mBrdf(other.mBrdf)
 {
-    memcpy(&mBrdf, &other.mBrdf, sizeof(BRDF));
 }
 
 Material* Material::clone() const
@@ -164,7 +160,7 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
         }
     }
     
-#if 1
+#if 0
     if (hasDiffuse && r.depth() < tracer->maxDepth())
     {
         glm::vec3 y = hit.N;
