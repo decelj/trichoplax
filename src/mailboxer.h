@@ -10,7 +10,7 @@
 #define __trichoplax__mailboxer__
 
 #include <vector>
-#include "alligned_allocator.h"
+#include "aligned_allocator.h"
 
 class Mailboxer
 {
@@ -28,14 +28,12 @@ public:
     { mMailboxes[primId] = mCurrentRayId; }
     
 private:
-    static AllignedAllocator<unsigned>  s_Allocator;
-    
-    unsigned    mCurrentRayId;
-    std::vector<unsigned, AllignedAllocator<unsigned> >     mMailboxes;
+    unsigned                                                mCurrentRayId;
+    std::vector<unsigned, AlignedAllocator<unsigned> >      mMailboxes;
     
     /* Not copyable */
-    Mailboxer(const Mailboxer&);
-    Mailboxer& operator=(const Mailboxer&);
+    Mailboxer(const Mailboxer&) = delete;
+    Mailboxer& operator=(const Mailboxer&) = delete;
 };
 
 

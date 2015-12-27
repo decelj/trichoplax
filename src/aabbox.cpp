@@ -1,14 +1,26 @@
 #include <algorithm>
+#include <limits>
 
 #include "aabbox.h"
-#include "ray.h"
+
+AABBox::AABBox()
+{
+    mBounds[0] = glm::vec3(std::numeric_limits<float>::max());
+    mBounds[1] = glm::vec3(std::numeric_limits<float>::max());
+}
+
+AABBox::AABBox(const glm::vec3& ll, const glm::vec3& ur)
+{
+    mBounds[0] = ll;
+    mBounds[1] = ur;
+}
 
 short AABBox::longestAxis() const
 {
     glm::vec3 result = mBounds[1] - mBounds[0];
-    result[0] = fabs(result[0]);
-    result[1] = fabs(result[1]);
-    result[2] = fabs(result[2]);
+    result[0] = fabsf(result[0]);
+    result[1] = fabsf(result[1]);
+    result[2] = fabsf(result[2]);
     
     if (result[0] > result[1] && result[0] > result[2])
         return 0;
@@ -18,29 +30,13 @@ short AABBox::longestAxis() const
     return 2;
 }
 
-bool AABBox::intersect(const Ray& ray) const
+void AABBox::split(AABBox* outLeft, AABBox* outRight, float plane, unsigned axis) const
 {
-    const glm::vec3 llToOrigin = mBounds[0] - ray.origin();
-    const glm::vec3 urToOrigin = mBounds[1] - ray.origin();
-    const glm::vec3 nearTs = llToOrigin * ray.inverseDir();
-    const glm::vec3 farTs = urToOrigin * ray.inverseDir();
-    float tMin = ray.minT();
-    float tMax = ray.maxT();
+    glm::vec3 leftUR = mBounds[1];
+    leftUR[axis] = plane;
+    outLeft->update(mBounds[0], leftUR);
     
-    for (int i = 0; i < 3; ++i) {
-        float nearT = nearTs[i];
-        float farT = farTs[i];
-        if (nearT > farT) {
-            float tmp = nearT;
-            nearT = farT;
-            farT = tmp;
-        }
-        
-        tMin = std::max(nearT, tMin);
-        tMax = std::min(farT, tMax);
-        if (tMin > tMax)
-            return false;
-    }
-    
-    return true;
+    glm::vec3 rightLL = mBounds[0];
+    rightLL[axis] = plane;
+    outRight->update(rightLL, mBounds[1]);
 }

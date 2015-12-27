@@ -61,7 +61,7 @@ void Ray::transformed(const glm::mat4& m, Ray& outRay) const
     outRay.setOrigin(glm::vec3(m * glm::vec4(mOrigin, 1.0)));
     
     // Apply upper 3x3 rotation to direction
-    outRay.setDir(glm::normalize(glm::vec3(m * glm::vec4(mDir, 0.0))));
+    outRay.setDir(glm::normalize(glm::mat3(m) * mDir));
 }
 
 /* Reflected ray = Iparallel - Iorthogonal

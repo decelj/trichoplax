@@ -13,6 +13,7 @@
 #include "image_buffer.h"
 #include "camera.h"
 #include "env_sphere.h"
+#include "noise.h"
 
 
 Raytracer::Raytracer(const KdTree* tree, const Camera* cam, const EnvSphere* env,
@@ -21,6 +22,7 @@ Raytracer::Raytracer(const KdTree* tree, const Camera* cam, const EnvSphere* env
  :  mKdTree(tree),
     mCamera(cam),
     mEnv(env),
+    mNoiseGen(new Noise),
     mImgBuffer(imgBuffer),
     mSampler(sampler),
     mStats(),
@@ -33,6 +35,8 @@ Raytracer::Raytracer(const KdTree* tree, const Camera* cam, const EnvSphere* env
 
 Raytracer::~Raytracer()
 {
+    delete mNoiseGen;
+    mNoiseGen = NULL;
 }
 
 void Raytracer::registerStatsCollector(StatsCollector* c) const
@@ -110,6 +114,10 @@ bool Raytracer::trace(Ray& ray, bool firstHit) const
 bool Raytracer::traceAndShade(Ray& ray, glm::vec4& result) const
 {
     assert(ray.type() != Ray::SHADOW);
+    
+    if (ray.depth() > mMaxDepth)
+        return false;
+
     if (trace(ray)) {
         ray.shade(this, result);
         return true;

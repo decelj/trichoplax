@@ -11,6 +11,7 @@
 		2B05D3CF18665F57005082A9 /* stats_collector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B05D3CD18665F57005082A9 /* stats_collector.cpp */; };
 		2B1283EE1831F963009DCC0E /* timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B1283EC1831F963009DCC0E /* timer.cpp */; };
 		2B1BCAEC186A93DC004F0635 /* env_sphere.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B1BCAEA186A93DC004F0635 /* env_sphere.cpp */; };
+		2B1EC8B51B9FE5F700D5E1B7 /* noise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B1EC8B31B9FE5F700D5E1B7 /* noise.cpp */; };
 		2B2D9D8C171521940098D2C6 /* debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2D9D8B171521940098D2C6 /* debug.cpp */; };
 		2B2D9E3417164FB10098D2C6 /* point_light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2D9E3317164FB10098D2C6 /* point_light.cpp */; };
 		2B2DA0F7171E63EE0098D2C6 /* direct_light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2DA0F6171E63EE0098D2C6 /* direct_light.cpp */; };
@@ -62,6 +63,8 @@
 		2B1283ED1831F963009DCC0E /* timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timer.h; sourceTree = "<group>"; };
 		2B1BCAEA186A93DC004F0635 /* env_sphere.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = env_sphere.cpp; sourceTree = "<group>"; };
 		2B1BCAEB186A93DC004F0635 /* env_sphere.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = env_sphere.h; sourceTree = "<group>"; };
+		2B1EC8B31B9FE5F700D5E1B7 /* noise.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = noise.cpp; sourceTree = "<group>"; };
+		2B1EC8B41B9FE5F700D5E1B7 /* noise.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = noise.h; sourceTree = "<group>"; };
 		2B2D9C561713C85C0098D2C6 /* debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
 		2B2D9D8B171521940098D2C6 /* debug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = debug.cpp; sourceTree = "<group>"; };
 		2B2D9E2E17164EFD0098D2C6 /* ilight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ilight.h; sourceTree = "<group>"; };
@@ -71,9 +74,12 @@
 		2B2DA0F6171E63EE0098D2C6 /* direct_light.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = direct_light.cpp; sourceTree = "<group>"; };
 		2B2DA1A6171FA0D10098D2C6 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
 		2B3BEB1019B984C100CB4EEC /* glm.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = glm.framework; path = ../../../Library/Frameworks/glm.framework; sourceTree = "<group>"; };
-		2B794EFC1B2FC47000F6A919 /* alligned_allocator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = alligned_allocator.h; sourceTree = "<group>"; };
+		2B794EFC1B2FC47000F6A919 /* aligned_allocator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = aligned_allocator.h; sourceTree = "<group>"; };
 		2B794EFD1B2FF06200F6A919 /* mailboxer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mailboxer.cpp; sourceTree = "<group>"; };
 		2B794EFE1B2FF06200F6A919 /* mailboxer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mailboxer.h; sourceTree = "<group>"; };
+		2B794F001B31243200F6A919 /* bucket_allocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bucket_allocator.h; sourceTree = "<group>"; };
+		2B794F021B31309B00F6A919 /* bucket_pool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bucket_pool.h; sourceTree = "<group>"; };
+		2B794F041B37DA3D00F6A919 /* vector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vector.h; sourceTree = "<group>"; };
 		2B7B647A170FBCBD002C830F /* camera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = camera.h; sourceTree = "<group>"; };
 		2B7B647B170FBCBD002C830F /* hit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hit.h; sourceTree = "<group>"; };
 		2B7B647C170FBCBD002C830F /* image_buffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = image_buffer.h; sourceTree = "<group>"; };
@@ -153,67 +159,72 @@
 		08FB7795FE84155DC02AAC07 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				2B794EFC1B2FC47000F6A919 /* alligned_allocator.h */,
-				2B05D3CA18665DF2005082A9 /* stats.cpp */,
-				2B05D3CB18665DF2005082A9 /* stats.h */,
-				2B05D3CD18665F57005082A9 /* stats_collector.cpp */,
-				2B05D3CE18665F57005082A9 /* stats_collector.h */,
-				2B7B647A170FBCBD002C830F /* camera.h */,
-				2B7B6483170FBCBD002C830F /* camera.cpp */,
-				2BB1AC331738B14D00336221 /* aabbox.h */,
 				2BB1AC341738B14D00336221 /* aabbox.cpp */,
-				2BB1AC301738AF9A00336221 /* kdtree.h */,
-				2BB1AC311738AF9A00336221 /* kdtree.cpp */,
-				2B7B647C170FBCBD002C830F /* image_buffer.h */,
-				2B7B647E170FBCBD002C830F /* ray.h */,
-				2B7B68391710D326002C830F /* ray.cpp */,
-				2B7B647B170FBCBD002C830F /* hit.h */,
-				2BCF178C17DBAE5B00C35CC3 /* hit.cpp */,
-				2B7B6484170FBCBD002C830F /* image_buffer.cpp */,
-				2B1BCAEB186A93DC004F0635 /* env_sphere.h */,
-				2B1BCAEA186A93DC004F0635 /* env_sphere.cpp */,
-				2B7B647D170FBCBD002C830F /* iprimitive.h */,
-				2B1283EC1831F963009DCC0E /* timer.cpp */,
-				2B1283ED1831F963009DCC0E /* timer.h */,
-				2B7B674E171089A0002C830F /* object.h */,
-				2B7B674F171089A0002C830F /* object.cpp */,
-				2B2DA0F5171E63EE0098D2C6 /* direct_light.h */,
-				2B2DA0F6171E63EE0098D2C6 /* direct_light.cpp */,
-				2B2D9E3217164FB10098D2C6 /* point_light.h */,
-				2B2D9E3317164FB10098D2C6 /* point_light.cpp */,
-				2B2D9E2E17164EFD0098D2C6 /* ilight.h */,
-				2B7B67871710A857002C830F /* transform_stack.h */,
-				2B7B67881710A857002C830F /* transform_stack.cpp */,
-				2B2D9C561713C85C0098D2C6 /* debug.h */,
-				2B2D9D8B171521940098D2C6 /* debug.cpp */,
-				2BD9523D17AE089C000576EB /* multi_sample_ray.h */,
-				2BD9523E17AE089C000576EB /* multi_sample_ray.cpp */,
-				2B7B647F170FBCBD002C830F /* sample.h */,
-				2B7B6480170FBCBD002C830F /* sampler.h */,
-				2B7B65E2170FC938002C830F /* sampler.cpp */,
-				2BAEAF16193404BF002605AF /* scoped_lock.h */,
-				2B2DA1A6171FA0D10098D2C6 /* common.h */,
-				2B7B6481170FBCBD002C830F /* scene.h */,
-				2B7B65E3170FC938002C830F /* scene.cpp */,
-				2B7B6603170FD3CC002C830F /* raytracer.h */,
-				2B7B6604170FD3CC002C830F /* raytracer.cpp */,
-				2B7B67671710A3DA002C830F /* triangle.h */,
-				2B7B67681710A3DA002C830F /* triangle.cpp */,
-				2B7B673B171086CE002C830F /* material.h */,
-				2B7B673C171086CE002C830F /* material.cpp */,
-				2B7B6482170FBCBD002C830F /* sphere.h */,
-				2B7B65E4170FC938002C830F /* sphere.cpp */,
-				08FB7796FE84155DC02AAC07 /* main.cpp */,
-				2BAEAF091933AC52002605AF /* simple_parser.cpp */,
-				2BAEAF0A1933AC52002605AF /* simple_parser.h */,
-				2BAEAEFE1933A994002605AF /* parser_factory.cpp */,
-				2BAEAEFF1933A994002605AF /* parser_factory.h */,
-				2BAEAF081933AB51002605AF /* iparser.h */,
-				2B7B673A17108606002C830F /* brdf.h */,
+				2BB1AC331738B14D00336221 /* aabbox.h */,
+				2B794EFC1B2FC47000F6A919 /* aligned_allocator.h */,
 				2BAEAF0F1933C192002605AF /* assimp_parser.cpp */,
 				2BAEAF101933C192002605AF /* assimp_parser.h */,
+				2B7B673A17108606002C830F /* brdf.h */,
+				2B794F001B31243200F6A919 /* bucket_allocator.h */,
+				2B794F021B31309B00F6A919 /* bucket_pool.h */,
+				2B7B6483170FBCBD002C830F /* camera.cpp */,
+				2B7B647A170FBCBD002C830F /* camera.h */,
+				2B2DA1A6171FA0D10098D2C6 /* common.h */,
+				2B2D9D8B171521940098D2C6 /* debug.cpp */,
+				2B2D9C561713C85C0098D2C6 /* debug.h */,
+				2B2DA0F6171E63EE0098D2C6 /* direct_light.cpp */,
+				2B2DA0F5171E63EE0098D2C6 /* direct_light.h */,
+				2B1BCAEA186A93DC004F0635 /* env_sphere.cpp */,
+				2B1BCAEB186A93DC004F0635 /* env_sphere.h */,
+				2BCF178C17DBAE5B00C35CC3 /* hit.cpp */,
+				2B7B647B170FBCBD002C830F /* hit.h */,
+				2B2D9E2E17164EFD0098D2C6 /* ilight.h */,
+				2B7B6484170FBCBD002C830F /* image_buffer.cpp */,
+				2B7B647C170FBCBD002C830F /* image_buffer.h */,
+				2BAEAF081933AB51002605AF /* iparser.h */,
+				2B7B647D170FBCBD002C830F /* iprimitive.h */,
+				2BB1AC311738AF9A00336221 /* kdtree.cpp */,
+				2BB1AC301738AF9A00336221 /* kdtree.h */,
 				2B794EFD1B2FF06200F6A919 /* mailboxer.cpp */,
 				2B794EFE1B2FF06200F6A919 /* mailboxer.h */,
+				08FB7796FE84155DC02AAC07 /* main.cpp */,
+				2B7B673C171086CE002C830F /* material.cpp */,
+				2B7B673B171086CE002C830F /* material.h */,
+				2BD9523E17AE089C000576EB /* multi_sample_ray.cpp */,
+				2BD9523D17AE089C000576EB /* multi_sample_ray.h */,
+				2B1EC8B31B9FE5F700D5E1B7 /* noise.cpp */,
+				2B1EC8B41B9FE5F700D5E1B7 /* noise.h */,
+				2B7B674F171089A0002C830F /* object.cpp */,
+				2B7B674E171089A0002C830F /* object.h */,
+				2BAEAEFE1933A994002605AF /* parser_factory.cpp */,
+				2BAEAEFF1933A994002605AF /* parser_factory.h */,
+				2B2D9E3317164FB10098D2C6 /* point_light.cpp */,
+				2B2D9E3217164FB10098D2C6 /* point_light.h */,
+				2B7B68391710D326002C830F /* ray.cpp */,
+				2B7B647E170FBCBD002C830F /* ray.h */,
+				2B7B6604170FD3CC002C830F /* raytracer.cpp */,
+				2B7B6603170FD3CC002C830F /* raytracer.h */,
+				2B7B647F170FBCBD002C830F /* sample.h */,
+				2B7B65E2170FC938002C830F /* sampler.cpp */,
+				2B7B6480170FBCBD002C830F /* sampler.h */,
+				2B7B65E3170FC938002C830F /* scene.cpp */,
+				2B7B6481170FBCBD002C830F /* scene.h */,
+				2BAEAF16193404BF002605AF /* scoped_lock.h */,
+				2BAEAF091933AC52002605AF /* simple_parser.cpp */,
+				2BAEAF0A1933AC52002605AF /* simple_parser.h */,
+				2B7B65E4170FC938002C830F /* sphere.cpp */,
+				2B7B6482170FBCBD002C830F /* sphere.h */,
+				2B05D3CD18665F57005082A9 /* stats_collector.cpp */,
+				2B05D3CE18665F57005082A9 /* stats_collector.h */,
+				2B05D3CA18665DF2005082A9 /* stats.cpp */,
+				2B05D3CB18665DF2005082A9 /* stats.h */,
+				2B1283EC1831F963009DCC0E /* timer.cpp */,
+				2B1283ED1831F963009DCC0E /* timer.h */,
+				2B7B67881710A857002C830F /* transform_stack.cpp */,
+				2B7B67871710A857002C830F /* transform_stack.h */,
+				2B7B67681710A3DA002C830F /* triangle.cpp */,
+				2B7B67671710A3DA002C830F /* triangle.h */,
+				2B794F041B37DA3D00F6A919 /* vector.h */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -285,7 +296,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = com.jdecell;
 			};
 			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "trichoplax" */;
@@ -330,6 +341,7 @@
 				2B2D9E3417164FB10098D2C6 /* point_light.cpp in Sources */,
 				2B2DA0F7171E63EE0098D2C6 /* direct_light.cpp in Sources */,
 				2BB1AC321738AF9A00336221 /* kdtree.cpp in Sources */,
+				2B1EC8B51B9FE5F700D5E1B7 /* noise.cpp in Sources */,
 				2BAEAF111933C192002605AF /* assimp_parser.cpp in Sources */,
 				2BAEAF0B1933AC52002605AF /* simple_parser.cpp in Sources */,
 				2B1BCAEC186A93DC004F0635 /* env_sphere.cpp in Sources */,
@@ -375,16 +387,33 @@
 		1DEB923608733DC60010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
+				GCC_AUTO_VECTORIZATION = NO;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_ENABLE_ASM_KEYWORD = NO;
+				GCC_ENABLE_SSE3_EXTENSIONS = YES;
+				GCC_ENABLE_SSE41_EXTENSIONS = YES;
+				GCC_ENABLE_SSE42_EXTENSIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "DEBUG=1";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
+				GCC_WARN_PEDANTIC = YES;
+				GCC_WARN_SHADOW = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				LLVM_VECTORIZE_LOOPS = YES;
+				GENERATE_PROFILING_CODE = YES;
+				LLVM_VECTORIZE_LOOPS = NO;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				PREBINDING = NO;
 				SDKROOT = macosx;
 			};
@@ -393,8 +422,14 @@
 		2B2DA13D171E6C930098D2C6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_USE_OPTIMIZATION_PROFILE = NO;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
 				ENABLE_NS_ASSERTIONS = NO;
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
 				GCC_AUTO_VECTORIZATION = YES;
@@ -408,9 +443,13 @@
 				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_UNROLL_LOOPS = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
+				GCC_WARN_SHADOW = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LLVM_LTO = YES;
 				LLVM_VECTORIZE_LOOPS = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				PREBINDING = NO;
 				SDKROOT = macosx;
 			};
@@ -449,8 +488,14 @@
 		2BB1AF5C173F594200336221 /* Release Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_USE_OPTIMIZATION_PROFILE = NO;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
 				COPY_PHASE_STRIP = NO;
 				ENABLE_NS_ASSERTIONS = NO;
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
@@ -465,10 +510,13 @@
 				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_UNROLL_LOOPS = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
+				GCC_WARN_SHADOW = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				GENERATE_PROFILING_CODE = YES;
 				LLVM_VECTORIZE_LOOPS = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				PREBINDING = NO;
 				SDKROOT = macosx;
 			};

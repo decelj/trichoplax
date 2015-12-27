@@ -15,6 +15,7 @@ public:
         REFLECTED,
         REFRACTED,
         SHADOW,
+        GI,
         TYPE_COUNT
     };
     
@@ -28,12 +29,13 @@ public:
     inline void bias(const float bias) { mOrigin += mDir * bias; }
     inline void setMaxDistance(const float dist) { mMaxT = dist; }
     inline void shouldHitBackFaces(bool value) { mHitBack = value; }
+    inline void incrementDepth() { ++mDepth; }
 
     inline const glm::vec3& origin() const { return mOrigin; }
     inline const glm::vec3& dir() const { return mDir; }
     inline const glm::vec3& inverseDir() const { return mInverseDir; }
     inline glm::vec3 point(const float t) const { return mOrigin + mDir * t; }
-    inline short depth() const { return mDepth; }
+    inline unsigned depth() const { return mDepth; }
     inline bool shouldHitBackFaces() const { return mHitBack; }
     inline float ior() const { return mIor; }
     inline TYPE type() const { return mType; }
@@ -62,12 +64,12 @@ private:
     const TYPE mType;
     glm::vec3 mOrigin;
     glm::vec3 mDir, mInverseDir;
-    short mDepth;
+    unsigned mDepth;
     float mIor;
     float mMinT, mMaxT;
+    const IPrimitive *mHitPrim;
     bool mHitBack;
     bool mShouldHitBack;
-    const IPrimitive *mHitPrim;
 };
 
 #endif
