@@ -1,10 +1,7 @@
-#include <algorithm>
-
 #include "triangle.h"
 #include "ray.h"
-#include "hit.h"
 #include "common.h"
-#include "kdtree.h"
+
 
 Triangle::Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, Material* m)
     : IPrimitive(),
@@ -58,24 +55,4 @@ bool Triangle::intersect(Ray& ray) const
     
     ray.hit(this, t, denom > EPSILON);
     return true;
-}
-
-void Triangle::bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const
-{
-    lowerLeft[0] = MIN(MIN(mA[0], mB[0]), mC[0]);
-    lowerLeft[1] = MIN(MIN(mA[1], mB[1]), mC[1]);
-    lowerLeft[2] = MIN(MIN(mA[2], mB[2]), mC[2]);
-    
-    upperRight[0] = MAX(MAX(mA[0], mB[0]), mC[0]);
-    upperRight[1] = MAX(MAX(mA[1], mB[1]), mC[1]);
-    upperRight[2] = MAX(MAX(mA[2], mB[2]), mC[2]);
-}
-
-KdTree::PartitionResult Triangle::partition(const float plane, const short axis) const
-{
-    if (mA[axis] <= plane && mB[axis] <= plane && mC[axis] <= plane)
-        return KdTree::LEFT;
-    if (mA[axis] >= plane && mB[axis] >= plane && mC[axis] >= plane)
-        return KdTree::RIGHT;
-    return KdTree::BOTH;
 }

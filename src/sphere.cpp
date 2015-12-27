@@ -92,21 +92,5 @@ glm::vec3 Sphere::normal(const glm::vec3& p) const
     // p is in world space, transform it to object space
     // find the normal, transform the normal back to world
     // space.
-    return glm::normalize(glm::vec3(mTInverseTranspose * glm::vec4(glm::vec3(mTInverse * glm::vec4(p, 1.0f)) - mCenter, 0.0f)));
+    return glm::normalize(glm::mat3(mTInverseTranspose) * glm::vec3(mTInverse * glm::vec4(p, 1.0f)) - mCenter);
 }
-
-void Sphere::bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const
-{
-    lowerLeft = mLL;
-    upperRight = mUR;
-}
-
-KdTree::PartitionResult Sphere::partition(const float plane, const short axis) const
-{
-    if (mUR[axis] <= plane)
-        return KdTree::LEFT;
-    if (mLL[axis] >= plane)
-        return KdTree::RIGHT;
-    return KdTree::BOTH;
-}
-
