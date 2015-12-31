@@ -9,7 +9,7 @@
 class PointLight : public ILight
 {
 public:
-    PointLight(glm::vec3 pos, glm::vec3 kd, float radius, float bias,
+    PointLight(const glm::vec3& pos, const glm::vec3& kd, float radius, float bias,
                float constAtten, float linearAtten, float quadAtten);
     ~PointLight() { }
     
@@ -18,24 +18,35 @@ public:
     glm::vec3 getHalf(const glm::vec3& dirToLgt, const glm::vec3& I) const;
     glm::vec3 getColor() const { return mKd; }
     void attenuate(const glm::vec3& P, glm::vec3& result) const;
-    bool generateShadowRay(MultiSampleRay& r) const;
-    inline void setShadowRays(unsigned int numRays) {
-        mShadowRays = numRays; mSqrtShadowSamples = sqrtf(numRays); } // reimplemented
+    bool generateShadowRay(MultiSampleRay& r, Noise& noise) const;
+    void setShadowRays(unsigned int numRays); // reimplemented
     
 private:
-    PointLight() { }
-    
     void pointOnDisk(const glm::vec3& P,
                      const unsigned int currentSample,
                      glm::vec3& result) const;
-    void randomPointOnDisk(const glm::vec3& P, glm::vec3& result) const;
+    void randomPointOnDisk(Noise& noise, const glm::vec3& P, glm::vec3& result) const;
     
     glm::vec3 mPos;
     float mConstAtten, mLinearAtten, mQuadAtten;
-    bool mHasAtten;
     float mSqrtShadowSamples;
-    mutable std::ranlux24_base mRandEngine;
 };
+
+
+inline glm::vec3 PointLight::getDir(const glm::vec3& p) const
+{
+    return glm::normalize(mPos - p);
+}
+
+inline glm::vec3 PointLight::getHalf(const glm::vec3& dirToLgt, const glm::vec3& I) const
+{
+    return glm::normalize(dirToLgt + I);
+}
+
+inline void PointLight::setShadowRays(unsigned int numRays) {
+    mShadowRays = numRays;
+    mSqrtShadowSamples = sqrtf(numRays);
+}
 
 #endif
 

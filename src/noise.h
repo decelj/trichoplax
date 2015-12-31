@@ -21,7 +21,7 @@ private:
 
 inline float Noise::generateNormalizedFloat()
 {
-    return std::generate_canonical<float, 32>(mGenerator);
+    return std::generate_canonical<float, 24>(mGenerator);
 }
 
 #endif /* noise_cpp */

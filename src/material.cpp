@@ -137,10 +137,13 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
             MultiSampleRay shadow(Ray::SHADOW, r, lgt->shadowRays());
             shadow.setOrigin(hit.P);
             shadow.shouldHitBackFaces(true);
-            while (lgt->generateShadowRay(shadow)) {
-                if (!tracer->traceShadow(shadow)) {
+            while (lgt->generateShadowRay(shadow, tracer->getNoiseGenerator()))
+            {
+                if (!tracer->traceShadow(shadow))
+                {
                     float specularPower = 0.f;
-                    if(hasSpecular) {
+                    if(hasSpecular)
+                    {
                         specularPower = powf(
                                 std::max<float>(glm::dot(lgt->getHalf(shadow.dir(),
                                                                       hit.I),
@@ -152,7 +155,8 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
                     }
                     
                     // Diffuse
-                    if (hasDiffuse) {
+                    if (hasDiffuse)
+                    {
                         color += mBrdf.Kd * lightColor *
                                 (1.f - std::max<float>((specularFactor / 2.f + specularPower + transparencyFactor),0.f)) *
                                  std::max<float>(glm::dot(hit.N, shadow.dir()), 0.f);
