@@ -38,7 +38,7 @@ PointLight* parsePointLight(const aiLight* aiLight, const TransformStack* tStack
 {
     return new PointLight(tStack->transformPoint(toVec3(aiLight->mPosition)),
                           toVec3(aiLight->mColorDiffuse),
-                          0 /*radius*/, .1 /*bias*/,
+                          0.f /*radius*/, .1f /*bias*/,
                           aiLight->mAttenuationConstant,
                           aiLight->mAttenuationLinear,
                           aiLight->mAttenuationQuadratic);
@@ -48,7 +48,7 @@ DirectLight* parseDirectLight(const aiLight* aiLight, const TransformStack* tSta
 {
     return new DirectLight(tStack->transformNormal(toVec3(aiLight->mDirection)),
                            toVec3(aiLight->mColorDiffuse),
-                           .1 /*bias*/);
+                           .1f /*bias*/);
 }
 } // anonymous namespace
 
