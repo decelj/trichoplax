@@ -12,7 +12,8 @@
 #include "raytracer.h"
 #include "noise.h"
 
-#define NUM_GI_SAMPLES 200.f
+#define NUM_GI_SAMPLES 50.f
+#define DO_GI 1
 
 Material::Material()
     : mBrdf(glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f), 0.f, 1.f)
@@ -86,7 +87,8 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
     float opaqueFactor = 1.f - transparencyFactor;
     
     // Refraction
-    if (transparencyFactor > 0.f && r.type() != Ray::GI) {
+    if (transparencyFactor > 0.f && r.type() != Ray::GI)
+    {
         Ray refracted(Ray::REFRACTED, hit.P, mBrdf.ior);
         if (r.refracted(hit, refracted)) {
             refracted.bias(.01f);
@@ -101,7 +103,8 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
     }
 
     // Reflection
-    if (hasSpecular && opaqueFactor > 0.f && r.type() != Ray::GI) {
+    if (hasSpecular && opaqueFactor > 0.f && r.type() != Ray::GI)
+    {
         Ray reflected(Ray::REFLECTED);
         r.reflected(hit, reflected);
         reflected.bias(.01f);
@@ -112,7 +115,8 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
                                          specularFactor * opaqueFactor * .5f);
     }
     
-    if (hasDiffuse || hasSpecular) {
+    if (hasDiffuse || hasSpecular)
+    {
         for (std::vector<ILight*>::const_iterator it = s->lightsBegin(); 
              it != s->lightsEnd(); ++it) {
             const ILight* lgt = *it;
@@ -160,39 +164,42 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
         }
     }
     
-#if 0
+#if DO_GI
     if (hasDiffuse && r.depth() < tracer->maxDepth())
     {
-        glm::vec3 y = hit.N;
+        glm::vec3 v = hit.N;
         glm::vec3 u;
-        if (fabs(y.x) > fabs(y.y))
-            u = glm::normalize(glm::vec3(-y.z, 0.f, y.x));
+        if (fabs(v.x) > fabs(v.y))
+            u = glm::normalize(glm::vec3(-v.z, 0.f, v.x));
         else
-            u = glm::normalize(glm::vec3(0.f, -y.z, y.y));
-        glm::vec3 v = glm::normalize(glm::cross(u, y));
+            u = glm::normalize(glm::vec3(0.f, -v.z, v.y));
+        glm::vec3 w = glm::normalize(glm::cross(u, v));
         
-        Noise* noiseGen = tracer->getNoiseGenerator();
+        Noise& noiseGen = tracer->getNoiseGenerator();
         glm::vec4 giColor(0.f);
         MultiSampleRay giRay(Ray::GI, r, NUM_GI_SAMPLES);
         giRay.setOrigin(hit.P);
-        giRay.shouldHitBackFaces(true);
+        giRay.shouldHitBackFaces(false);
         giRay.incrementDepth();
+        giRay.bias(0.001f);
         while (giRay.currentSample())
         {
-            float Xi1 = noiseGen->generateNormalizedFloat();
-            float Xi2 = noiseGen->generateNormalizedFloat();
+            float Xi1 = noiseGen.generateNormalizedFloat();
+            float Xi2 = noiseGen.generateNormalizedFloat();
+            Xi1 = std::min(Xi1, 0.9999f);
+            Xi2 = 1.f - glm::clamp(Xi2, 0.0001f, 0.9999f) * 2.f;
             
-            float theta = acosf(sqrtf(1.f - Xi1));
-            float phi = 2.f * M_PI * Xi2;
-            float sinTheta = sinf(theta);
+            float theta = static_cast<float>(M_PI) * Xi1;
+            float sqrtU = sqrtf(1.f - Xi2 * Xi2);
 
-            float xs = sinTheta * cosf(phi);
-            float ys = cosf(theta);
-            float zs = sinTheta * sinf(phi);
+            float xs = sqrtU * cosf(theta);
+            float ys = sqrtU * sinf(theta);
+            float zs = Xi2;
             
             glm::vec4 tmp(0.f);
-            giRay.setDir(glm::normalize(xs * u + ys * y + zs * v));
+            giRay.setDir(glm::normalize(xs * u + ys * v + zs * w));
             giRay.setMaxDistance(std::numeric_limits<float>::max());
+            TP_ASSERT(glm::dot(hit.N, giRay.dir()) > 0.0);
             tracer->traceAndShade(giRay, tmp);
             
             giColor += tmp;
