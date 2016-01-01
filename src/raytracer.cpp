@@ -1,11 +1,11 @@
 #include <iostream>
+#include <unistd.h>
 
 #include "raytracer.h"
 #include "ray.h"
 #include "iprimitive.h"
 #include "material.h"
 #include "hit.h"
-#include "stats.h"
 #include "stats_collector.h"
 #include "kdtree.h"
 #include "sampler.h"
@@ -13,6 +13,7 @@
 #include "image_buffer.h"
 #include "camera.h"
 #include "env_sphere.h"
+#include "noise.h"
 
 
 Raytracer::Raytracer(const KdTree* tree, const Camera* cam, const EnvSphere* env,
@@ -21,23 +22,26 @@ Raytracer::Raytracer(const KdTree* tree, const Camera* cam, const EnvSphere* env
  :  mKdTree(tree),
     mCamera(cam),
     mEnv(env),
+    mNoiseGen(new Noise),
     mImgBuffer(imgBuffer),
     mSampler(sampler),
-    mStats(new Stats),
-    mMaxDepth(5),
+    mStats(),
+    mMaxDepth(maxDepth),
     mThreadId(0),
-    mIsCanceled(false)
+    mIsCanceled(false),
+    mMailboxes(tree->numberOfPrimitives())
 {
 }
 
 Raytracer::~Raytracer()
 {
-    delete mStats;
+    delete mNoiseGen;
+    mNoiseGen = NULL;
 }
 
 void Raytracer::registerStatsCollector(StatsCollector* c) const
 {
-    c->addStats(mStats);
+    c->addStats(&mStats);
 }
 
 bool Raytracer::start()
@@ -67,17 +71,17 @@ void* Raytracer::_run(void *arg) {
 void Raytracer::run() const
 {
     SamplePacket packet;
-    Sample sample;
-    while (!mIsCanceled && mSampler->buildSamplePacket(&packet)) {
+    while (!mIsCanceled && mSampler->buildSamplePacket(packet)) {
+        const Sample* sample;
         glm::vec4 packetResult(0.f, 0.f, 0.f, 0.f);
         while (!mIsCanceled && packet.nextSample(sample)) {
             Ray primary(Ray::PRIMARY);
-            mCamera->generateRay(sample, &primary);
+            mCamera->generateRay(*sample, &primary);
             glm::vec4 rayColor(0.f, 0.f, 0.f, 0.f);
             traceAndShade(primary, rayColor);
             packetResult += rayColor;
         }
-        mImgBuffer->commit(sample, packetResult / Sampler::sSamplesPerPixel);
+        mImgBuffer->commit(*sample, packetResult / Sampler::sSamplesPerPixel);
     }
 }
 
@@ -98,27 +102,28 @@ void Raytracer::cancel()
     mIsCanceled = true;
 }
 
-bool Raytracer::traceShadow(Ray& ray) const
-{
-    return trace(ray, true);
-}
-
 bool Raytracer::trace(Ray& ray, bool firstHit) const
 {
     if (ray.depth() > mMaxDepth) return false;
     
-    mStats->increment(ray.type());
-    return mKdTree->trace(ray, firstHit);
+    mStats.increment(ray.type());
+    mMailboxes.IncrementRayId();
+    return mKdTree->trace(ray, firstHit, mMailboxes);
 }
 
 bool Raytracer::traceAndShade(Ray& ray, glm::vec4& result) const
 {
+    assert(ray.type() != Ray::SHADOW);
+    
+    if (ray.depth() > mMaxDepth)
+        return false;
+
     if (trace(ray)) {
         ray.shade(this, result);
         return true;
     }
     
-    if (mEnv != NULL && ray.type() != Ray::PRIMARY && ray.type() != Ray::SHADOW)
+    if (mEnv != NULL && ray.type() != Ray::PRIMARY)
         mEnv->sample(ray, result);
     
     return false;

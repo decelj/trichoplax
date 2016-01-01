@@ -3,12 +3,38 @@
 #include "hit.h"
 #include "common.h"
 
+#include <algorithm>
+#include <limits>
+
 Sphere::Sphere(const glm::vec3& center, const float radius, Material *m, glm::mat4 t) :
-    mCenter(center), mRadius(radius), mT(t)
+    IPrimitive(), mCenter(center),
+    mLL(std::numeric_limits<float>::max()),
+    mUR(-std::numeric_limits<float>::max()),
+    mRadius(radius), mT(t)
 {
     mTInverse = glm::inverse(mT);
     mTInverseTranspose = glm::transpose(mTInverse);
     mMaterial = m;
+    
+    // Precompute the AABB bonds for this sphere
+    glm::vec3 utll = mCenter - mRadius;
+    
+    glm::vec3 points[8];
+    points[0] = glm::vec3(mT * glm::vec4(utll, 1.f));
+    points[1] = glm::vec3(mT * glm::vec4(utll + glm::vec3(0, mRadius*2, 0), 1.f));
+    points[2] = glm::vec3(mT * glm::vec4(utll + glm::vec3(0, mRadius*2, mRadius*2), 1.f));
+    points[3] = glm::vec3(mT * glm::vec4(utll + glm::vec3(0, 0, mRadius*2), 1.f));
+    points[4] = glm::vec3(mT * glm::vec4(utll + glm::vec3(mRadius*2, 0, 0), 1.f));
+    points[5] = glm::vec3(mT * glm::vec4(utll + glm::vec3(mRadius*2, mRadius*2, 0), 1.f));
+    points[6] = glm::vec3(mT * glm::vec4(utll + glm::vec3(mRadius*2, 0, mRadius*2), 1.f));
+    points[7] = glm::vec3(mT * glm::vec4(utll + glm::vec3(mRadius*2, mRadius*2, mRadius*2), 1.f));
+    
+    for (unsigned i = 0; i < 8; ++i) {
+        for (unsigned int j = 0; j < 3; ++j) {
+            mLL[j] = std::min(mLL[j], points[i][j]);
+            mUR[j] = std::max(mUR[j], points[i][j]);
+        }
+    }
 }
 
 bool Sphere::intersect(Ray& ray) const
@@ -17,8 +43,8 @@ bool Sphere::intersect(Ray& ray) const
     // and origin
     Ray transformed(ray.type());
     ray.transformed(mTInverse, transformed);
-    const glm::vec3 ro = transformed.origin();
-    const glm::vec3 rd = transformed.dir();
+    const glm::vec3& ro = transformed.origin();
+    const glm::vec3& rd = transformed.dir();
  
     // t^2(P1 . P1) + 2tP1 . (Po - C) + (Po - C) . (Po - C) - r^2 = 0
     const glm::vec3 rToCenter = ro - mCenter;
@@ -66,19 +92,5 @@ glm::vec3 Sphere::normal(const glm::vec3& p) const
     // p is in world space, transform it to object space
     // find the normal, transform the normal back to world
     // space.
-    return glm::normalize(glm::vec3(mTInverseTranspose * glm::vec4(glm::vec3(mTInverse * glm::vec4(p, 1.0f)) - mCenter, 0.0f)));
+    return glm::normalize(glm::mat3(mTInverseTranspose) * glm::vec3(mTInverse * glm::vec4(p, 1.0f)) - mCenter);
 }
-
-void Sphere::bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const
-{
-    lowerLeft = glm::vec3(mT * glm::vec4(mCenter - mRadius, 1.0f));
-    upperRight = glm::vec3(mT * glm::vec4(mCenter + mRadius, 1.0f));
-}
-
-bool Sphere::onLeftOfPlane(const float plane, const short axis) const
-{
-    float transformedCoord = mCenter[axis] + mRadius;
-    transformedCoord = (transformedCoord*mT[0][axis] + transformedCoord*mT[1][axis] + transformedCoord*mT[2][axis] + mT[3][axis]);
-    return transformedCoord < plane;
-}
-

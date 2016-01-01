@@ -11,7 +11,10 @@ class Raytracer;
 
 class Material {
 public:
-    Material();
+    explicit Material();
+    explicit Material(const glm::vec3& Ka, const glm::vec3& Ke,
+                      const glm::vec3& Kd, const glm::vec3& Ks,
+                      const glm::vec3& Kt, const float Kr, const float ior);
     Material* clone() const;
     
     void setAmbient(glm::vec3 Ka);

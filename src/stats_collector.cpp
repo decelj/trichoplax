@@ -9,13 +9,9 @@ StatsCollector::StatsCollector()
     mStats.clear();
 }
 
-void StatsCollector::addStats(Stats *s) {
-    mStats.push_back(s);
-}
-
 void StatsCollector::print() const {
     for (int i = 0; i < Ray::TYPE_COUNT; ++i) {
-        unsigned int sum = 0;
+        size_t sum = 0;
         for (auto it = mStats.begin(); it != mStats.end(); ++it)
             sum += (*it)->mValues[i];
         
@@ -32,6 +28,8 @@ void StatsCollector::print() const {
             case Ray::SHADOW:
                 std::cout << "Shadow rays: " << sum << std::endl;
                 break;
+            case Ray::GI:
+                std::cout << "GI rays: " << sum << std::endl;
             default:
                 break;
         }

@@ -1,17 +1,18 @@
 #include <iostream>
 #include <FreeImage.h>
+#include <assert.h>
 
 #include "image_buffer.h"
 #include "sampler.h"
 #include "sample.h"
 #include "common.h"
 #include "debug.h"
+#include "scoped_lock.h"
 
-ImageBuffer::ImageBuffer(const int width, const int height)
+ImageBuffer::ImageBuffer(const unsigned short width, const unsigned short height)
     : mWidth(width),
       mHeight(height)
 {
-    pthread_mutex_init(&mBufferLock, NULL);
     mPixels = new float[mWidth*mHeight*4];
     bzero(mPixels, sizeof(mPixels));
 }
@@ -19,16 +20,15 @@ ImageBuffer::ImageBuffer(const int width, const int height)
 ImageBuffer::~ImageBuffer()
 {
     delete [] mPixels;
-    pthread_mutex_destroy(&mBufferLock);
 }
 
 void ImageBuffer::commit(const Sample& sample, const glm::vec4& color)
 {
-    pthread_mutex_lock(&mBufferLock);
-    
     const unsigned int offset = 
         (static_cast<int>(sample.y) * mWidth + static_cast<int>(sample.x)) * 4;
     
+    // Note: No thread locking needed here since each thread executes and commits
+    // a unique pixel as controlled via sampler in Sampler::buildSamplePacket
     assert(color.a <= 1.f);
     assert(mPixels[offset] == 0.f &&
            mPixels[offset+2] == 0.f &&
@@ -37,8 +37,6 @@ void ImageBuffer::commit(const Sample& sample, const glm::vec4& color)
     mPixels[offset+2] = color.r;
     mPixels[offset+1] = color.g;
     mPixels[offset] = color.b;
-    
-    pthread_mutex_unlock(&mBufferLock);
 }
 
 void ImageBuffer::write(const std::string& filename) const

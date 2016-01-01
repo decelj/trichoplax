@@ -1,17 +1,18 @@
 #include "triangle.h"
 #include "ray.h"
-#include "hit.h"
 #include "common.h"
 
-Triangle::Triangle()
-{
-    mA = mB = mC = mN = glm::vec3(0.0f,0.0f,0.0f);
-}
 
 Triangle::Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, Material* m)
-    : mA(a), mB(b), mC(c)
+    : IPrimitive(),
+    mA(a),
+    mB(b),
+    mC(c),
+    mN(glm::normalize(glm::cross(mA - mB, mA - mC))),
+    mCA(mC - mA),
+    mBA(mB - mA),
+    mDotAN(glm::dot(mA, mN))
 {
-    mN = glm::normalize(glm::cross(mA - mB, mA - mC));
     mMaterial = m;
 }
 
@@ -28,7 +29,7 @@ bool Triangle::intersect(Ray& ray) const
         return false;
     }
     
-    const float numerator = glm::dot(mA, mN) - glm::dot(ray.origin(), mN);
+    const float numerator = mDotAN - glm::dot(ray.origin(), mN);
     const float t = numerator / denom;
     if (t < 0.0f || !ray.hits(t)) return false;
     
@@ -37,13 +38,13 @@ bool Triangle::intersect(Ray& ray) const
     // http://www.blackpawn.com/texts/pointinpoly/default.html
     
     const glm::vec3 P = ray.point(t);
-    const glm::vec3 v0 = mC - mA, v1 = mB - mA, v2 = P - mA;
+    const glm::vec3 vPA = P - mA;
     
-    const float dot00 = glm::dot(v0, v0);
-    const float dot01 = glm::dot(v0, v1);
-    const float dot02 = glm::dot(v0, v2);
-    const float dot11 = glm::dot(v1, v1);
-    const float dot12 = glm::dot(v1, v2);
+    const float dot00 = glm::dot(mCA, mCA);
+    const float dot01 = glm::dot(mCA, mBA);
+    const float dot02 = glm::dot(mCA, vPA);
+    const float dot11 = glm::dot(mBA, mBA);
+    const float dot12 = glm::dot(mBA, vPA);
     
     const float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
     const float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
@@ -54,20 +55,4 @@ bool Triangle::intersect(Ray& ray) const
     
     ray.hit(this, t, denom > EPSILON);
     return true;
-}
-
-void Triangle::bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const
-{
-    lowerLeft[0] = MIN(MIN(mA[0], mB[0]), mC[0]);
-    lowerLeft[1] = MIN(MIN(mA[1], mB[1]), mC[1]);
-    lowerLeft[2] = MIN(MIN(mA[2], mB[2]), mC[2]);
-    
-    upperRight[0] = MAX(MAX(mA[0], mB[0]), mC[0]);
-    upperRight[1] = MAX(MAX(mA[1], mB[1]), mC[1]);
-    upperRight[2] = MAX(MAX(mA[2], mB[2]), mC[2]);
-}
-
-bool Triangle::onLeftOfPlane(const float plane, const short axis) const
-{
-    return mA[axis] < plane && mB[axis] < plane && mC[axis] < plane;
 }

@@ -1,28 +1,26 @@
 #ifndef __SAMPLER_H__
-#define __SMAPLER_H__
+#define __SAMPLER_H__
 
-#include <pthread.h>
+#include <atomic>
 
 class SamplePacket;
 
 class Sampler
 {
 public:
-    static const int sSamplesPerPixel;
-    static const int sSamplesPerAxis;
+    static const unsigned sSamplesPerPixel;
+    static const unsigned sSamplesPerAxis;
     static const float sSubpixelStep;
     
-    explicit Sampler(const int width, const int height);
+    explicit Sampler(const unsigned short width, const unsigned short height);
+    Sampler(const Sampler&) = delete;
+    Sampler operator=(const Sampler&) = delete;
 
-    bool buildSamplePacket(SamplePacket* packet);
+    bool buildSamplePacket(SamplePacket& packet);
 
 private:
-    explicit Sampler() { } // Don't use default constructor
-
-    int mWidth, mHeight;
-    int mCurrentX, mCurrentY;
-    
-    pthread_mutex_t mLock;
+    const unsigned mWidth, mHeight;
+    std::atomic_uint mPixelIdx;
 };
 
 #endif

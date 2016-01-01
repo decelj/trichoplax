@@ -2,13 +2,12 @@
 #include "sample.h"
 #include "ray.h"
 
-Camera::Camera(const float fov, const glm::vec3& pos, const glm::vec3& lookAt, const glm::vec3& up, const int width, const int height) : 
-    mPos(pos), mLookAt(lookAt), mUp(up), mWidth(width), mHeight(height)
+Camera::Camera(const float fov, const glm::vec3& pos, const glm::vec3& lookAt, const glm::vec3& up, const unsigned width, const unsigned height) :
+    mPos(pos), mLookAt(lookAt), mUp(up), mWidth(width), mHeight(height), mFov((fov / 180.f) * M_PI)
 {
-    mFov = ((fov / 180.0) * M_PI);
-    float fovX = 2.0 * atanf(tanf(mFov/2.0)*(width / static_cast<float>(height)));
-    mAlpha = tanf(fovX/2.0);
-    mBeta = tanf(mFov/2.0);
+    float fovX = 2.f * atanf(tanf(mFov/2.f)*(width / static_cast<float>(height)));
+    mAlpha = tanf(fovX/2.f);
+    mBeta = tanf(mFov/2.f);
     mW = glm::normalize(pos - lookAt);
     mU = glm::normalize(glm::cross(up, mW));
     mV = glm::normalize(glm::cross(mU, mW));

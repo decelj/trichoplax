@@ -1,12 +1,26 @@
+#include <algorithm>
+#include <limits>
+
 #include "aabbox.h"
-#include "ray.h"
+
+AABBox::AABBox()
+{
+    mBounds[0] = glm::vec3(std::numeric_limits<float>::max());
+    mBounds[1] = glm::vec3(std::numeric_limits<float>::max());
+}
+
+AABBox::AABBox(const glm::vec3& ll, const glm::vec3& ur)
+{
+    mBounds[0] = ll;
+    mBounds[1] = ur;
+}
 
 short AABBox::longestAxis() const
 {
     glm::vec3 result = mBounds[1] - mBounds[0];
-    result[0] = fabs(result[0]);
-    result[1] = fabs(result[1]);
-    result[2] = fabs(result[2]);
+    result[0] = fabsf(result[0]);
+    result[1] = fabsf(result[1]);
+    result[2] = fabsf(result[2]);
     
     if (result[0] > result[1] && result[0] > result[2])
         return 0;
@@ -16,37 +30,13 @@ short AABBox::longestAxis() const
     return 2;
 }
 
-float AABBox::split(const short axis) const
+void AABBox::split(AABBox* outLeft, AABBox* outRight, float plane, unsigned axis) const
 {
-    return ((mBounds[1][axis] - mBounds[0][axis]) / 2.0) + mBounds[0][axis];
-}
-
-bool AABBox::intersect(const Ray& ray) const
-{
-    const glm::vec3 invDir = ray.inverseDir();
-    unsigned short signX = invDir.x < 0.0f ? 1 : 0;
-    unsigned short signY = invDir.y < 0.0f ? 1 : 0;
+    glm::vec3 leftUR = mBounds[1];
+    leftUR[axis] = plane;
+    outLeft->update(mBounds[0], leftUR);
     
-    float tMin = (mBounds[signX].x - ray.origin().x) * invDir.x;
-    float tMax = (mBounds[1-signX].x - ray.origin().x) * invDir.x;
-    float tyMin = (mBounds[signY].y - ray.origin().y) * invDir.y;
-    float tyMax = (mBounds[1-signY].y - ray.origin().y) * invDir.y;
-    
-    if ((tMin > tyMax) || (tyMin > tMax))
-        return false;
-    
-    if (tyMin > tMin)
-        tMin = tyMin;
-    
-    if (tyMax > tMax)
-        tMax = tyMax;
-    
-    unsigned short signZ = invDir.z < 0.0f ? 1 : 0;
-    float tzMin = (mBounds[signZ].z - ray.origin().z) * invDir.z;
-    float tzMax = (mBounds[1-signZ].z - ray.origin().z) * invDir.z;
-    
-    if ((tMin > tzMax) || (tzMin > tMax))
-        return false;
-    
-    return true;
+    glm::vec3 rightLL = mBounds[0];
+    rightLL[axis] = plane;
+    outRight->update(rightLL, mBounds[1]);
 }

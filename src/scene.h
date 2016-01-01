@@ -13,13 +13,11 @@ class ImageBuffer;
 class ILight;
 class Ray;
 class IPrimitive;
-class Raytracer;
 class EnvSphere;
 
 class Scene
 {
 public:
-    void createBuffer(const int width, const int height);
     void render(const std::string& filename);
     void setCamera(Camera* cam) { mCam = cam; }
     inline void addPrimitive(IPrimitive* prim) { mKdTree->addPrimitive(prim); }
@@ -33,13 +31,14 @@ public:
     inline std::vector<ILight*>::const_iterator lightsEnd() const
     { return mLights.end(); }
     
-    static Scene* instance();
+    static Scene* const instance();
+    static void create();
     static void destroy();
 
 private:
     explicit Scene() {}
     void setup();
-    void cleanupThreads(bool force=false);
+    void createBuffer();
     ~Scene();
 
     Camera* mCam;
@@ -48,7 +47,6 @@ private:
     KdTree* mKdTree;
     EnvSphere* mEnvSphere;
     std::vector<ILight*> mLights;
-    std::vector<Raytracer*> mTracers;
     unsigned int mMaxTraceDepth;
     
     static Scene* mInstance;

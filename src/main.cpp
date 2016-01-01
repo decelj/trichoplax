@@ -3,7 +3,9 @@
 
 #include "FreeImage.h"
 #include "scene.h"
-#include "parser.h"
+#include "parser_factory.h"
+#include "iparser.h"
+#include "timer.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -12,9 +14,30 @@ int main(int argc, char** argv) {
     }
     
     FreeImage_Initialise();
+    Scene::create();
     
+    std::string sceneFile(argv[1]);
     std::string outputImage;
-    readFile(argv[1], outputImage);
+    
+    {
+        Timer loadTimer;
+        loadTimer.start();
+        
+        IParser* parser = ParserFactory().create(sceneFile);
+        
+        try {
+            outputImage = parser->parse(sceneFile, Scene::instance());
+        } catch (...) {
+            delete parser;
+            Scene::destroy();
+            throw;
+        }
+        
+        delete parser;
+        
+        std::cout << "Scene load time: " << loadTimer.elapsed() << std::endl;
+    }
+
     Scene::instance()->render(outputImage);
     Scene::destroy();
     
