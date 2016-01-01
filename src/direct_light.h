@@ -11,9 +11,7 @@ public:
     ~DirectLight() { };
     
     // ILight
-    glm::vec3 getDir(const glm::vec3& p) const;
-    glm::vec3 getHalf(const glm::vec3& dirToLgt, const glm::vec3& I) const;
-    glm::vec3 getColor() const { return mKd; }
+    glm::vec3 directionToLight(const glm::vec3& p) const;
     void attenuate(const glm::vec3& P, glm::vec3& result) const;
     bool generateShadowRay(MultiSampleRay& r, Noise& noise) const;
     
@@ -22,14 +20,9 @@ private:
 };
 
 
-inline glm::vec3 DirectLight::getDir(const glm::vec3& p) const
+inline glm::vec3 DirectLight::directionToLight(const glm::vec3& p) const
 {
     return mDir;
-}
-
-inline glm::vec3 DirectLight::getHalf(const glm::vec3& dirToLgt, const glm::vec3& I) const
-{
-    return glm::normalize(dirToLgt + I);
 }
 
 inline void DirectLight::attenuate(const glm::vec3& P, glm::vec3& result) const

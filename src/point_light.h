@@ -2,9 +2,9 @@
 #define __POINT_LIGHT_H__
 
 #include <glm/glm.hpp>
-#include <random>
 
 #include "ilight.h"
+
 
 class PointLight : public ILight
 {
@@ -12,11 +12,9 @@ public:
     PointLight(const glm::vec3& pos, const glm::vec3& kd, float radius, float bias,
                float constAtten, float linearAtten, float quadAtten);
     ~PointLight() { }
-    
+
     // ILight
-    glm::vec3 getDir(const glm::vec3& p) const;
-    glm::vec3 getHalf(const glm::vec3& dirToLgt, const glm::vec3& I) const;
-    glm::vec3 getColor() const { return mKd; }
+    glm::vec3 directionToLight(const glm::vec3& p) const;
     void attenuate(const glm::vec3& P, glm::vec3& result) const;
     bool generateShadowRay(MultiSampleRay& r, Noise& noise) const;
     void setShadowRays(unsigned int numRays); // reimplemented
@@ -33,20 +31,15 @@ private:
 };
 
 
-inline glm::vec3 PointLight::getDir(const glm::vec3& p) const
+inline glm::vec3 PointLight::directionToLight(const glm::vec3& p) const
 {
     return glm::normalize(mPos - p);
 }
 
-inline glm::vec3 PointLight::getHalf(const glm::vec3& dirToLgt, const glm::vec3& I) const
+inline void PointLight::setShadowRays(unsigned numRays)
 {
-    return glm::normalize(dirToLgt + I);
-}
-
-inline void PointLight::setShadowRays(unsigned int numRays) {
     mShadowRays = numRays;
     mSqrtShadowSamples = sqrtf(numRays);
 }
 
 #endif
-

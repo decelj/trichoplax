@@ -34,7 +34,7 @@ bool readValues(std::string& line, std::stringstream &s, const int num, float* v
 } // annoymous namespace
 
 
-std::string SimpleParser::parse(const std::string& file, Scene* const scene)
+std::string SimpleParser::parse(const std::string& file, Scene& scene)
 {
     std::ifstream in;
     in.open(file);
@@ -77,19 +77,19 @@ std::string SimpleParser::parse(const std::string& file, Scene* const scene)
             s >> outputImage;
         } else if (cmd == "maxdepth") {
             if (readValues(line, s, 1, values))
-                scene->setMaxDepth(static_cast<unsigned>(values[0]));
+                scene.setMaxDepth(static_cast<unsigned>(values[0]));
         } else if (cmd == "shdwrays") {
             if (readValues(line, s, 1, values))
-                scene->setShadowRays(static_cast<unsigned>(values[0]));
+                scene.setShadowRays(static_cast<unsigned>(values[0]));
         } else if (cmd == "camera") {
             if (w == 0 || h == 0)
                 throw std::runtime_error("zero image height and/or width!");
             
             if (readValues(line, s, 10, values)) {
-                scene->setCamera(new Camera(values[9], // fov
-                                            glm::vec3(values[0], values[1], values[2]), // pos
-                                            glm::vec3(values[3], values[4], values[5]), // look at
-                                            glm::vec3(values[6], values[7], values[8]), // up
+                scene.setCamera(new Camera(values[9], // fov
+                                           glm::vec3(values[0], values[1], values[2]), // pos
+                                           glm::vec3(values[3], values[4], values[5]), // look at
+                                           glm::vec3(values[6], values[7], values[8]), // up
                                             w, h) // width/height
                                   );
             }
@@ -104,22 +104,22 @@ std::string SimpleParser::parse(const std::string& file, Scene* const scene)
             tStack.pop();
         } else if (cmd == "sphere") {
             if (readValues(line, s, 4, values))
-                scene->addPrimitive(new Sphere(glm::vec3(values[0], values[1], values[2]),
-                                               values[3],
-                                               currMaterial->clone(),
-                                               tStack.top())
+                scene.addPrimitive(new Sphere(glm::vec3(values[0], values[1], values[2]),
+                                              values[3],
+                                              currMaterial->clone(),
+                                              tStack.top())
                                      );
         } else if (cmd == "tri") {
             if (readValues(line, s, 3, values))
-                scene->addPrimitive(new Triangle(tStack.transformPoint(verticies[static_cast<size_t>(values[0])]),
-                                                 tStack.transformPoint(verticies[static_cast<size_t>(values[1])]),
-                                                 tStack.transformPoint(verticies[static_cast<size_t>(values[2])]),
-                                                 currMaterial->clone())
+                scene.addPrimitive(new Triangle(tStack.transformPoint(verticies[static_cast<size_t>(values[0])]),
+                                                tStack.transformPoint(verticies[static_cast<size_t>(values[1])]),
+                                                tStack.transformPoint(verticies[static_cast<size_t>(values[2])]),
+                                                currMaterial->clone())
                                      );
         } else if (cmd == "envsphere") {
             std::string envImage;
             s >> envImage;
-            scene->setEnvSphereImage(envImage);
+            scene.setEnvSphereImage(envImage);
         } else if (cmd == "translate") {
             if (readValues(line, s, 3, values))
                 tStack.translate(values[0], values[1], values[2]);
@@ -155,16 +155,16 @@ std::string SimpleParser::parse(const std::string& file, Scene* const scene)
                 pointLgtRadius = values[0];
         } else if (cmd == "point") {
             if (readValues(line, s, 6, values))
-                scene->addLight(new PointLight(glm::vec3(values[0], values[1], values[2]),
-                                               glm::vec3(values[3], values[4], values[5]),
-                                               pointLgtRadius,
-                                               bias, constAtten, linearAtten, quadAtten)
+                scene.addLight(new PointLight(glm::vec3(values[0], values[1], values[2]),
+                                              glm::vec3(values[3], values[4], values[5]),
+                                              pointLgtRadius,
+                                              bias, constAtten, linearAtten, quadAtten)
                                  );
         } else if (cmd == "directional") {
             if (readValues(line, s, 6, values))
-                scene->addLight(new DirectLight(glm::vec3(values[0], values[1], values[2]), // direction
-                                                glm::vec3(values[3], values[4], values[5]), // color
-                                                bias)
+                scene.addLight(new DirectLight(glm::vec3(values[0], values[1], values[2]), // direction
+                                               glm::vec3(values[3], values[4], values[5]), // color
+                                               bias)
                                  );
         } else if (cmd == "attenuation") {
             if (readValues(line, s, 3, values)) {

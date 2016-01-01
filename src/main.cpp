@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
         std::cout << "Scene load time: " << loadTimer.elapsed() << std::endl;
     }
 
-    Scene::instance()->render(outputImage);
+    Scene::instance().render(outputImage);
     Scene::destroy();
     
     FreeImage_DeInitialise();

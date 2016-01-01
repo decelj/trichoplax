@@ -12,7 +12,7 @@ class SimpleParser : public IParser
 public:
     SimpleParser() { }
     
-    virtual std::string parse(const std::string& file, Scene* const scene);
+    virtual std::string parse(const std::string& file, Scene& scene);
 };
 
 #endif /* defined(__trichoplax__simple_parser__) */

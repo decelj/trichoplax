@@ -24,9 +24,11 @@ public:
     { }
     virtual ~AssimpParser();
     
-    virtual std::string parse(const std::string& file, Scene* const scene);
+    virtual std::string parse(const std::string& file, Scene& scene);
     
 private:
+    typedef std::vector<std::unique_ptr<Material> > MaterialVector;
+
     void loadMaterials();
     void loadLight(const aiLight* light, const TransformStack* tStack);
     void loadCamera(const aiCamera* cam, const TransformStack* tStack);
@@ -34,7 +36,7 @@ private:
     
     Scene* mScene;
     const aiScene* mAiScene;
-    std::vector<std::unique_ptr<Material> > mMaterials;
+    MaterialVector mMaterials;
     unsigned mCameraIdx;
 };
 

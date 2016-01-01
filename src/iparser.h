@@ -11,7 +11,7 @@ public:
     IParser() { }
     virtual ~IParser() { }
     
-    virtual std::string parse(const std::string& file, Scene* const scene) = 0;
+    virtual std::string parse(const std::string& file, Scene& scene) = 0;
 };
 
 #endif

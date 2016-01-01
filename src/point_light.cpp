@@ -4,8 +4,9 @@
 #include "multi_sample_ray.h"
 #include "noise.h"
 
-namespace {
-    static const float gGoldenAngle = M_PI * (3.0f - sqrtf(5.0f));
+namespace
+{
+static const float gGoldenAngle = static_cast<float>(M_PI) * (3.0f - sqrtf(5.0f));
 }
 
 PointLight::PointLight(const glm::vec3& pos, const glm::vec3& kd, float radius,

@@ -11,7 +11,7 @@
 #include "raytracer.h"
 #include "noise.h"
 
-#define NUM_GI_SAMPLES 50.f
+#define NUM_GI_SAMPLES 25.f
 #define DO_GI 1
 
 Material::Material()
@@ -77,7 +77,7 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
     // Ambient and emissive
     glm::vec3 color = mBrdf.Ka + mBrdf.Ke;
     
-    const Scene* s = Scene::instance();
+    const Scene& scene = Scene::instance();
     const float specularFactor = (mBrdf.Ks.r + mBrdf.Ks.g + mBrdf.Ks.b) / 3.f;
     const bool hasDiffuse = !relEq(mBrdf.Kd.r + mBrdf.Kd.g + mBrdf.Kd.b, 0.f);
     const bool hasSpecular = !relEq(specularFactor, 0.f);
@@ -91,7 +91,7 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
     {
         Ray refracted(Ray::REFRACTED, hit.P, mBrdf.ior);
         if (r.refracted(hit, refracted)) {
-            refracted.bias(.01f);
+            refracted.bias(0.001f);
             
             glm::vec4 refraction(0.f, 0.f, 0.f, 0.f);
             tracer->traceAndShade(refracted, refraction);
@@ -107,7 +107,7 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
     {
         Ray reflected(Ray::REFLECTED);
         r.reflected(hit, reflected);
-        reflected.bias(.01f);
+        reflected.bias(0.001f);
         
         glm::vec4 reflection(0.f, 0.f, 0.f, 0.f);
         tracer->traceAndShade(reflected, reflection);
@@ -117,10 +117,10 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
     
     if (hasDiffuse || hasSpecular)
     {
-        for (std::vector<ILight*>::const_iterator it = s->lightsBegin(); 
-             it != s->lightsEnd(); ++it) {
+        for (Scene::ConstLightIter it = scene.lightsBegin(); it != scene.lightsEnd(); ++it)
+        {
             const ILight* lgt = *it;
-            glm::vec3 lightColor = lgt->getColor();
+            glm::vec3 lightColor = lgt->color();
             // TODO: Technically, for area lighting we should attenuate based on the
             // distance to the sample point on the light, not the center of the light.
             lgt->attenuate(hit.P, lightColor);
@@ -134,33 +134,37 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
             // TODO: Can we early out if say half the shadow rays are coherent?
             //       Won't work with current non-random area sampling...
             // TODO: We don't support transparent shadow rays :(
-            MultiSampleRay shadow(Ray::SHADOW, r, lgt->shadowRays());
-            shadow.setOrigin(hit.P);
-            shadow.shouldHitBackFaces(true);
-            while (lgt->generateShadowRay(shadow, tracer->getNoiseGenerator()))
+            MultiSampleRay shadowRay(Ray::SHADOW, r, lgt->shadowRays());
+            shadowRay.setOrigin(hit.P);
+            shadowRay.shouldHitBackFaces(true);
+            while (lgt->generateShadowRay(shadowRay, tracer->getNoiseGenerator()))
             {
-                if (!tracer->traceShadow(shadow))
+                float nDotL = std::max(glm::dot(hit.N, shadowRay.dir()), 0.f);
+                if (nDotL == 0.f)
                 {
-                    float specularPower = 0.f;
-                    if(hasSpecular)
-                    {
-                        specularPower = powf(
-                                std::max<float>(glm::dot(lgt->getHalf(shadow.dir(),
-                                                                      hit.I),
-                                                         hit.N),
-                                                0.f),
-                                               mBrdf.Kr);
-                        specularPower *= specularFactor * .5f;
-                        color += mBrdf.Ks * specularPower * lightColor;
-                    }
-                    
-                    // Diffuse
-                    if (hasDiffuse)
-                    {
-                        color += mBrdf.Kd * lightColor *
-                                (1.f - std::max<float>((specularFactor / 2.f + specularPower + transparencyFactor),0.f)) *
-                                 std::max<float>(glm::dot(hit.N, shadow.dir()), 0.f);
-                    }
+                    continue;
+                }
+
+                if (tracer->traceShadow(shadowRay))
+                {
+                    continue;
+                }
+
+                float specularPower = 0.f;
+                if(hasSpecular)
+                {
+                    const glm::vec3 H = glm::normalize(shadowRay.dir() + hit.I);
+                    float nDotH = std::max(glm::dot(hit.N, H), 0.f);
+                    specularPower = powf(nDotH, mBrdf.Kr);
+                    specularPower *= specularFactor * .5f;
+                    color += mBrdf.Ks * specularPower * lightColor;
+                }
+
+                if (hasDiffuse)
+                {
+                    float diffuseWeight = 1.f - std::max(specularFactor / 2.f + specularPower + transparencyFactor, 0.f);
+
+                    color += mBrdf.Kd * lightColor * nDotL * diffuseWeight;
                 }
             }
             

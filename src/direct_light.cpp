@@ -11,7 +11,7 @@ bool DirectLight::generateShadowRay(MultiSampleRay& r, Noise& /*noise*/) const
 {
     if (r.currentSample() <= 0) return false;
     
-    r.setDir(this->getDir(r.origin()));
+    r.setDir(directionToLight(r.origin()));
     r.bias(mBias);
     
     // No area lighting for direct lights

@@ -10,15 +10,14 @@ class ILight
 {
 public:
     virtual ~ILight() { }
-    virtual glm::vec3 getDir(const glm::vec3& p) const = 0;
-    virtual glm::vec3 getHalf(const glm::vec3& dirToLgt, const glm::vec3& I) const = 0;
-    virtual glm::vec3 getColor() const = 0;
+    virtual glm::vec3 directionToLight(const glm::vec3& p) const = 0;
     virtual void attenuate(const glm::vec3& P, glm::vec3& result) const = 0;
     virtual bool generateShadowRay(MultiSampleRay& r, Noise& noise) const = 0;
-    
+    virtual void setShadowRays(unsigned numRays) { mShadowRays = numRays; }
+
+    const glm::vec3& color() const { return mKd; }
     float bias() const { return mBias; }
-    unsigned int shadowRays() const { return mRadius > 0.f ? mShadowRays : 1; }
-    virtual void setShadowRays(unsigned int numRays) { mShadowRays = numRays; }
+    unsigned shadowRays() const { return mRadius > 0.f ? mShadowRays : 1; }
     
 protected:
     ILight(const glm::vec3& kd, float radius, float bias, unsigned shadowRays);
@@ -29,7 +28,7 @@ protected:
     glm::vec3 mKd;
     float mRadius;
     float mBias;
-    unsigned int mShadowRays;
+    unsigned mShadowRays;
 };
 
 #endif

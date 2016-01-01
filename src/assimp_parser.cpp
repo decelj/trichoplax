@@ -57,14 +57,14 @@ AssimpParser::~AssimpParser()
 {
     // trichoplax's primatives now own the material pointers, release them
     // from the unique_ptr.
-    for (auto it = mMaterials.begin(); it != mMaterials.end(); ++it) {
+    for (MaterialVector::iterator it = mMaterials.begin(); it != mMaterials.end(); ++it) {
         it->release();
     }
 }
 
-std::string AssimpParser::parse(const std::string& file, Scene* const scene)
+std::string AssimpParser::parse(const std::string& file, Scene& scene)
 {
-    mScene = scene;
+    mScene = &scene;
     
     Assimp::Importer importer;
     mAiScene = importer.ReadFile(file,
@@ -117,7 +117,7 @@ void AssimpParser::loadCamera(const aiCamera* cam, const TransformStack* tStack)
     // Convert hfov in radians to vfov / 2 in radians
     float vfov = atanf(tanf(2.f * cam->mHorizontalFOV) / cam->mAspect);
     // convert from [pi/2, -pi/2] -> [pi, 0] then convert to degrees
-    vfov = ((vfov + M_PI_2) / M_PI) * 180.f;
+    vfov = static_cast<float>((vfov + M_PI_2) / M_PI) * 180.f;
     vfov *= 2.f;
     
     mScene->setCamera(new Camera(vfov,
@@ -125,7 +125,7 @@ void AssimpParser::loadCamera(const aiCamera* cam, const TransformStack* tStack)
         tStack->transformNormal(toVec3(cam->mLookAt)),
         tStack->transformNormal(toVec3(cam->mUp)),
         800 /*width TODO: FIX ME!*/,
-        cam->mAspect == 0. ? 600 : (800 / cam->mAspect)));
+        cam->mAspect == 0. ? 600 : static_cast<unsigned>(800.f / cam->mAspect)));
 }
 
 void AssimpParser::loadScene(const aiNode* node, TransformStack* tStack)

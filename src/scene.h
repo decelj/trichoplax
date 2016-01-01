@@ -17,7 +17,12 @@ class EnvSphere;
 
 class Scene
 {
+private:
+    typedef std::vector<ILight*> LightVector;
+
 public:
+    typedef LightVector::const_iterator ConstLightIter;
+
     void render(const std::string& filename);
     void setCamera(Camera* cam) { mCam = cam; }
     inline void addPrimitive(IPrimitive* prim) { mKdTree->addPrimitive(prim); }
@@ -26,12 +31,10 @@ public:
     void setEnvSphereImage(const std::string& file);
     void setShadowRays(int num);
     
-    inline std::vector<ILight*>::const_iterator lightsBegin() const
-    { return mLights.begin(); }
-    inline std::vector<ILight*>::const_iterator lightsEnd() const
-    { return mLights.end(); }
+    ConstLightIter lightsBegin() const { return mLights.begin(); }
+    ConstLightIter lightsEnd() const { return mLights.end(); }
     
-    static Scene* const instance();
+    static Scene& instance();
     static void create();
     static void destroy();
 
@@ -46,7 +49,7 @@ private:
     ImageBuffer* mImgBuffer;
     KdTree* mKdTree;
     EnvSphere* mEnvSphere;
-    std::vector<ILight*> mLights;
+    LightVector mLights;
     unsigned int mMaxTraceDepth;
     
     static Scene* mInstance;

@@ -70,9 +70,9 @@ Scene::~Scene()
     mLights.clear();
 }
 
-Scene* const Scene::instance()
+Scene& Scene::instance()
 {
-    return mInstance;
+    return *mInstance;
 }
 
 void Scene::create()
