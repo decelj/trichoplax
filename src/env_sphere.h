@@ -17,8 +17,8 @@ public:
     void sample(const Ray& r, glm::vec4& result) const;
     
 private:
-    EnvSphere() { }
-    EnvSphere(const EnvSphere& other) { }
+    EnvSphere(const EnvSphere&) = delete;
+    EnvSphere& operator=(const EnvSphere&) = delete;
     
     FIBITMAP* mImg;
     unsigned int mWidth, mHeight;

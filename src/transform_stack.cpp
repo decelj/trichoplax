@@ -58,26 +58,26 @@ void TransformStack::translate(const float x, const float y, const float z)
 
 void TransformStack::rotate(const glm::vec3& axis, const float degrees)
 {
-    float radians = (degrees/180.0f) * M_PI;
+    float radians = (degrees/180.0f) * static_cast<float>(M_PI);
     float cosTheta = cosf(radians);
     float sinTheta = sinf(radians);
     
     glm::vec3 normAxis = glm::normalize(axis);
     
     glm::mat3 aaT(1.0f);
-    aaT[0][0] = normAxis.x*normAxis.x*(1.0-cosTheta);
-    aaT[1][1] = normAxis.y*normAxis.y*(1.0-cosTheta);
-    aaT[2][2] = normAxis.z*normAxis.z*(1.0-cosTheta);
-    aaT[0][1] = aaT[1][0] = normAxis.x*normAxis.y*(1.0-cosTheta);
-    aaT[0][2] = aaT[2][0] = normAxis.x*normAxis.z*(1.0-cosTheta);
-    aaT[1][2] = aaT[2][1] = normAxis.y*normAxis.z*(1.0-cosTheta);
+    aaT[0][0] = normAxis.x*normAxis.x*(1.f-cosTheta);
+    aaT[1][1] = normAxis.y*normAxis.y*(1.f-cosTheta);
+    aaT[2][2] = normAxis.z*normAxis.z*(1.f-cosTheta);
+    aaT[0][1] = aaT[1][0] = normAxis.x*normAxis.y*(1.f-cosTheta);
+    aaT[0][2] = aaT[2][0] = normAxis.x*normAxis.z*(1.f-cosTheta);
+    aaT[1][2] = aaT[2][1] = normAxis.y*normAxis.z*(1.f-cosTheta);
     
     glm::mat3 aStar(0.0f);
-    aStar[1][0] = normAxis.z*-1.0*sinTheta;
+    aStar[1][0] = normAxis.z*-1.f*sinTheta;
     aStar[2][0] = normAxis.y*sinTheta;
     aStar[0][1] = normAxis.z*sinTheta;
-    aStar[2][1] = normAxis.x*-1.0*sinTheta;
-    aStar[0][2] = normAxis.y*-1.0*sinTheta;
+    aStar[2][1] = normAxis.x*-1.f*sinTheta;
+    aStar[0][2] = normAxis.y*-1.f*sinTheta;
     aStar[1][2] = normAxis.x*sinTheta;
     
     transform(glm::mat4(glm::mat3(cosTheta) + aaT + aStar));

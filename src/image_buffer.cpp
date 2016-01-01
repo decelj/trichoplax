@@ -1,27 +1,24 @@
 #include <iostream>
 #include <algorithm>
 #include <FreeImage.h>
-#include <assert.h>
 
 #include "image_buffer.h"
-#include "sampler.h"
 #include "sample.h"
 #include "common.h"
-#include "debug.h"
-#include "scoped_lock.h"
 
-ImageBuffer::ImageBuffer(const unsigned width, const unsigned height)
+ImageBuffer::ImageBuffer(unsigned width, unsigned height)
     : mPixels(NULL)
     , mWidth(width)
     , mHeight(height)
 {
     mPixels = new float[mWidth*mHeight*4];
-    bzero(mPixels, sizeof(mPixels));
+    memset(mPixels, 0, sizeof(float) * mWidth * mHeight * 4);
 }
 
 ImageBuffer::~ImageBuffer()
 {
     delete [] mPixels;
+    mPixels = NULL;
 }
 
 void ImageBuffer::commit(const Sample& sample, const glm::vec4& color)
@@ -31,8 +28,8 @@ void ImageBuffer::commit(const Sample& sample, const glm::vec4& color)
     
     // Note: No thread locking needed here since each thread executes and commits
     // a unique pixel as controlled via sampler in Sampler::buildSamplePacket
-    assert(color.a <= 1.f);
-    assert(mPixels[offset] == 0.f &&
+    TP_ASSERT(color.a <= 1.f);
+    TP_ASSERT(mPixels[offset] == 0.f &&
            mPixels[offset+2] == 0.f &&
            mPixels[offset+3] == 0.f);
     mPixels[offset+3] = color.a;

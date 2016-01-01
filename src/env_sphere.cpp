@@ -4,17 +4,22 @@
 #include "ray.h"
 #include "common.h"
 
-void sphericalCoordinates(const glm::vec3& v, float& r, float& theta, float& phi)
+namespace
+{
+
+inline void sphericalCoordinates(const glm::vec3& v, float& r, float& theta, float& phi)
 {
     r = glm::length(v);
     theta = acosf(v.z / r);
     phi = atan2f(v.y, v.x);
 }
+} // anonymous namespace
+
 
 EnvSphere::EnvSphere(const std::string& file)
-: mImg(NULL),
-  mWidth(0),
-  mHeight(0)
+    : mImg(NULL)
+    , mWidth(0)
+    , mHeight(0)
 {
     FREE_IMAGE_FORMAT format = FIF_UNKNOWN;
     format = FreeImage_GetFileType(file.c_str(), 0);
@@ -43,13 +48,13 @@ void EnvSphere::sample(const Ray& ray, glm::vec4& result) const
     float r, theta, phi;
     sphericalCoordinates(ray.dir(), r, theta, phi);
     
-    float u = (phi + M_PI) / (M_PI * 2.f);
-    float v = theta / M_PI;
-    assert(u <= 1.f && u >= 0.f);
-    assert(v <= 1.f && v >= 0.f);
+    float u = (phi + static_cast<float>(M_PI)) / (static_cast<float>(M_PI) * 2.f);
+    float v = theta / static_cast<float>(M_PI);
+    TP_ASSERT(u <= 1.f && u >= 0.f);
+    TP_ASSERT(v <= 1.f && v >= 0.f);
     
-    unsigned int x = (mWidth - 1) * u;
-    unsigned int y = (mHeight - 1) * v;
+    unsigned x = static_cast<unsigned>((mWidth - 1) * u);
+    unsigned y = static_cast<unsigned>((mHeight - 1) * v);
     RGBQUAD value;
     
     if (!FreeImage_GetPixelColor(mImg, x, y, &value)) {

@@ -12,7 +12,7 @@ public:
     static const unsigned sSamplesPerAxis;
     static const float sSubpixelStep;
     
-    explicit Sampler(const unsigned short width, const unsigned short height);
+    explicit Sampler(unsigned width, unsigned height);
     Sampler(const Sampler&) = delete;
     Sampler operator=(const Sampler&) = delete;
 

@@ -2,14 +2,14 @@
 #define __IMAGE_BUFFER_H__
 
 #include <glm/glm.hpp>
-#include <string.h>
+#include <string>
 
 struct Sample;
 
 class ImageBuffer
 {
 public:
-    explicit ImageBuffer(const unsigned width, const unsigned height);
+    explicit ImageBuffer(unsigned width, unsigned height);
     ~ImageBuffer();
 
     void commit(const Sample& sample, const glm::vec4& color);

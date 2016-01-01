@@ -1,17 +1,17 @@
-#include <math.h>
+#include <cmath>
 #include <iostream>
 
 #include "sampler.h"
 #include "sample.h"
 
 const unsigned Sampler::sSamplesPerPixel = 16;
-const unsigned Sampler::sSamplesPerAxis = sqrtf(Sampler::sSamplesPerPixel);
+const unsigned Sampler::sSamplesPerAxis = (unsigned)sqrtf((float)Sampler::sSamplesPerPixel);
 const float Sampler::sSubpixelStep = 1.0f / (sSamplesPerAxis + 1);
 
-Sampler::Sampler (const unsigned short width, const unsigned short height)
-:   mWidth(width),
-    mHeight(height),
-    mPixelIdx(0)
+Sampler::Sampler(unsigned width, unsigned height)
+    : mWidth(width)
+    , mHeight(height)
+    , mPixelIdx(0)
 {
 }
 
