@@ -9,16 +9,15 @@ struct Sample;
 class ImageBuffer
 {
 public:
-    explicit ImageBuffer(const unsigned short width, const unsigned short height);
+    explicit ImageBuffer(const unsigned width, const unsigned height);
     ~ImageBuffer();
 
     void commit(const Sample& sample, const glm::vec4& color);
     void write(const std::string& filename) const;
 
 private:
-    
-    float *mPixels;
-    const unsigned short mWidth, mHeight;
+    float* mPixels;
+    const unsigned mWidth, mHeight;
 };
 
 #endif

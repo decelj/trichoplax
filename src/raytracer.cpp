@@ -19,24 +19,22 @@
 Raytracer::Raytracer(const KdTree* tree, const Camera* cam, const EnvSphere* env,
                      Sampler* const sampler, ImageBuffer* const imgBuffer,
                      const unsigned int maxDepth)
- :  mKdTree(tree),
-    mCamera(cam),
-    mEnv(env),
-    mNoiseGen(new Noise),
-    mImgBuffer(imgBuffer),
-    mSampler(sampler),
-    mStats(),
-    mMaxDepth(maxDepth),
-    mThreadId(0),
-    mIsCanceled(false),
-    mMailboxes(tree->numberOfPrimitives())
+    : mNoiseGen()
+    , mMailboxes(tree->numberOfPrimitives())
+    , mKdTree(tree)
+    , mCamera(cam)
+    , mEnv(env)
+    , mImgBuffer(imgBuffer)
+    , mSampler(sampler)
+    , mStats()
+    , mMaxDepth(maxDepth)
+    , mThreadId(0)
+    , mIsCanceled(false)
 {
 }
 
 Raytracer::~Raytracer()
 {
-    delete mNoiseGen;
-    mNoiseGen = NULL;
 }
 
 void Raytracer::registerStatsCollector(StatsCollector* c) const
@@ -60,7 +58,8 @@ bool Raytracer::start()
     return true;
 }
 
-void* Raytracer::_run(void *arg) {
+void* Raytracer::_run(void *arg)
+{
     Raytracer* tracer = static_cast<Raytracer*>(arg);
     tracer->run();
     

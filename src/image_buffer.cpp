@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include <FreeImage.h>
 #include <assert.h>
 
@@ -9,9 +10,10 @@
 #include "debug.h"
 #include "scoped_lock.h"
 
-ImageBuffer::ImageBuffer(const unsigned short width, const unsigned short height)
-    : mWidth(width),
-      mHeight(height)
+ImageBuffer::ImageBuffer(const unsigned width, const unsigned height)
+    : mPixels(NULL)
+    , mWidth(width)
+    , mHeight(height)
 {
     mPixels = new float[mWidth*mHeight*4];
     bzero(mPixels, sizeof(mPixels));
@@ -51,10 +53,10 @@ void ImageBuffer::write(const std::string& filename) const
         BYTE *bits = FreeImage_GetScanLine(img, y);
         for (unsigned int x = 0; x < mWidth; ++x) {
             const unsigned int offset = (y * mWidth + x) * 4;
-            bits[FI_RGBA_ALPHA] = MIN(mPixels[offset+3], 1.0f) * 255;
-            bits[FI_RGBA_RED] = MIN(mPixels[offset+2], 1.0f) * 255;
-            bits[FI_RGBA_GREEN] = MIN(mPixels[offset+1], 1.0f) * 255;
-            bits[FI_RGBA_BLUE] = MIN(mPixels[offset], 1.0f) * 255;
+            bits[FI_RGBA_ALPHA] = static_cast<unsigned char>(std::min(mPixels[offset+3], 1.0f) * 255);
+            bits[FI_RGBA_RED] = static_cast<unsigned char>(std::min(mPixels[offset+2], 1.0f) * 255);
+            bits[FI_RGBA_GREEN] = static_cast<unsigned char>(std::min(mPixels[offset+1], 1.0f) * 255);
+            bits[FI_RGBA_BLUE] = static_cast<unsigned char>(std::min(mPixels[offset], 1.0f) * 255);
             
             bits += bytespp;
         }

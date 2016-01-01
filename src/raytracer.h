@@ -6,6 +6,7 @@
 
 #include "stats.h"
 #include "mailboxer.h"
+#include "noise.h"
 
 class Ray;
 class KdTree;
@@ -16,7 +17,7 @@ class Stats;
 class StatsCollector;
 class EnvSphere;
 class IPrimitive;
-class Noise;
+
 
 class Raytracer
 {
@@ -37,7 +38,7 @@ public:
         return trace(ray, true);
     }
     
-    Noise* getNoiseGenerator() const { return mNoiseGen; }
+    Noise& getNoiseGenerator() const { return mNoiseGen; }
     
     unsigned maxDepth() const { return mMaxDepth; }
 	
@@ -52,19 +53,20 @@ private:
     void run() const;
     
     bool trace(Ray& ray, bool firstHit=false) const;
-    
+
+    mutable Noise mNoiseGen;
+    mutable Mailboxer mMailboxes;
+
     const KdTree* mKdTree;
     const Camera* mCamera;
     const EnvSphere* mEnv;
-    Noise* mNoiseGen;
     ImageBuffer* const mImgBuffer;
     Sampler* const mSampler;
+
     mutable Stats mStats;
     const unsigned int mMaxDepth;
     pthread_t mThreadId;
     bool mIsCanceled;
-    
-    mutable Mailboxer mMailboxes;
 };
 
 #endif

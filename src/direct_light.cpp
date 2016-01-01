@@ -1,30 +1,13 @@
 #include "direct_light.h"
 #include "multi_sample_ray.h"
 
-DirectLight::DirectLight(glm::vec3 dir, glm::vec3 kd, float bias)
-{ 
-    mKd = kd;
-    mDir = glm::normalize(dir);
-    mBias = bias;
-    mShadowRays = 1;
-}
-
-glm::vec3 DirectLight::getDir(const glm::vec3& p) const
+DirectLight::DirectLight(const glm::vec3& dir, const glm::vec3& kd, float bias)
+    : ILight(kd, 0.f, bias, 1)
+    , mDir(glm::normalize(dir))
 {
-    return mDir;
 }
 
-glm::vec3 DirectLight::getHalf(const glm::vec3& dirToLgt, const glm::vec3& I) const
-{
-    return glm::normalize(dirToLgt + I);
-}
-
-void DirectLight::attenuate(const glm::vec3& P, glm::vec3& result) const
-{
-    return;
-}
-
-bool DirectLight::generateShadowRay(MultiSampleRay& r) const
+bool DirectLight::generateShadowRay(MultiSampleRay& r, Noise& /*noise*/) const
 {
     if (r.currentSample() <= 0) return false;
     

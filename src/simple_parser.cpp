@@ -53,7 +53,7 @@ std::string SimpleParser::parse(const std::string& file, Scene* const scene)
     float quadAtten = 0.0f;
     float bias = 0.001f;
     float pointLgtRadius = 0.0f;
-    unsigned short w = 0, h = 0;
+    unsigned w = 0, h = 0;
     
     do {
         getline(in, line);
@@ -69,15 +69,18 @@ std::string SimpleParser::parse(const std::string& file, Scene* const scene)
         
         if (cmd == "size") {
             if (readValues(line, s, 2, values))
-                w = values[0]; h = values[1];
+            {
+                w = static_cast<unsigned>(values[0]);
+                h = static_cast<unsigned>(values[1]);
+            }
         } else if (cmd == "output") {
             s >> outputImage;
         } else if (cmd == "maxdepth") {
             if (readValues(line, s, 1, values))
-                scene->setMaxDepth(values[0]);
+                scene->setMaxDepth(static_cast<unsigned>(values[0]));
         } else if (cmd == "shdwrays") {
             if (readValues(line, s, 1, values))
-                scene->setShadowRays(values[0]);
+                scene->setShadowRays(static_cast<unsigned>(values[0]));
         } else if (cmd == "camera") {
             if (w == 0 || h == 0)
                 throw std::runtime_error("zero image height and/or width!");
@@ -108,15 +111,15 @@ std::string SimpleParser::parse(const std::string& file, Scene* const scene)
                                      );
         } else if (cmd == "tri") {
             if (readValues(line, s, 3, values))
-                scene->addPrimitive(new Triangle(tStack.transformPoint(verticies[values[0]]),
-                                                 tStack.transformPoint(verticies[values[1]]),
-                                                 tStack.transformPoint(verticies[values[2]]),
+                scene->addPrimitive(new Triangle(tStack.transformPoint(verticies[static_cast<size_t>(values[0])]),
+                                                 tStack.transformPoint(verticies[static_cast<size_t>(values[1])]),
+                                                 tStack.transformPoint(verticies[static_cast<size_t>(values[2])]),
                                                  currMaterial->clone())
                                      );
         } else if (cmd == "envsphere") {
-            std::string file;
-            s >> file;
-            scene->setEnvSphereImage(file);
+            std::string envImage;
+            s >> envImage;
+            scene->setEnvSphereImage(envImage);
         } else if (cmd == "translate") {
             if (readValues(line, s, 3, values))
                 tStack.translate(values[0], values[1], values[2]);
