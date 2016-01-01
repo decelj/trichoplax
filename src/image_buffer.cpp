@@ -33,9 +33,9 @@ void ImageBuffer::commit(const Sample& sample, const glm::vec4& color)
            mPixels[offset+2] == 0.f &&
            mPixels[offset+3] == 0.f);
     mPixels[offset+3] = color.a;
-    mPixels[offset+2] = color.r;
-    mPixels[offset+1] = color.g;
-    mPixels[offset] = color.b;
+    mPixels[offset+2] = linearToGamma(color.r);
+    mPixels[offset+1] = linearToGamma(color.g);
+    mPixels[offset] = linearToGamma(color.b);
 }
 
 void ImageBuffer::write(const std::string& filename) const
@@ -47,7 +47,7 @@ void ImageBuffer::write(const std::string& filename) const
     std::cout << "Saving image: " << filename << std::endl;
     
     for (unsigned int y = 0; y < mHeight; ++y) {
-        BYTE *bits = FreeImage_GetScanLine(img, y);
+        BYTE* bits = FreeImage_GetScanLine(img, y);
         for (unsigned int x = 0; x < mWidth; ++x) {
             const unsigned int offset = (y * mWidth + x) * 4;
             bits[FI_RGBA_ALPHA] = static_cast<unsigned char>(std::min(mPixels[offset+3], 1.0f) * 255);

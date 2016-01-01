@@ -1,8 +1,9 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#include <math.h>
+#include <cmath>
 #include <cassert>
+#include <glm/glm.hpp>
 
 #define EPSILON .000001f
 #define VEC3_IS_REL_ZERO(v) (v[0] < EPSILON && v[1] < EPSILON && v[2] < EPSILON)
@@ -20,6 +21,26 @@
 inline bool relEq(const float a, const float b, const float tol=EPSILON)
 {
     return fabsf(a - b) < tol;
+}
+
+inline float gammaToLinear(float x)
+{
+    return powf(x, 1.f / 2.2f);
+}
+
+inline glm::vec3 gammaToLinear(const glm::vec3& v)
+{
+    return glm::pow(v, glm::vec3(1.f / 2.2f));
+}
+
+inline float linearToGamma(float x)
+{
+    return powf(x, 2.2f);
+}
+
+inline glm::vec3 linearToGamma(const glm::vec3& v)
+{
+    return glm::pow(v, glm::vec3(2.2f));
 }
 
 #endif

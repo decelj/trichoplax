@@ -131,16 +131,28 @@ std::string SimpleParser::parse(const std::string& file, Scene& scene)
                 tStack.rotate(glm::vec3(values[0], values[1], values[2]), values[3]);
         } else if (cmd == "ambient") {
             if (readValues(line, s, 3, values))
-                currMaterial->setAmbient(glm::vec3(values[0], values[1], values[2]));
+            {
+                currMaterial->setAmbient(
+                    gammaToLinear(glm::vec3(values[0], values[1], values[2])));
+            }
         } else if (cmd == "emission") {
             if (readValues(line, s, 3, values))
-                currMaterial->setEmissive(glm::vec3(values[0], values[1], values[2]));
+            {
+                currMaterial->setEmissive(
+                    gammaToLinear(glm::vec3(values[0], values[1], values[2])));
+            }
         } else if (cmd == "diffuse") {
             if (readValues(line, s, 3, values))
-                currMaterial->setDiffuse(glm::vec3(values[0], values[1], values[2]));
+            {
+                currMaterial->setDiffuse(
+                    gammaToLinear(glm::vec3(values[0], values[1], values[2])));
+            }
         } else if (cmd == "specular") {
             if (readValues(line, s, 3, values))
-                currMaterial->setSpecular(glm::vec3(values[0], values[1], values[2]));
+            {
+                currMaterial->setSpecular(
+                    gammaToLinear(glm::vec3(values[0], values[1], values[2])));
+            }
         } else if (cmd == "transparency") {
             if (readValues(line, s, 3, values))
                 currMaterial->setTransparency(glm::vec3(values[0], values[1], values[2]));

@@ -23,11 +23,13 @@
 namespace {
     
 template<typename T>
-inline glm::vec3 toVec3(const T& vec) {
+inline glm::vec3 toVec3(const T& vec)
+{
     return glm::vec3(vec[0], vec[1], vec[2]);
 }
 
-inline glm::mat4 toMat4(const aiMatrix4x4& mat) {
+inline glm::mat4 toMat4(const aiMatrix4x4& mat)
+{
     return glm::mat4(mat.a1, mat.b1, mat.c1, mat.d1,
                      mat.a2, mat.b2, mat.c2, mat.d2,
                      mat.a3, mat.b3, mat.c3, mat.d3,
@@ -57,7 +59,8 @@ AssimpParser::~AssimpParser()
 {
     // trichoplax's primatives now own the material pointers, release them
     // from the unique_ptr.
-    for (MaterialVector::iterator it = mMaterials.begin(); it != mMaterials.end(); ++it) {
+    for (MaterialVector::iterator it = mMaterials.begin(); it != mMaterials.end(); ++it)
+    {
         it->release();
     }
 }
@@ -97,7 +100,8 @@ std::string AssimpParser::parse(const std::string& file, Scene& scene)
 
 void AssimpParser::loadLight(const aiLight* light, const TransformStack* tStack)
 {
-    switch (light->mType) {
+    switch (light->mType)
+    {
         case aiLightSource_DIRECTIONAL:
             mScene->addLight(parseDirectLight(light, tStack));
             break;
@@ -133,12 +137,15 @@ void AssimpParser::loadScene(const aiNode* node, TransformStack* tStack)
     tStack->push();
     tStack->transform(toMat4(node->mTransformation));
     
-    for (unsigned meshIdx = 0; meshIdx < node->mNumMeshes; ++meshIdx){
+    for (unsigned meshIdx = 0; meshIdx < node->mNumMeshes; ++meshIdx)
+    {
         const aiMesh* mesh = mAiScene->mMeshes[meshIdx];
-        for (unsigned faceIdx = 0; faceIdx < mesh->mNumFaces; ++faceIdx) {
+        for (unsigned faceIdx = 0; faceIdx < mesh->mNumFaces; ++faceIdx)
+        {
             const aiFace face = mesh->mFaces[faceIdx];
             
-            if (face.mNumIndices != 3) {
+            if (face.mNumIndices != 3)
+            {
                 std::cerr << "Invalid number of verticies (" << face.mNumIndices
                     << "), skipping face!" << std::endl;
                 continue;
@@ -152,9 +159,12 @@ void AssimpParser::loadScene(const aiNode* node, TransformStack* tStack)
         }
     }
     
-    for (unsigned i = 0; i < mAiScene->mNumLights; ++i) {
+    for (unsigned i = 0; i < mAiScene->mNumLights; ++i)
+    {
         if (mAiScene->mLights[i]->mName == node->mName)
+        {
             loadLight(mAiScene->mLights[i], tStack);
+        }
     }
     
     if (mAiScene->mCameras[mCameraIdx]->mName == node->mName)
@@ -169,47 +179,55 @@ void AssimpParser::loadScene(const aiNode* node, TransformStack* tStack)
 void AssimpParser::loadMaterials()
 {
     mMaterials.reserve(mAiScene->mNumMaterials);
-    for (unsigned int i = 0; i < mAiScene->mNumMaterials; ++i) {
+    for (unsigned i = 0; i < mAiScene->mNumMaterials; ++i)
+    {
         const aiMaterial* aiMaterial = mAiScene->mMaterials[i];
         std::unique_ptr<Material> material(new Material);
         aiColor3D value;
         float valueF;
         
-        if (aiMaterial->Get(AI_MATKEY_COLOR_AMBIENT, value) != AI_SUCCESS) {
+        if (aiMaterial->Get(AI_MATKEY_COLOR_AMBIENT, value) != AI_SUCCESS)
+        {
             throw std::runtime_error("error reading material!");
         }
-        material->setAmbient(toVec3(value));
+        material->setAmbient(gammaToLinear(toVec3(value)));
         
-        if (aiMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, value) != AI_SUCCESS) {
+        if (aiMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, value) != AI_SUCCESS)
+        {
             throw std::runtime_error("error reading material!");
         }
-        material->setDiffuse(toVec3(value));
+        material->setDiffuse(gammaToLinear(toVec3(value)));
         
-        if (aiMaterial->Get(AI_MATKEY_COLOR_SPECULAR, value) != AI_SUCCESS) {
+        if (aiMaterial->Get(AI_MATKEY_COLOR_SPECULAR, value) != AI_SUCCESS)
+        {
             throw std::runtime_error("error reading material!");
         }
-        if (aiMaterial->Get(AI_MATKEY_SHININESS_STRENGTH, valueF) != AI_SUCCESS) {
+        if (aiMaterial->Get(AI_MATKEY_SHININESS_STRENGTH, valueF) != AI_SUCCESS)
+        {
             valueF = 1.f; // TODO: this seems to error sometimes, not sure why...
         }
-        material->setSpecular(toVec3(value)*valueF);
+        material->setSpecular(gammaToLinear(toVec3(value)*valueF));
         
-        if (aiMaterial->Get(AI_MATKEY_COLOR_EMISSIVE, value) != AI_SUCCESS) {
+        if (aiMaterial->Get(AI_MATKEY_COLOR_EMISSIVE, value) != AI_SUCCESS)
+        {
             throw std::runtime_error("error reading material!");
         }
+        material->setEmissive(gammaToLinear(toVec3(value)));
         
-        material->setEmissive(toVec3(value));
-        
-        if (aiMaterial->Get(AI_MATKEY_COLOR_TRANSPARENT, value) != AI_SUCCESS) {
+        if (aiMaterial->Get(AI_MATKEY_COLOR_TRANSPARENT, value) != AI_SUCCESS)
+        {
             throw std::runtime_error("error reading material!");
         }
         material->setTransparency(toVec3(value));
         
-        if (aiMaterial->Get(AI_MATKEY_REFRACTI, valueF) != AI_SUCCESS) {
+        if (aiMaterial->Get(AI_MATKEY_REFRACTI, valueF) != AI_SUCCESS)
+        {
             throw std::runtime_error("error reading material!");
         }
         material->setIor(valueF);
         
-        if (aiMaterial->Get(AI_MATKEY_SHININESS, valueF) != AI_SUCCESS) {
+        if (aiMaterial->Get(AI_MATKEY_SHININESS, valueF) != AI_SUCCESS)
+        {
             throw std::runtime_error("error reading material!");
         }
         material->setShininess(valueF);

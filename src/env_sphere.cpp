@@ -63,8 +63,8 @@ void EnvSphere::sample(const Ray& ray, glm::vec4& result) const
         result.g = 0.f;
         result.b = 0.f;
     } else {
-        result.r = value.rgbRed / 255.f;
-        result.g = value.rgbGreen / 255.f;
-        result.b = value.rgbBlue / 255.f;
+        result.r = gammaToLinear(value.rgbRed / 255.f);
+        result.g = gammaToLinear(value.rgbGreen / 255.f);
+        result.b = gammaToLinear(value.rgbBlue / 255.f);
     }
 }
