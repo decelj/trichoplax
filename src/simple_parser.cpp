@@ -18,13 +18,15 @@
 
 
 namespace {
-bool readValues(std::string& line, std::stringstream &s, const int num, float* values)
+bool readValues(std::stringstream &lineStream, const int num, float* values)
 {
-    for (int i = 0; i < num; i++) {
-        s >> values[i];
-        if (s.fail()) {
+    for (int i = 0; i < num; i++)
+    {
+        lineStream >> values[i];
+        if (lineStream.fail())
+        {
             std::cerr << "Failed to read value " << i+1 << " for line \"" <<
-                line << "\", skipping command" << std::endl;
+                lineStream.str() << "\", skipping command" << std::endl;
             return false;
         }
     }
@@ -64,28 +66,28 @@ std::string SimpleParser::parse(const std::string& file, Scene& scene)
             continue;
         }
         
-        std::stringstream s(line);
-        s >> cmd;
-        
+        std::stringstream lineStream(line);
+        lineStream >> cmd;
+
         if (cmd == "size") {
-            if (readValues(line, s, 2, values))
+            if (readValues(lineStream, 2, values))
             {
                 w = static_cast<unsigned>(values[0]);
                 h = static_cast<unsigned>(values[1]);
             }
         } else if (cmd == "output") {
-            s >> outputImage;
+            lineStream >> outputImage;
         } else if (cmd == "maxdepth") {
-            if (readValues(line, s, 1, values))
+            if (readValues(lineStream, 1, values))
                 scene.setMaxDepth(static_cast<unsigned>(values[0]));
         } else if (cmd == "shdwrays") {
-            if (readValues(line, s, 1, values))
+            if (readValues(lineStream, 1, values))
                 scene.setShadowRays(static_cast<unsigned>(values[0]));
         } else if (cmd == "camera") {
             if (w == 0 || h == 0)
                 throw std::runtime_error("zero image height and/or width!");
             
-            if (readValues(line, s, 10, values)) {
+            if (readValues(lineStream, 10, values)) {
                 scene.setCamera(new Camera(values[9], // fov
                                            glm::vec3(values[0], values[1], values[2]), // pos
                                            glm::vec3(values[3], values[4], values[5]), // look at
@@ -94,7 +96,7 @@ std::string SimpleParser::parse(const std::string& file, Scene& scene)
                                   );
             }
         } else if (cmd == "vertex") {
-            if (readValues(line, s, 3, values))
+            if (readValues(lineStream, 3, values))
                 verticies.push_back(glm::vec3(values[0], values[1], values[2]));
         } else if (cmd == "maxverts") {
             // Using vectors so I don't care
@@ -103,14 +105,14 @@ std::string SimpleParser::parse(const std::string& file, Scene& scene)
         } else if (cmd == "popTransform") {
             tStack.pop();
         } else if (cmd == "sphere") {
-            if (readValues(line, s, 4, values))
+            if (readValues(lineStream, 4, values))
                 scene.addPrimitive(new Sphere(glm::vec3(values[0], values[1], values[2]),
                                               values[3],
                                               currMaterial->clone(),
                                               tStack.top())
                                      );
         } else if (cmd == "tri") {
-            if (readValues(line, s, 3, values))
+            if (readValues(lineStream, 3, values))
                 scene.addPrimitive(new Triangle(tStack.transformPoint(verticies[static_cast<size_t>(values[0])]),
                                                 tStack.transformPoint(verticies[static_cast<size_t>(values[1])]),
                                                 tStack.transformPoint(verticies[static_cast<size_t>(values[2])]),
@@ -118,75 +120,80 @@ std::string SimpleParser::parse(const std::string& file, Scene& scene)
                                      );
         } else if (cmd == "envsphere") {
             std::string envImage;
-            s >> envImage;
+            lineStream >> envImage;
             scene.setEnvSphereImage(envImage);
         } else if (cmd == "translate") {
-            if (readValues(line, s, 3, values))
+            if (readValues(lineStream, 3, values))
                 tStack.translate(values[0], values[1], values[2]);
         } else if (cmd == "scale") {
-            if (readValues(line, s, 3, values))
+            if (readValues(lineStream, 3, values))
                 tStack.scale(values[0], values[1], values[2]);
         } else if (cmd == "rotate") {
-            if (readValues(line, s, 4, values))
+            if (readValues(lineStream, 4, values))
                 tStack.rotate(glm::vec3(values[0], values[1], values[2]), values[3]);
         } else if (cmd == "ambient") {
-            if (readValues(line, s, 3, values))
+            if (readValues(lineStream, 3, values))
             {
                 currMaterial->setAmbient(
                     gammaToLinear(glm::vec3(values[0], values[1], values[2])));
             }
         } else if (cmd == "emission") {
-            if (readValues(line, s, 3, values))
+            if (readValues(lineStream, 3, values))
             {
                 currMaterial->setEmissive(
                     gammaToLinear(glm::vec3(values[0], values[1], values[2])));
             }
         } else if (cmd == "diffuse") {
-            if (readValues(line, s, 3, values))
+            if (readValues(lineStream, 3, values))
             {
                 currMaterial->setDiffuse(
                     gammaToLinear(glm::vec3(values[0], values[1], values[2])));
             }
         } else if (cmd == "specular") {
-            if (readValues(line, s, 3, values))
+            if (readValues(lineStream, 3, values))
             {
                 currMaterial->setSpecular(
                     gammaToLinear(glm::vec3(values[0], values[1], values[2])));
             }
         } else if (cmd == "transparency") {
-            if (readValues(line, s, 3, values))
+            if (readValues(lineStream, 3, values))
                 currMaterial->setTransparency(glm::vec3(values[0], values[1], values[2]));
         } else if (cmd == "shininess") {
-            if (readValues(line, s, 1, values))
+            if (readValues(lineStream, 1, values))
                 currMaterial->setShininess(values[0]);
         } else if (cmd == "ior") {
-            if (readValues(line, s, 1, values))
+            if (readValues(lineStream, 1, values))
                 currMaterial->setIor(values[0]);
         } else if (cmd == "radius") {
-            if (readValues(line, s, 1, values))
+            if (readValues(lineStream, 1, values))
                 pointLgtRadius = values[0];
         } else if (cmd == "point") {
-            if (readValues(line, s, 6, values))
+            if (readValues(lineStream, 6, values))
                 scene.addLight(new PointLight(glm::vec3(values[0], values[1], values[2]),
                                               glm::vec3(values[3], values[4], values[5]),
                                               pointLgtRadius,
                                               bias, constAtten, linearAtten, quadAtten)
                                  );
         } else if (cmd == "directional") {
-            if (readValues(line, s, 6, values))
+            if (readValues(lineStream, 6, values))
                 scene.addLight(new DirectLight(glm::vec3(values[0], values[1], values[2]), // direction
                                                glm::vec3(values[3], values[4], values[5]), // color
                                                bias)
                                  );
         } else if (cmd == "attenuation") {
-            if (readValues(line, s, 3, values)) {
+            if (readValues(lineStream, 3, values)) {
                 constAtten = values[0];
                 linearAtten = values[1];
                 quadAtten = values[2];
             }
         } else if (cmd == "bias") {
-            if (readValues(line, s, 1, values))
+            if (readValues(lineStream, 1, values))
                 bias = values[0];
+        } else if (cmd == "gisamples") {
+            if (readValues(lineStream, 1, values))
+            {
+                scene.setNumGISamples(static_cast<unsigned>(values[0]));
+            }
         } else {
             std::cerr << "Unknown command: " << cmd << std::endl;
         }

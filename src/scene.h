@@ -23,13 +23,24 @@ private:
 public:
     typedef LightVector::const_iterator ConstLightIter;
 
+    struct RenderSettings
+    {
+        RenderSettings();
+
+        unsigned maxDepth;
+        unsigned GISamples;
+    };
+
     void render(const std::string& filename);
     void setCamera(Camera* cam) { mCam = cam; }
-    inline void addPrimitive(IPrimitive* prim) { mKdTree->addPrimitive(prim); }
-    inline void addLight(ILight* lgt) { mLights.push_back(lgt); }
-    inline void setMaxDepth(unsigned int depth) { mMaxTraceDepth = depth; }
+    void addPrimitive(IPrimitive* prim) { mKdTree->addPrimitive(prim); }
+    void addLight(ILight* lgt) { mLights.push_back(lgt); }
+    void setMaxDepth(unsigned depth) { mSettings.maxDepth = depth; }
+    void setNumGISamples(unsigned numSamples) { mSettings.GISamples = numSamples; }
     void setEnvSphereImage(const std::string& file);
     void setShadowRays(int num);
+
+    const RenderSettings& renderSettings() const { return mSettings; }
     
     ConstLightIter lightsBegin() const { return mLights.begin(); }
     ConstLightIter lightsEnd() const { return mLights.end(); }
@@ -39,10 +50,10 @@ public:
     static void destroy();
 
 private:
-    explicit Scene() {}
-    void setup();
-    void createBuffer();
+    explicit Scene();
     ~Scene();
+
+    void createBuffer();
 
     Camera* mCam;
     Sampler* mSampler;
@@ -50,9 +61,9 @@ private:
     KdTree* mKdTree;
     EnvSphere* mEnvSphere;
     LightVector mLights;
-    unsigned int mMaxTraceDepth;
+    RenderSettings mSettings;
     
-    static Scene* mInstance;
+    static Scene* sInstance;
 };
 
 #endif

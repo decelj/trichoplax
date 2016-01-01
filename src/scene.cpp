@@ -36,19 +36,26 @@ void cleanupThreads(std::vector<Raytracer*>& tracers)
 }
 } // annonymous namespace
 
-// Global static pointer for singleton
-Scene* Scene::mInstance = NULL;
 
-void Scene::setup()
+Scene::RenderSettings::RenderSettings()
+    : maxDepth(1)
+    , GISamples(0)
 {
-    mCam = NULL;
-    mSampler = NULL;
-    mImgBuffer = NULL;
-    mEnvSphere = NULL;
-	mKdTree = new KdTree();
-    mLights.clear();
-    mInstance = this;
-    mMaxTraceDepth = 3;
+}
+
+
+// Global static pointer for singleton
+Scene* Scene::sInstance = NULL;
+
+Scene::Scene()
+    : mCam(NULL)
+    , mSampler(NULL)
+    , mImgBuffer(NULL)
+    , mKdTree(new KdTree)
+    , mEnvSphere(NULL)
+    , mLights()
+    , mSettings()
+{
 }
 
 Scene::~Scene()
@@ -72,19 +79,19 @@ Scene::~Scene()
 
 Scene& Scene::instance()
 {
-    return *mInstance;
+    return *sInstance;
 }
 
 void Scene::create()
 {
-    Scene *s = new Scene;
-    s->setup();
+    TP_ASSERT(sInstance == NULL);
+    sInstance = new Scene;
 }
 
 void Scene::destroy()
 {
-    delete mInstance;
-    mInstance = NULL;
+    delete sInstance;
+    sInstance = NULL;
 }
 
 void Scene::createBuffer()
@@ -107,7 +114,7 @@ void Scene::setEnvSphereImage(const std::string& file)
 
 void Scene::render(const std::string& filename)
 {
-    assert(mCam != NULL);
+    TP_ASSERT(mCam != NULL);
     createBuffer();
     mKdTree->build();
     
@@ -129,7 +136,7 @@ void Scene::render(const std::string& filename)
     
     for (unsigned int i = 0; i < numCpus; ++i) {
         Raytracer* tracer = new Raytracer(mKdTree, mCam, mEnvSphere, mSampler,
-                                          mImgBuffer, mMaxTraceDepth);
+                                          mImgBuffer, mSettings.maxDepth);
         tracers.emplace_back(tracer);
         tracer->registerStatsCollector(&collector);
         if (!tracer->start()) {

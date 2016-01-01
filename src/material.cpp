@@ -11,8 +11,7 @@
 #include "raytracer.h"
 #include "noise.h"
 
-#define NUM_GI_SAMPLES 25.f
-#define DO_GI 1
+#define GI_ENABLED 1
 
 Material::Material()
     : mBrdf(glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f),
@@ -172,8 +171,10 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
         }
     }
     
-#if DO_GI
-    if (hasDiffuse && r.depth() < tracer->maxDepth())
+#if GI_ENABLED
+    if (hasDiffuse &&
+        scene.renderSettings().GISamples > 0 &&
+        r.depth() < tracer->maxDepth())
     {
         glm::vec3 v = hit.N;
         glm::vec3 u;
@@ -184,8 +185,8 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
         glm::vec3 w = glm::normalize(glm::cross(u, v));
         
         Noise& noiseGen = tracer->getNoiseGenerator();
-        glm::vec4 giColor(0.f);
-        MultiSampleRay giRay(Ray::GI, r, NUM_GI_SAMPLES);
+        glm::vec3 giColor(0.f);
+        MultiSampleRay giRay(Ray::GI, r, scene.renderSettings().GISamples);
         giRay.setOrigin(hit.P);
         giRay.shouldHitBackFaces(false);
         giRay.incrementDepth();
@@ -210,13 +211,17 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
             TP_ASSERT(glm::dot(hit.N, giRay.dir()) > 0.0);
             tracer->traceAndShade(giRay, tmp);
             
-            giColor += tmp;
+            giColor += glm::vec3(tmp);
             --giRay;
         }
-        
-        result.r += (giColor.r / NUM_GI_SAMPLES) * mBrdf.Kd.r;
-        result.g += (giColor.g / NUM_GI_SAMPLES) * mBrdf.Kd.g;
-        result.b += (giColor.b / NUM_GI_SAMPLES) * mBrdf.Kd.b;
+
+        float invNumSamples = 1.f / static_cast<float>(scene.renderSettings().GISamples);
+        giColor *= invNumSamples;
+        giColor *= mBrdf.Kd;
+
+        result.r += giColor.r;
+        result.g += giColor.g;
+        result.b += giColor.b;
     }
 #endif
     
