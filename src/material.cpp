@@ -1,5 +1,4 @@
-#include <string.h> // For memcpy
-#include <math.h>
+#include <cmath>
 #include <iostream>
 
 #include "material.h"
@@ -16,14 +15,15 @@
 #define DO_GI 1
 
 Material::Material()
-    : mBrdf(glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f), 0.f, 1.f)
+    : mBrdf(glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f),
+            glm::vec3(0.f), glm::vec3(0.f), 0.f, 1.f)
 {
 }
 
 Material::Material(const glm::vec3& Ka, const glm::vec3& Ke,
          const glm::vec3& Kd, const glm::vec3& Ks,
          const glm::vec3& Kt, const float Kr, const float ior)
-: mBrdf(Ka, Ke, Kd, Ks, Kt, Kr, ior)
+    : mBrdf(Ka, Ke, Kd, Ks, Kt, Kr, ior)
 {
 }
 
@@ -37,27 +37,27 @@ Material* Material::clone() const
     return new Material(*this);
 }
 
-void Material::setAmbient(glm::vec3 Ka)
+void Material::setAmbient(const glm::vec3& Ka)
 {
     mBrdf.Ka = Ka;
 }
 
-void Material::setEmissive(glm::vec3 Ke)
+void Material::setEmissive(const glm::vec3& Ke)
 {
     mBrdf.Ke = Ke;
 }
 
-void Material::setDiffuse(glm::vec3 Kd)
+void Material::setDiffuse(const glm::vec3& Kd)
 {
     mBrdf.Kd = Kd;
 }
 
-void Material::setSpecular(glm::vec3 Ks)
+void Material::setSpecular(const glm::vec3& Ks)
 {
     mBrdf.Ks = Ks;
 }
 
-void Material::setTransparency(glm::vec3 Kt)
+void Material::setTransparency(const glm::vec3& Kt)
 {
     mBrdf.Kt = Kt;
 }

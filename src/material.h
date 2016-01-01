@@ -17,11 +17,11 @@ public:
                       const glm::vec3& Kt, const float Kr, const float ior);
     Material* clone() const;
     
-    void setAmbient(glm::vec3 Ka);
-    void setEmissive(glm::vec3 Ke);
-    void setDiffuse(glm::vec3 Kd);
-    void setSpecular(glm::vec3 Ks);
-    void setTransparency(glm::vec3 Kt);
+    void setAmbient(const glm::vec3& Ka);
+    void setEmissive(const glm::vec3& Ke);
+    void setDiffuse(const glm::vec3& Kd);
+    void setSpecular(const glm::vec3& Ks);
+    void setTransparency(const glm::vec3& Kt);
     void setShininess(float Kr);
     void setIor(float Ior);
     
