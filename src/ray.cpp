@@ -75,34 +75,32 @@ void Ray::reflected(const Hit& hit, Ray& r) const
     r.setDir(mDir - 2.f * glm::dot(mDir, hit.N) * hit.N);
 }
 
-bool Ray::refracted(const Hit& h, Ray& r) const
+bool Ray::refracted(const Hit& hit, Ray& outRay) const
 {
-    float cosThetaIn = glm::dot(mDir, h.N);
+    float nDotI = glm::dot(mDir, hit.N);
     
     float iorQuotient;
-    if (cosThetaIn > 0.f) {
-        iorQuotient = r.mIor / mIor;
-        r.shouldHitBackFaces(true);
-    } else {
-        // Assume we're going back to air if we've hit
-        // a back face.
-        iorQuotient = mIor;
+    if (nDotI <= 0.f)
+    {
+        iorQuotient = mIor / outRay.mIor;
+        outRay.shouldHitBackFaces(true);
     }
-    float sinSqrdThetaOut = powf(iorQuotient, 2.f) *
-                            (1.f - powf(cosThetaIn, 2.f));
-    
+    else
+    {
+        // Assume we're going back to air if we've hit a back face.
+        iorQuotient = outRay.mIor;
+        nDotI = glm::dot(mDir, -hit.N);
+    }
+
+    float k = 1.f - iorQuotient * iorQuotient * (1.f - nDotI * nDotI);
+
     // Total internal reflection
-    // TODO: Handle this
-    if (sinSqrdThetaOut > 1.f)
+    if (k < 0.f)
         return false;
     
-    float cosThetaOut = sqrtf(1.f - sinSqrdThetaOut);
-    r.setDir(iorQuotient * mDir +
-             (iorQuotient * cosThetaIn - cosThetaOut) * h.N);
-    
-    r.setDir(glm::normalize(r.dir()));
-    
-    r.mDepth = mDepth+1;
+    outRay.setDir(iorQuotient * mDir - (iorQuotient * nDotI + sqrtf(k)) * hit.N);
+    outRay.mDepth = mDepth + 1;
+
     return true;
 }
 
