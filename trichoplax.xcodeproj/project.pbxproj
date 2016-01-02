@@ -12,7 +12,6 @@
 		2B1283EE1831F963009DCC0E /* timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B1283EC1831F963009DCC0E /* timer.cpp */; };
 		2B1BCAEC186A93DC004F0635 /* env_sphere.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B1BCAEA186A93DC004F0635 /* env_sphere.cpp */; };
 		2B1EC8B51B9FE5F700D5E1B7 /* noise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B1EC8B31B9FE5F700D5E1B7 /* noise.cpp */; };
-		2B2D9D8C171521940098D2C6 /* debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2D9D8B171521940098D2C6 /* debug.cpp */; };
 		2B2D9E3417164FB10098D2C6 /* point_light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2D9E3317164FB10098D2C6 /* point_light.cpp */; };
 		2B2DA0F7171E63EE0098D2C6 /* direct_light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2DA0F6171E63EE0098D2C6 /* direct_light.cpp */; };
 		2B3BEB1119B984C100CB4EEC /* glm.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B3BEB1019B984C100CB4EEC /* glm.framework */; };
@@ -66,8 +65,6 @@
 		2B1BCAEB186A93DC004F0635 /* env_sphere.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = env_sphere.h; sourceTree = "<group>"; };
 		2B1EC8B31B9FE5F700D5E1B7 /* noise.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = noise.cpp; sourceTree = "<group>"; };
 		2B1EC8B41B9FE5F700D5E1B7 /* noise.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = noise.h; sourceTree = "<group>"; };
-		2B2D9C561713C85C0098D2C6 /* debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
-		2B2D9D8B171521940098D2C6 /* debug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = debug.cpp; sourceTree = "<group>"; };
 		2B2D9E2E17164EFD0098D2C6 /* ilight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ilight.h; sourceTree = "<group>"; };
 		2B2D9E3217164FB10098D2C6 /* point_light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = point_light.h; sourceTree = "<group>"; };
 		2B2D9E3317164FB10098D2C6 /* point_light.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = point_light.cpp; sourceTree = "<group>"; };
@@ -102,8 +99,6 @@
 		2B7B673A17108606002C830F /* brdf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = brdf.h; sourceTree = "<group>"; };
 		2B7B673B171086CE002C830F /* material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = material.h; sourceTree = "<group>"; };
 		2B7B673C171086CE002C830F /* material.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = material.cpp; sourceTree = "<group>"; };
-		2B7B674E171089A0002C830F /* object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = object.h; sourceTree = "<group>"; };
-		2B7B674F171089A0002C830F /* object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = object.cpp; sourceTree = "<group>"; };
 		2B7B67671710A3DA002C830F /* triangle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = triangle.h; sourceTree = "<group>"; };
 		2B7B67681710A3DA002C830F /* triangle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = triangle.cpp; sourceTree = "<group>"; };
 		2B7B67871710A857002C830F /* transform_stack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = transform_stack.h; sourceTree = "<group>"; };
@@ -172,8 +167,6 @@
 				2B7B6483170FBCBD002C830F /* camera.cpp */,
 				2B7B647A170FBCBD002C830F /* camera.h */,
 				2B2DA1A6171FA0D10098D2C6 /* common.h */,
-				2B2D9D8B171521940098D2C6 /* debug.cpp */,
-				2B2D9C561713C85C0098D2C6 /* debug.h */,
 				2B2DA0F6171E63EE0098D2C6 /* direct_light.cpp */,
 				2B2DA0F5171E63EE0098D2C6 /* direct_light.h */,
 				2B1BCAEA186A93DC004F0635 /* env_sphere.cpp */,
@@ -197,8 +190,6 @@
 				2BD9523D17AE089C000576EB /* multi_sample_ray.h */,
 				2B1EC8B31B9FE5F700D5E1B7 /* noise.cpp */,
 				2B1EC8B41B9FE5F700D5E1B7 /* noise.h */,
-				2B7B674F171089A0002C830F /* object.cpp */,
-				2B7B674E171089A0002C830F /* object.h */,
 				2BAEAEFE1933A994002605AF /* parser_factory.cpp */,
 				2BAEAEFF1933A994002605AF /* parser_factory.h */,
 				2B2D9E3317164FB10098D2C6 /* point_light.cpp */,
@@ -340,7 +331,6 @@
 				2B7B67891710A857002C830F /* transform_stack.cpp in Sources */,
 				2B1283EE1831F963009DCC0E /* timer.cpp in Sources */,
 				2B7B683A1710D326002C830F /* ray.cpp in Sources */,
-				2B2D9D8C171521940098D2C6 /* debug.cpp in Sources */,
 				2B2D9E3417164FB10098D2C6 /* point_light.cpp in Sources */,
 				2BE7B8F71C34DB58007C3AD6 /* ilight.cpp in Sources */,
 				2B2DA0F7171E63EE0098D2C6 /* direct_light.cpp in Sources */,
