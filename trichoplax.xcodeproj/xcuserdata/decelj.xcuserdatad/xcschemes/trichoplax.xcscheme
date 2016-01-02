@@ -42,7 +42,7 @@
       </AdditionalOptions>
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Debug"
+      buildConfiguration = "Release"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
@@ -77,7 +77,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "$(SRCROOT)/simple_refract.test"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "$(SRCROOT)/scene4-diffuse-area.test"
@@ -93,7 +93,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "$(SRCROOT)/dragon-refract.test"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
       <AdditionalOptions>

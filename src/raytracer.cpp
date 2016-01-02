@@ -122,7 +122,7 @@ bool Raytracer::traceAndShade(Ray& ray, glm::vec4& result) const
         return true;
     }
     
-    if (mEnv != NULL && ray.type() != Ray::PRIMARY)
+    if (mEnv != NULL)
         mEnv->sample(ray, result);
     
     return false;
