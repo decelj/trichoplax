@@ -24,21 +24,22 @@ public:
     explicit Ray(const Ray& r, const TYPE t);
     explicit Ray(const TYPE t, const glm::vec3& origin, const float ior);
     
-    inline void setDir(glm::vec3 d) { mDir = d; mInverseDir = 1.0f / d; }
-    inline void setOrigin(glm::vec3 o) { mOrigin = o; }
-    inline void bias(const float bias) { mOrigin += mDir * bias; }
-    inline void setMaxDistance(const float dist) { mMaxT = dist; }
-    inline void shouldHitBackFaces(bool value) { mHitBack = value; }
-    inline void incrementDepth() { ++mDepth; }
+    void setDir(const glm::vec3& d)     { mDir = d; mInverseDir = 1.0f / d; }
+    void setOrigin(const glm::vec3& o)  { mOrigin = o; }
+    void setDepth(unsigned depth)       { mDepth = depth; }
+    void bias(const float bias)         { mOrigin += mDir * bias; }
+    void setMaxDistance(const float dist) { mMaxT = dist; }
+    void shouldHitBackFaces(bool value) { mHitBack = value; }
+    void incrementDepth()               { ++mDepth; }
 
-    inline const glm::vec3& origin() const { return mOrigin; }
-    inline const glm::vec3& dir() const { return mDir; }
-    inline const glm::vec3& inverseDir() const { return mInverseDir; }
+    inline const glm::vec3& origin() const      { return mOrigin; }
+    inline const glm::vec3& dir() const         { return mDir; }
+    inline const glm::vec3& inverseDir() const  { return mInverseDir; }
     inline glm::vec3 point(const float t) const { return mOrigin + mDir * t; }
-    inline unsigned depth() const { return mDepth; }
-    inline bool shouldHitBackFaces() const { return mHitBack; }
-    inline float ior() const { return mIor; }
-    inline TYPE type() const { return mType; }
+    inline unsigned depth() const               { return mDepth; }
+    inline bool shouldHitBackFaces() const      { return mHitBack; }
+    inline float ior() const                    { return mIor; }
+    inline TYPE type() const                    { return mType; }
     
     inline void hit(const IPrimitive* prim, const float t, bool hit_back)
     { mMaxT = t; mHitPrim = prim; mHitBack = hit_back; }
@@ -46,13 +47,14 @@ public:
     
     // This method is bad and should go away. Assumes we already know p
     // lies on the ray.
-    inline float t(const glm::vec3& p) { return glm::length(p - mOrigin); }
-    inline float maxT() const { return mMaxT; }
-    inline float minT() const { return mMinT; }
+    inline float t(const glm::vec3& p)  { return glm::length(p - mOrigin); }
+    inline float maxT() const           { return mMaxT; }
+    inline float minT() const           { return mMinT; }
     
     void transformed(const glm::mat4& m, Ray& outRay) const;
     void reflected(const Hit& h, Ray& r) const;
     bool refracted(const Hit& h, Ray& r) const;
+    bool refract(const Hit& hit, float destIOR);
     
     void shade(const Raytracer* tracer, glm::vec4& result) const;
 

@@ -43,5 +43,11 @@ inline glm::vec3 linearToGamma(const glm::vec3& v)
     return glm::pow(v, glm::vec3(2.2f));
 }
 
+inline float luminance(const glm::vec3& color)
+{
+    // TODO: Fix me
+    return glm::dot(color, glm::vec3(1.f)) / 3.f;
+}
+
 #endif
 

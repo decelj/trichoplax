@@ -13,6 +13,17 @@
 
 #define GI_ENABLED 1
 
+namespace
+{
+
+inline glm::vec3 estimateFresnel(const glm::vec3& reflectance, float cosTheta, float power=5.f)
+{
+    return reflectance + (1.f - reflectance) * powf(1.f - cosTheta, power);
+}
+
+} // anonymous namespace
+
+
 Material::Material()
     : mBrdf(glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f),
             glm::vec3(0.f), glm::vec3(0.f), 0.f, 1.f)
@@ -74,36 +85,53 @@ void Material::setIor(float Ior)
 void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result) const
 {
     // Ambient and emissive
-    glm::vec3 color = mBrdf.Ka + mBrdf.Ke;
+    glm::vec3 opaqueColor = mBrdf.Ka + mBrdf.Ke;
     
     const Scene& scene = Scene::instance();
-    const float specularFactor = (mBrdf.Ks.r + mBrdf.Ks.g + mBrdf.Ks.b) / 3.f;
-    const bool hasDiffuse = !relEq(mBrdf.Kd.r + mBrdf.Kd.g + mBrdf.Kd.b, 0.f);
-    bool hasSpecular = !relEq(specularFactor, 0.f);
     const Hit hit(r);
-    
-    float transparencyFactor = (mBrdf.Kt.r + mBrdf.Kt.g + mBrdf.Kt.b) / 3.f;
-    float opaqueFactor = 1.f - transparencyFactor;
-    
-    // Refraction
-    if (transparencyFactor > 0.f && r.type() != Ray::GI)
+
+    // TODO: Hit.I is actually V not I, rename
+    const glm::vec3& I = hit.I;
+    glm::vec3 shadingNormal = hit.N;
+    float nDotI = glm::dot(shadingNormal, I);
+    const bool didHitBackface = nDotI < 0.f;
+
+    if (didHitBackface)
     {
-        Ray refracted(Ray::REFRACTED, hit.P, mBrdf.ior);
-        if (r.refracted(hit, refracted)) {
-            refracted.bias(0.001f);
-            
-            glm::vec4 refraction(0.f, 0.f, 0.f, 0.f);
-            tracer->traceAndShade(refracted, refraction);
-            result += refraction * glm::vec4(mBrdf.Kt, transparencyFactor);
-        } else {
-            transparencyFactor = 0.f;
-            opaqueFactor = 1.f;
-            hasSpecular = true;
+        shadingNormal = -shadingNormal;
+        nDotI = glm::dot(shadingNormal, I);
+    }
+
+    glm::vec3 fresnelFactor = estimateFresnel(mBrdf.Ks, nDotI);
+    glm::vec3 transmissionColor = (1.f - fresnelFactor) * mBrdf.Kt;
+    float transmissionWeight = luminance(transmissionColor);
+
+    // Transmission
+    if (transmissionWeight > 0.f && r.type() != Ray::GI)
+    {
+        Ray refractedRay(Ray::REFRACTED, hit.P, mBrdf.ior);
+        if (refractedRay.refract(hit, r.ior()))
+        {
+            refractedRay.bias(0.001f);
+            refractedRay.setDepth(r.depth() + 1);
+
+            glm::vec4 refractionColor(0.f);
+            tracer->traceAndShade(refractedRay, refractionColor);
+
+            // TODO: Beer's law
+            result += refractionColor * glm::vec4(transmissionColor, transmissionWeight);
+        }
+        else
+        {
+            fresnelFactor = glm::vec3(1.f);
+            transmissionWeight = 0.f;
         }
     }
 
+    float opaqueWeight = 1.f - transmissionWeight;
+
     // Reflection
-    if (hasSpecular && opaqueFactor > 0.f && r.type() != Ray::GI)
+    if (opaqueWeight > 0.f && r.type() != Ray::GI)
     {
         Ray reflected(Ray::REFLECTED);
         r.reflected(hit, reflected);
@@ -111,12 +139,13 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
         
         glm::vec4 reflection(0.f, 0.f, 0.f, 0.f);
         tracer->traceAndShade(reflected, reflection);
-        result += reflection * glm::vec4(mBrdf.Ks * opaqueFactor,
-                                         specularFactor * opaqueFactor * .5f);
+        result += reflection * glm::vec4(fresnelFactor, 0.f);
     }
-    
-    if (hasDiffuse || hasSpecular)
+
+    // Simple diffuse + specular
+    if (opaqueWeight > 0.f)
     {
+        const bool isSpecular = luminance(mBrdf.Ks) > 0.f;
         for (Scene::ConstLightIter it = scene.lightsBegin(); it != scene.lightsEnd(); ++it)
         {
             const ILight* lgt = *it;
@@ -150,30 +179,26 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
                     continue;
                 }
 
-                float specularPower = 0.f;
-                if(hasSpecular)
+                glm::vec3 specularColor(0.f);
+                if(isSpecular)
                 {
                     const glm::vec3 H = glm::normalize(shadowRay.dir() + hit.I);
                     float nDotH = std::max(glm::dot(hit.N, H), 0.f);
-                    specularPower = powf(nDotH, mBrdf.Kr);
-                    specularPower *= specularFactor * .5f;
-                    color += mBrdf.Ks * specularPower * lightColor;
+                    float specularPower = powf(nDotH, mBrdf.Kr);
+                    specularColor = mBrdf.Ks * specularPower * lightColor;
                 }
 
-                if (hasDiffuse)
-                {
-                    float diffuseWeight = 1.f - std::max(specularFactor / 2.f + specularPower + transparencyFactor, 0.f);
-
-                    color += mBrdf.Kd * lightColor * nDotL * diffuseWeight;
-                }
+                glm::vec3 diffuseWeight = 1.f - specularColor;
+                opaqueColor += mBrdf.Kd * lightColor * nDotL * diffuseWeight;
+                opaqueColor += specularColor;
             }
             
-            color *= opaqueFactor / lgt->shadowRays();
+            opaqueColor /= lgt->shadowRays();
         }
     }
     
 #if GI_ENABLED
-    if (hasDiffuse &&
+    if (opaqueWeight > 0.f &&
         scene.renderSettings().GISamples > 0 &&
         r.depth() < tracer->maxDepth())
     {
@@ -220,13 +245,11 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
         giColor *= invNumSamples;
         giColor *= mBrdf.Kd;
 
-        result.r += giColor.r;
-        result.g += giColor.g;
-        result.b += giColor.b;
+        opaqueColor += giColor;
     }
 #endif
     
-    result += glm::vec4(color, opaqueFactor);
+    result += glm::vec4(opaqueColor * opaqueWeight, opaqueWeight);
     result.a = std::min(result.a, 1.f);
 }
     

@@ -104,6 +104,38 @@ bool Ray::refracted(const Hit& hit, Ray& outRay) const
     return true;
 }
 
+bool Ray::refract(const Hit& hit, float inIOR)
+{
+    glm::vec3 N = hit.N;
+    const glm::vec3 V = -hit.I;
+    float nDotV = glm::dot(V, N);
+    bool hitBackface = nDotV > 0.f;
+
+    float eta = inIOR / mIor;
+    if (hitBackface)
+    {
+        // Assume we're going back to air if we've hit a back face.
+        eta = mIor;
+        N = -N;
+        nDotV = glm::dot(V, N);
+    }
+    else
+    {
+        shouldHitBackFaces(true);
+    }
+
+    float k = 1.f - eta * eta * (1.f - nDotV * nDotV);
+    if (k < 0.f)
+    {
+        // Total internal reflection
+        return false;
+    }
+
+    setDir(glm::normalize(eta * V - (eta * nDotV + sqrtf(k)) * N));
+
+    return true;
+}
+
 void Ray::shade(const Raytracer* tracer, glm::vec4& result) const
 {
     assert(mHitPrim != NULL);
