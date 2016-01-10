@@ -6,16 +6,3 @@ DirectLight::DirectLight(const glm::vec3& dir, const glm::vec3& kd, float bias)
     , mDir(glm::normalize(dir))
 {
 }
-
-bool DirectLight::generateShadowRay(MultiSampleRay& r, Noise& /*noise*/) const
-{
-    if (r.currentSample() <= 0) return false;
-    
-    r.setDir(directionToLight(r.origin()));
-    r.bias(mBias);
-    
-    // No area lighting for direct lights
-    r.zeroSampleCount();
-    
-    return true;
-}

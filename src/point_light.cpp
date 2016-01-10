@@ -3,6 +3,8 @@
 #include "point_light.h"
 #include "multi_sample_ray.h"
 #include "noise.h"
+#include "common.h"
+
 
 namespace
 {
@@ -16,7 +18,6 @@ PointLight::PointLight(const glm::vec3& pos, const glm::vec3& kd, float radius,
     , mConstAtten(constAtten)
     , mLinearAtten(linearAtten)
     , mQuadAtten(quadAtten)
-    , mSqrtShadowSamples(1.0f)
 {
 }
 
@@ -28,50 +29,55 @@ void PointLight::attenuate(const glm::vec3& P, glm::vec3& result) const
     result /= mConstAtten + mLinearAtten * distance + mQuadAtten * distance * distance;
 }
 
-bool PointLight::generateShadowRay(MultiSampleRay& r, Noise& noise) const
+bool PointLight::generateShadowRay(Noise& noise, MultiSampleRay& outRay) const
 {
-    if (r.currentSample() <= 0) return false;
-    
+    if (outRay.currentSample() == 0) return false;
+
     glm::vec3 samplePoint;
-    //pointOnDisk(r.origin(), r.currentSample(), samplePoint);
-    randomPointOnDisk(noise, r.origin(), samplePoint);
+    if (mRadius == 0.f)
+    {
+        TP_ASSERT(outRay.numberOfSamples() == 1);
+        samplePoint = mPos;
+    }
+    else
+    {
+        randomPointOnDisk(noise, outRay.origin(), outRay.numberOfSamples(),
+                          outRay.currentSample(), samplePoint);
+    }
     
-    glm::vec3 dirToLgtSample = samplePoint - r.origin();
-    r.setDir(glm::normalize(dirToLgtSample));
-    r.setMaxDistance(glm::length(dirToLgtSample));
-    r.bias(mBias);
-    
-    --r;
-    
-    return true;
+    glm::vec3 dirToLgtSample = samplePoint - outRay.origin();
+    outRay.setDir(glm::normalize(dirToLgtSample));
+    outRay.setMaxDistance(glm::length(dirToLgtSample));
+    outRay.bias(mBias);
+    --outRay;
+
+    return  true;
 }
 
-void PointLight::pointOnDisk(const glm::vec3& P, const unsigned int currentSample, glm::vec3& result) const
+void PointLight::randomPointOnDisk(Noise& noise, const glm::vec3& P,
+                                   unsigned numSamples, unsigned currentSample,
+                                   glm::vec3& result) const
 {
-    // Spread points on disk
-    // http://blog.marmakoide.org/?p=1
-    const float r = sqrtf(static_cast<float>(currentSample)) * mRadius / mSqrtShadowSamples;
-    const float theta = currentSample * gGoldenAngle;
-    
+    // Pick strata for current sample
+    const float sqrtSamples = std::sqrtf((float)numSamples);
+    const float numRStratas = std::max(1.f, std::floorf(sqrtSamples));
+    const float numTheataStratas = std::ceilf(sqrtSamples);
+
+    const float rStrata = std::floorf((float)currentSample / numRStratas);
+    const float rStrataSize = mRadius / numRStratas;
+
+    const float thetaStrata = (float)(currentSample % (unsigned)numTheataStratas);
+    const float thetaStrataSize = (2.f * (float)M_PI) / numTheataStratas;
+
+    // Generate a sample within that strata
+    float r = noise.generateNormalizedFloat() * rStrataSize;
+    r += rStrataSize * rStrata;
+
+    float theta = noise.generateNormalizedFloat() * thetaStrataSize;
+    theta += thetaStrataSize * thetaStrata;
+
     const float x = r * cosf(theta);
     const float y = r * sinf(theta);
-    
-    result.x = x + mPos.x;
-    result.y = y + mPos.y;
-    
-    // Plane eqn, solve for z
-    // Nx(X-X0) + Ny(Y-Y0) + Nz(Z-Z0) = 0
-    // (Nx(X-X0) + Ny(Y-Y0)) / -Nz + Z0 = Z
-    const glm::vec3 dirToLgt = glm::normalize(P - mPos);
-    result.z = ((dirToLgt.x * x + dirToLgt.y * y) / (-1.0f * dirToLgt.z)) + mPos.z;
-}
-
-void PointLight::randomPointOnDisk(Noise& noise, const glm::vec3& P, glm::vec3& result) const
-{
-    const float r = noise.generateNormalizedFloat() * mRadius;
-    const float angle = noise.generateNormalizedFloat() * 2.f * static_cast<float>(M_PI);
-    const float x = r * cosf(angle);
-    const float y = r * sinf(angle);
     
     result.x = x + mPos.x;
     result.y = y + mPos.y;

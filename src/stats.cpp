@@ -5,5 +5,8 @@
 
 Stats::Stats()
 {
-    bzero(mValues, sizeof(size_t) * Ray::TYPE_COUNT);
+    for (unsigned i = 0; i < Ray::TYPE_COUNT; ++i)
+    {
+        mValues[i] = 0;
+    }
 }

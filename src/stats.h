@@ -6,16 +6,17 @@
 class Stats
 {
 public:
+    friend class StatsCollector;
+
     explicit Stats();
     
-    inline void increment(const Ray::TYPE v) { ++mValues[v]; }
-    
-    friend class StatsCollector;
-protected:
-    size_t mValues[Ray::TYPE_COUNT];
+    void increment(const Ray::TYPE v) { ++mValues[v]; }
     
 private:
-    Stats(Stats& other) {} // No copy
+    Stats(Stats&) = delete;
+    Stats& operator=(Stats&) = delete;
+
+    unsigned long long mValues[Ray::TYPE_COUNT];
 };
 
 #endif

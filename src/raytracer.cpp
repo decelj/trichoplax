@@ -50,7 +50,8 @@ bool Raytracer::start()
     
     int err = pthread_create(&mThreadId, &attr, _run, this);
     pthread_attr_destroy(&attr);
-    if (err) {
+    if (err)
+    {
         std::cerr << "Error creating new thread: " << err << std::endl;
         return false;
     }
@@ -70,16 +71,19 @@ void* Raytracer::_run(void *arg)
 void Raytracer::run() const
 {
     SamplePacket packet;
-    while (!mIsCanceled && mSampler->buildSamplePacket(packet)) {
+    while (!mIsCanceled && mSampler->buildSamplePacket(packet))
+    {
         const Sample* sample;
         glm::vec4 packetResult(0.f, 0.f, 0.f, 0.f);
-        while (!mIsCanceled && packet.nextSample(sample)) {
+        while (!mIsCanceled && packet.nextSample(sample))
+        {
             Ray primary(Ray::PRIMARY);
             mCamera->generateRay(*sample, &primary);
             glm::vec4 rayColor(0.f, 0.f, 0.f, 0.f);
             traceAndShade(primary, rayColor);
             packetResult += rayColor;
         }
+
         mImgBuffer->commit(*sample, packetResult / Sampler::sSamplesPerPixel);
     }
 }
@@ -88,7 +92,8 @@ bool Raytracer::join() const
 {
     void* status;
     int err = pthread_join(mThreadId, &status);
-    if (err) {
+    if (err)
+    {
         std::cerr << "Error joining threads: " << err << std::endl;
         return false;
     }
@@ -112,13 +117,14 @@ bool Raytracer::trace(Ray& ray, bool firstHit) const
 
 bool Raytracer::traceAndShade(Ray& ray, glm::vec4& result) const
 {
-    assert(ray.type() != Ray::SHADOW);
+    TP_ASSERT(ray.type() != Ray::SHADOW);
     
     if (ray.depth() > mMaxDepth)
         return false;
 
-    if (trace(ray)) {
-        ray.shade(this, result);
+    if (trace(ray))
+    {
+        ray.shade(*this, result);
         return true;
     }
     

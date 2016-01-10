@@ -1,10 +1,15 @@
-#include <assert.h>
-
 #include "hit.h"
 #include "ray.h"
 
-Hit::Hit(const Ray& r) :
-    P(r.point(r.mMaxT)),
-    N(r.mHitPrim->normal(P)),
-    I(-r.mDir)
-{ }
+#include "iprimitive.h"
+
+
+Hit::Hit(const Ray& r)
+    : P(r.point(r.mMaxT))
+    , Ng(r.mHitPrim->normal(P))
+    , N(r.didHitBackFace() ? -Ng : Ng)
+    , V(-r.mDir)
+    , I(r.mDir)
+    , hitBackFace(r.didHitBackFace())
+{
+}

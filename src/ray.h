@@ -2,10 +2,11 @@
 #define __RAY_H__
 
 #include <glm/glm.hpp>
+#include "hit.h"
 
-class Hit;
 class IPrimitive;
 class Raytracer;
+
 
 class Ray
 {
@@ -27,52 +28,77 @@ public:
     void setDir(const glm::vec3& d)     { mDir = d; mInverseDir = 1.0f / d; }
     void setOrigin(const glm::vec3& o)  { mOrigin = o; }
     void setDepth(unsigned depth)       { mDepth = depth; }
-    void bias(const float bias)         { mOrigin += mDir * bias; }
-    void setMaxDistance(const float dist) { mMaxT = dist; }
-    void shouldHitBackFaces(bool value) { mHitBack = value; }
+    void bias(const float bias)         { mMinT = bias; }
+    void setMaxDistance(float dist)     { mMaxT = dist; }
+    void shouldHitBackFaces(bool value) { mShouldHitBack = value; }
     void incrementDepth()               { ++mDepth; }
 
-    inline const glm::vec3& origin() const      { return mOrigin; }
-    inline const glm::vec3& dir() const         { return mDir; }
-    inline const glm::vec3& inverseDir() const  { return mInverseDir; }
-    inline glm::vec3 point(const float t) const { return mOrigin + mDir * t; }
-    inline unsigned depth() const               { return mDepth; }
-    inline bool shouldHitBackFaces() const      { return mHitBack; }
-    inline float ior() const                    { return mIor; }
-    inline TYPE type() const                    { return mType; }
+    const glm::vec3& origin() const         { return mOrigin; }
+    const glm::vec3& dir() const            { return mDir; }
+    const glm::vec3& inverseDir() const     { return mInverseDir; }
+    glm::vec3 point(const float t) const    { return mOrigin + mDir * t; }
+    unsigned depth() const                  { return mDepth; }
+    bool shouldHitBackFaces() const         { return mShouldHitBack; }
+    bool didHitBackFace() const             { return mDidHitBack; }
+    float ior() const                       { return mIor; }
+    TYPE type() const                       { return mType; }
     
-    inline void hit(const IPrimitive* prim, const float t, bool hit_back)
-    { mMaxT = t; mHitPrim = prim; mHitBack = hit_back; }
-    inline bool hits(const float t) const { return t < mMaxT && t > mMinT; }
+    void hit(const IPrimitive* primitive, float t, bool hitBackFace);
+    bool hits(const float t) const { return t < mMaxT && t > mMinT; }
     
     // This method is bad and should go away. Assumes we already know p
     // lies on the ray.
-    inline float t(const glm::vec3& p)  { return glm::length(p - mOrigin); }
-    inline float maxT() const           { return mMaxT; }
-    inline float minT() const           { return mMinT; }
+    float t(const glm::vec3& p)  { return glm::length(p - mOrigin); }
+    float maxT() const           { return mMaxT; }
+    float minT() const           { return mMinT; }
     
     void transformed(const glm::mat4& m, Ray& outRay) const;
     void reflected(const Hit& h, Ray& r) const;
-    bool refracted(const Hit& h, Ray& r) const;
     bool refract(const Hit& hit, float destIOR);
+    void reflect(const Hit& hit, const glm::vec3& I);
     
-    void shade(const Raytracer* tracer, glm::vec4& result) const;
+    void shade(const Raytracer& tracer, glm::vec4& result) const;
 
     friend class Hit;
 protected:
     Ray() : mType(PRIMARY) {}
     
 private:
-    const TYPE mType;
-    glm::vec3 mOrigin;
-    glm::vec3 mDir, mInverseDir;
-    unsigned mDepth;
-    float mIor;
-    float mMinT, mMaxT;
-    const IPrimitive *mHitPrim;
-    bool mHitBack;
-    bool mShouldHitBack;
+    const TYPE          mType;
+    glm::vec3           mOrigin;
+    glm::vec3           mDir;
+    glm::vec3           mInverseDir;
+    unsigned            mDepth;
+    float               mIor;
+    float               mMinT;
+    float               mMaxT;
+    const IPrimitive*   mHitPrim;
+    bool                mDidHitBack;
+    bool                mShouldHitBack;
 };
+
+
+inline void Ray::hit(const IPrimitive* primitive, float t, bool hitBackFace)
+{
+    mMaxT = t;
+    mHitPrim = primitive;
+    mDidHitBack = hitBackFace;
+}
+
+inline void Ray::reflect(const Hit& hit, const glm::vec3& I)
+{
+    setDir(I - 2.f * glm::dot(I, hit.N) * hit.N);
+    setOrigin(hit.P);
+}
+
+inline void Ray::transformed(const glm::mat4& m, Ray& outRay) const
+{
+    // Apply translation to origin
+    outRay.setOrigin(glm::vec3(m * glm::vec4(mOrigin, 1.0)));
+
+    // Apply upper 3x3 rotation to direction
+    outRay.setDir(glm::normalize(glm::mat3(m) * mDir));
+}
 
 #endif
 

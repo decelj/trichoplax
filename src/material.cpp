@@ -21,6 +21,40 @@ inline glm::vec3 estimateFresnel(const glm::vec3& reflectance, float cosTheta, f
     return reflectance + (1.f - reflectance) * powf(1.f - cosTheta, power);
 }
 
+inline glm::vec3 cosineSampleHemisphere(float u1, float u2)
+{
+    // From: http://www.rorydriscoll.com/2009/01/07/better-sampling/
+    // Generate cosine weighted hemispherical samples in tangent space
+    const float r = sqrtf(u1);
+    const float theta = 2.f * (float)M_PI * u2;
+
+    const float x = r * cosf(theta);
+    const float y = r * sinf(theta);
+
+    return glm::vec3(x, sqrtf(std::max(0.0f, 1.f - u1)), y);
+}
+
+inline glm::vec3 computeSurfaceLighting(const Ray& ray, const Hit& hit, const BRDF& brdf,
+                                        const glm::vec3& lightColor, const float nDotL,
+                                        bool isSpecular)
+{
+    glm::vec3 specularColor(0.f);
+    if(isSpecular)
+    {
+        const glm::vec3 H = glm::normalize(ray.dir() + hit.V);
+        float nDotH = std::max(glm::dot(hit.N, H), 0.f);
+        float specularPower = powf(nDotH, brdf.Kr);
+        specularColor = brdf.Ks * specularPower * lightColor;
+    }
+
+    glm::vec3 diffuseWeight = 1.f - specularColor;
+
+    glm::vec3 outColor = brdf.Kd * lightColor * nDotL * diffuseWeight;
+    outColor += specularColor;
+
+    return outColor;
+}
+
 } // anonymous namespace
 
 
@@ -42,47 +76,7 @@ Material::Material(const Material& other)
 {
 }
 
-Material* Material::clone() const
-{
-    return new Material(*this);
-}
-
-void Material::setAmbient(const glm::vec3& Ka)
-{
-    mBrdf.Ka = Ka;
-}
-
-void Material::setEmissive(const glm::vec3& Ke)
-{
-    mBrdf.Ke = Ke;
-}
-
-void Material::setDiffuse(const glm::vec3& Kd)
-{
-    mBrdf.Kd = Kd;
-}
-
-void Material::setSpecular(const glm::vec3& Ks)
-{
-    mBrdf.Ks = Ks;
-}
-
-void Material::setTransparency(const glm::vec3& Kt)
-{
-    mBrdf.Kt = Kt;
-}
-
-void Material::setShininess(float Kr)
-{
-    mBrdf.Kr = Kr;
-}
-
-void Material::setIor(float Ior)
-{
-    mBrdf.ior = Ior;
-}
-
-void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result) const
+void Material::shadeRay(const Raytracer& tracer, const Ray& r, glm::vec4& result) const
 {
     // Ambient and emissive
     glm::vec3 opaqueColor = mBrdf.Ka + mBrdf.Ke;
@@ -90,19 +84,8 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
     const Scene& scene = Scene::instance();
     const Hit hit(r);
 
-    // TODO: Hit.I is actually V not I, rename
-    const glm::vec3& I = hit.I;
-    glm::vec3 shadingNormal = hit.N;
-    float nDotI = glm::dot(shadingNormal, I);
-    const bool didHitBackface = nDotI < 0.f;
-
-    if (didHitBackface)
-    {
-        shadingNormal = -shadingNormal;
-        nDotI = glm::dot(shadingNormal, I);
-    }
-
-    glm::vec3 fresnelFactor = estimateFresnel(mBrdf.Ks, nDotI);
+    const float nDotV = glm::dot(hit.N, hit.V);
+    glm::vec3 fresnelFactor = estimateFresnel(mBrdf.Ks, nDotV);
     glm::vec3 transmissionColor = (1.f - fresnelFactor) * mBrdf.Kt;
     float transmissionWeight = luminance(transmissionColor);
 
@@ -116,7 +99,7 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
             refractedRay.setDepth(r.depth() + 1);
 
             glm::vec4 refractionColor(0.f);
-            tracer->traceAndShade(refractedRay, refractionColor);
+            tracer.traceAndShade(refractedRay, refractionColor);
 
             // TODO: Beer's law
             result += refractionColor * glm::vec4(transmissionColor, transmissionWeight);
@@ -133,74 +116,30 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
     // Reflection
     if (opaqueWeight > 0.f && r.type() != Ray::GI)
     {
-        Ray reflected(Ray::REFLECTED);
-        r.reflected(hit, reflected);
+        Ray reflected(r, Ray::REFLECTED);
+        reflected.reflect(hit, hit.I);
         reflected.bias(0.001f);
+        reflected.setDepth(r.depth() + 1);
         
-        glm::vec4 reflection(0.f, 0.f, 0.f, 0.f);
-        tracer->traceAndShade(reflected, reflection);
+        glm::vec4 reflection(0.f);
+        tracer.traceAndShade(reflected, reflection);
         result += reflection * glm::vec4(fresnelFactor, 0.f);
     }
 
-    // Simple diffuse + specular
+    // Diffuse/spec
     if (opaqueWeight > 0.f)
     {
         const bool isSpecular = luminance(mBrdf.Ks) > 0.f;
         for (Scene::ConstLightIter it = scene.lightsBegin(); it != scene.lightsEnd(); ++it)
         {
-            const ILight* lgt = *it;
-            glm::vec3 lightColor = lgt->color();
-            // TODO: Technically, for area lighting we should attenuate based on the
-            // distance to the sample point on the light, not the center of the light.
-            lgt->attenuate(hit.P, lightColor);
-            
-            // Check for zero contribution
-            if (VEC3_IS_REL_ZERO(lightColor))
-                continue;
-            
-            // TODO: This should be more elegant. Maybe construct a ShadowRay type
-            //       that's a subclass of MultiSampleRay?
-            // TODO: Can we early out if say half the shadow rays are coherent?
-            //       Won't work with current non-random area sampling...
-            // TODO: We don't support transparent shadow rays :(
-            MultiSampleRay shadowRay(Ray::SHADOW, r, lgt->shadowRays());
-            shadowRay.setOrigin(hit.P);
-            shadowRay.shouldHitBackFaces(true);
-            while (lgt->generateShadowRay(shadowRay, tracer->getNoiseGenerator()))
-            {
-                float nDotL = std::max(glm::dot(hit.N, shadowRay.dir()), 0.f);
-                if (nDotL == 0.f)
-                {
-                    continue;
-                }
-
-                if (tracer->traceShadow(shadowRay))
-                {
-                    continue;
-                }
-
-                glm::vec3 specularColor(0.f);
-                if(isSpecular)
-                {
-                    const glm::vec3 H = glm::normalize(shadowRay.dir() + hit.I);
-                    float nDotH = std::max(glm::dot(hit.N, H), 0.f);
-                    float specularPower = powf(nDotH, mBrdf.Kr);
-                    specularColor = mBrdf.Ks * specularPower * lightColor;
-                }
-
-                glm::vec3 diffuseWeight = 1.f - specularColor;
-                opaqueColor += mBrdf.Kd * lightColor * nDotL * diffuseWeight;
-                opaqueColor += specularColor;
-            }
-            
-            opaqueColor /= lgt->shadowRays();
+            opaqueColor += sampleLight(**it, hit, tracer, r.depth(), isSpecular);
         }
     }
-    
+
 #if GI_ENABLED
     if (opaqueWeight > 0.f &&
         scene.renderSettings().GISamples > 0 &&
-        r.depth() < tracer->maxDepth())
+        r.depth() < tracer.maxDepth())
     {
         glm::vec3 v = hit.N;
         glm::vec3 u;
@@ -209,33 +148,29 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
         else
             u = glm::normalize(glm::vec3(0.f, -v.z, v.y));
         glm::vec3 w = glm::normalize(glm::cross(u, v));
+
+        const glm::mat3 basis(u,v,w);
         
-        Noise& noiseGen = tracer->getNoiseGenerator();
+        Noise& noiseGen = tracer.getNoiseGenerator();
         glm::vec3 giColor(0.f);
-        MultiSampleRay giRay(Ray::GI, r, scene.renderSettings().GISamples);
+        MultiSampleRay giRay(Ray::GI, scene.renderSettings().GISamples);
         giRay.setOrigin(hit.P);
         giRay.shouldHitBackFaces(false);
-        giRay.incrementDepth();
+        giRay.setDepth(r.depth() + 1);
         giRay.bias(0.001f);
         while (giRay.currentSample())
         {
             float Xi1 = noiseGen.generateNormalizedFloat();
             float Xi2 = noiseGen.generateNormalizedFloat();
             Xi1 = std::min(Xi1, 0.9999f);
-            Xi2 = 1.f - glm::clamp(Xi2, 0.0001f, 0.9999f) * 2.f;
-            
-            float theta = static_cast<float>(M_PI) * Xi1;
-            float sqrtU = sqrtf(1.f - Xi2 * Xi2);
+            Xi2 = std::min(Xi2, 0.9999f);
 
-            float xs = sqrtU * cosf(theta);
-            float ys = sqrtU * sinf(theta);
-            float zs = Xi2;
-            
-            glm::vec4 tmp(0.f);
-            giRay.setDir(glm::normalize(xs * u + ys * v + zs * w));
+            giRay.setDir(glm::normalize(basis * cosineSampleHemisphere(Xi1, Xi2)));
             giRay.setMaxDistance(std::numeric_limits<float>::max());
             TP_ASSERT(glm::dot(hit.N, giRay.dir()) > 0.0);
-            tracer->traceAndShade(giRay, tmp);
+
+            glm::vec4 tmp(0.f);
+            tracer.traceAndShade(giRay, tmp);
             
             giColor += glm::vec3(tmp);
             --giRay;
@@ -252,4 +187,74 @@ void Material::shadeRay(const Raytracer* tracer, const Ray& r, glm::vec4& result
     result += glm::vec4(opaqueColor * opaqueWeight, opaqueWeight);
     result.a = std::min(result.a, 1.f);
 }
-    
+
+glm::vec3 Material::sampleLight(const ILight& light, const Hit& hit,
+                                const Raytracer& tracer, unsigned rayDepth,
+                                bool isSpecular) const
+{
+    glm::vec3 result(0.f);
+    glm::vec3 lightColor = light.color();
+    light.attenuate(hit.P, lightColor);
+
+    // Check for zero contribution
+    if (VEC3_IS_REL_ZERO(lightColor))
+        return result;
+
+    // TODO: We don't support transparent shadow rays :(
+    MultiSampleRay shadowRay(Ray::SHADOW, light.firstPassShadowRays());
+    shadowRay.setDepth(rayDepth);
+    shadowRay.setOrigin(hit.P);
+    shadowRay.shouldHitBackFaces(true);
+
+    unsigned lastLitSample = light.firstPassShadowRays();
+    while (light.generateShadowRay(tracer.getNoiseGenerator(), shadowRay))
+    {
+        float nDotL = std::max(glm::dot(hit.N, shadowRay.dir()), 0.f);
+        if (nDotL == 0.f)
+        {
+            continue;
+        }
+
+        if (tracer.traceShadow(shadowRay))
+        {
+            continue;
+        }
+
+        lastLitSample = shadowRay.currentSample() + 1;
+        result += computeSurfaceLighting(
+                shadowRay, hit, mBrdf, lightColor, nDotL, isSpecular);
+    }
+
+    if (lastLitSample == light.firstPassShadowRays())
+    {
+        // First pass shadow sample consistent, early out
+        result /= (float)light.firstPassShadowRays();
+    }
+    else
+    {
+        // Inconsistent samples, must be in penumbra
+        // Finish shooting rays to resolve lighting
+        shadowRay.setNumberOfSamples(light.secondPassShadowRays());
+        while (light.generateShadowRay(tracer.getNoiseGenerator(), shadowRay))
+        {
+            float nDotL = std::max(glm::dot(hit.N, shadowRay.dir()), 0.f);
+            if (nDotL == 0.f)
+            {
+                continue;
+            }
+
+            if (tracer.traceShadow(shadowRay))
+            {
+                continue;
+            }
+
+            result += computeSurfaceLighting(
+                shadowRay, hit, mBrdf, lightColor, nDotL, isSpecular);
+        }
+
+        result /= light.shadowRays();
+    }
+
+    return result;
+}
+

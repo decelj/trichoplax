@@ -3,20 +3,19 @@
 
 #include <glm/glm.hpp>
 
-#include "iprimitive.h"
-
 class Ray;
-class Material;
 
 class Hit
 {
 public:
     explicit Hit(const Ray& r);
-    
-    // All public for speed
-    const glm::vec3 P;
-    const glm::vec3 N;
-    const glm::vec3 I;
+
+    glm::vec3 P;
+    glm::vec3 Ng;   // Geometric normal
+    glm::vec3 N;    // Shading normal (will be flipped Ng if backface hit)
+    glm::vec3 V;
+    glm::vec3 I;
+    bool hitBackFace;
 
 private:
     // Not copyable

@@ -99,7 +99,8 @@ void KdTree::build(Node* node, SHAPlaneEventList& events, unsigned int depth)
     SHASplitPlane splitPlane = findSplitPlane(&splitCost, node->mBBox, events, node->mPrims.size());
 
     // Base case
-    if (leafCost < splitCost) {
+    if (leafCost < splitCost || node->mPrims.size() == 1)
+    {
         mMaxDepth = std::max(depth, mMaxDepth);
         mMinDepth = std::min(depth, mMinDepth);
         mMaxPrimsPerNode = std::max(node->mPrims.size(), mMaxPrimsPerNode);

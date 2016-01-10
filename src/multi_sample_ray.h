@@ -6,19 +6,29 @@
 
 class MultiSampleRay : public Ray {
 public:
-    explicit MultiSampleRay(const Ray::TYPE t, const Ray& r,
-                            unsigned int samples);
+    explicit MultiSampleRay(const Ray::TYPE t, unsigned samples);
+
+    unsigned numberOfSamples() const { return mSamples; }
+    unsigned currentSample() const { return mCurrentSample; }
+    void decrementSampleCount() { --mCurrentSample; }
+    void zeroSampleCount() { mCurrentSample = 0; }
+    void setNumberOfSamples(unsigned numSamples);
     
-    inline unsigned int currentSample() { return mSamples; }
-    inline void decrementSampleCount() { --mSamples; }
-    inline void zeroSampleCount() { mSamples = 0; }
-    
-    inline MultiSampleRay &operator--() { --mSamples; return *this; }
+    MultiSampleRay& operator--() { --mCurrentSample; return *this; }
     
 private:
-    MultiSampleRay(const MultiSampleRay&) { }
-    
-    unsigned int mSamples;
+    MultiSampleRay(const MultiSampleRay&) = delete;
+    MultiSampleRay& operator=(const MultiSampleRay&) = delete;
+
+    unsigned mCurrentSample;
+    unsigned mSamples;
 };
+
+
+inline void MultiSampleRay::setNumberOfSamples(unsigned numSamples)
+{
+    mCurrentSample = numSamples;
+    mSamples = numSamples;
+}
 
 #endif
