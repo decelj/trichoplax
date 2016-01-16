@@ -4,6 +4,5 @@ ILight::ILight(const glm::vec3& kd, float radius, float bias, unsigned shadowRay
     : mKd(kd)
     , mRadius(radius)
     , mBias(bias)
-    , mShadowRays(shadowRays)
 {
 }

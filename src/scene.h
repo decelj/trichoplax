@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <assert.h>
+#include <forward_list>
 
 #include "kdtree.h"
 
@@ -19,6 +19,7 @@ class Scene
 {
 private:
     typedef std::vector<ILight*> LightVector;
+    typedef std::forward_list<IPrimitive*> PrimitiveList;
 
 public:
     typedef LightVector::const_iterator ConstLightIter;
@@ -29,11 +30,12 @@ public:
 
         unsigned maxDepth;
         unsigned GISamples;
+        float bias;
     };
 
     void render(const std::string& filename);
     void setCamera(Camera* cam) { mCam = cam; }
-    void addPrimitive(IPrimitive* prim) { mKdTree->addPrimitive(prim); }
+    void addPrimitive(IPrimitive* prim);
     void addLight(ILight* lgt) { mLights.push_back(lgt); }
     void setMaxDepth(unsigned depth) { mSettings.maxDepth = depth; }
     void setNumGISamples(unsigned numSamples) { mSettings.GISamples = numSamples; }
@@ -55,13 +57,14 @@ private:
 
     void createBuffer();
 
-    Camera* mCam;
-    Sampler* mSampler;
-    ImageBuffer* mImgBuffer;
-    KdTree* mKdTree;
-    EnvSphere* mEnvSphere;
-    LightVector mLights;
-    RenderSettings mSettings;
+    Camera*                 mCam;
+    Sampler*                mSampler;
+    ImageBuffer*            mImgBuffer;
+    KdTree*                 mKdTree;
+    EnvSphere*              mEnvSphere;
+    LightVector             mLights;
+    RenderSettings          mSettings;
+    PrimitiveList           mPrimitives;
     
     static Scene* sInstance;
 };

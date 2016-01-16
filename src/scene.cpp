@@ -15,11 +15,14 @@
 #include "timer.h"
 #include "stats_collector.h"
 #include "env_sphere.h"
+#include "iprimitive.h"
+
 
 namespace {
 void joinThreads(std::vector<Raytracer*>& tracers, bool kill=false)
 {
-    if (kill) {
+    if (kill)
+    {
         for (auto it = tracers.begin(); it != tracers.end(); ++it)
             (*it)->cancel();
     }
@@ -40,6 +43,7 @@ void cleanupThreads(std::vector<Raytracer*>& tracers)
 Scene::RenderSettings::RenderSettings()
     : maxDepth(1)
     , GISamples(0)
+    , bias(0.001f)
 {
 }
 
@@ -71,10 +75,21 @@ Scene::~Scene()
     
     delete mEnvSphere;
     mEnvSphere = NULL;
-    
-    for (auto it = mLights.begin(); it != mLights.end(); ++it)
-        delete *it;
+
+    delete mKdTree;
+    mKdTree = NULL;
+
+    for (auto light : mLights)
+    {
+        delete light;
+    }
     mLights.clear();
+
+    for (auto prim : mPrimitives)
+    {
+        delete prim;
+    }
+    mPrimitives.clear();
 }
 
 Scene& Scene::instance()
@@ -103,9 +118,16 @@ void Scene::createBuffer()
     mImgBuffer = new ImageBuffer(mCam->width(), mCam->height());
 }
 
+void Scene::addPrimitive(IPrimitive* prim)
+{
+    mKdTree->addPrimitive(prim);
+    mPrimitives.push_front(prim);
+}
+
 void Scene::setEnvSphereImage(const std::string& file)
 {
-    if (mEnvSphere != NULL) {
+    if (mEnvSphere != NULL)
+    {
         std::cerr << "Warning: overriding existing env sphere" << std::endl;
         delete mEnvSphere;
     }
@@ -123,7 +145,8 @@ void Scene::render(const std::string& filename)
     t.start();
     
     unsigned int numCpus = sysconf(_SC_NPROCESSORS_ONLN);
-    if (numCpus < 1) {
+    if (numCpus < 1)
+    {
         std::stringstream ss;
         ss << "Error getting number of CPUs: " << strerror(numCpus);
         throw std::runtime_error(ss.str());
@@ -134,12 +157,14 @@ void Scene::render(const std::string& filename)
     std::vector<Raytracer*> tracers;
     tracers.reserve(numCpus);
     
-    for (unsigned int i = 0; i < numCpus; ++i) {
+    for (unsigned int i = 0; i < numCpus; ++i)
+    {
         Raytracer* tracer = new Raytracer(mKdTree, mCam, mEnvSphere, mSampler,
                                           mImgBuffer, mSettings.maxDepth);
         tracers.emplace_back(tracer);
         tracer->registerStatsCollector(&collector);
-        if (!tracer->start()) {
+        if (!tracer->start())
+        {
             joinThreads(tracers, true /*kill*/);
             cleanupThreads(tracers);
             throw std::runtime_error("Error creating threads!");
@@ -151,7 +176,7 @@ void Scene::render(const std::string& filename)
     
     // Print stats
     collector.print();
-    std::cout << "Render time: " << t.elapsed() << " seconds" << std::endl;
+    std::cout << "Render time: " << t.elapsedToString(t.elapsed()) << std::endl;
     
     // Must cleanup threads after we've printed the collected stats since each
     // thread object owns it's own stats block.

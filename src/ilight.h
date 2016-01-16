@@ -6,6 +6,7 @@
 
 class MultiSampleRay;
 class Noise;
+class ISampler;
 
 class ILight
 {
@@ -13,12 +14,12 @@ public:
     virtual ~ILight() { }
     virtual glm::vec3 directionToLight(const glm::vec3& p) const = 0;
     virtual void attenuate(const glm::vec3& P, glm::vec3& result) const = 0;
-    virtual bool generateShadowRay(Noise& noise, MultiSampleRay& outRay) const = 0;
-    virtual void setShadowRays(unsigned numRays) { mShadowRays = numRays; }
+    virtual ISampler* generateSamplerForPoint(const glm::vec3& samplePoint) const = 0;
+    virtual void setShadowRays(unsigned numRays) = 0;
+    virtual unsigned shadowRays() const = 0;
 
     const glm::vec3& color() const { return mKd; }
     float bias() const { return mBias; }
-    unsigned shadowRays() const { return mRadius > 0.f ? mShadowRays : 1; }
     unsigned firstPassShadowRays() const;
     unsigned secondPassShadowRays() const;
     
@@ -31,18 +32,17 @@ protected:
     glm::vec3 mKd;
     float mRadius;
     float mBias;
-    unsigned mShadowRays;
 };
 
 
 inline unsigned ILight::firstPassShadowRays() const
 {
-    return mShadowRays > 1 ? mShadowRays / 2 : mShadowRays;
+    return shadowRays() > 1 ? shadowRays() / 2 : shadowRays();
 }
 
 inline unsigned ILight::secondPassShadowRays() const
 {
-    return std::max(mShadowRays - firstPassShadowRays(), 0u);
+    return std::max(shadowRays() - firstPassShadowRays(), 0u);
 }
 
 #endif

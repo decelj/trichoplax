@@ -60,11 +60,12 @@ KdTree::KdTree()
 KdTree::~KdTree()
 {
     delete mRoot;
+    mRoot = NULL;
 }
 
 void KdTree::build()
 {
-    Timer t;
+    HighResTimer t;
     t.start();
     
     mRoot->updateBBox();
@@ -86,8 +87,7 @@ void KdTree::build()
     std::cout << "KdTree: Total nodes:               " << mTotalNodes << std::endl;
     std::cout << "KdTree: Leaf nodes:                " << mLeafNodes << std::endl;
     std::cout << "KdTree: Total primatives:          " << mTotalNumPrims << std::endl;
-    std::cout << "KdTree: Build time:                " << t.elapsed()
-        << " seconds" << std::endl;
+    std::cout << "KdTree: Build time:                " << t.elapsedToString(t.elapsed()) << std::endl;
 }
 
 void KdTree::build(Node* node, SHAPlaneEventList& events, unsigned int depth)
@@ -126,7 +126,7 @@ void KdTree::split(SHAPlaneEventList& outLeftEvents, SHAPlaneEventList& outRight
         PS_BOTH
     };
     
-    typedef std::unordered_map<IPrimitive*, PrimSide> PrimSideMap;
+    typedef std::unordered_map<const IPrimitive*, PrimSide> PrimSideMap;
     
     /* Classify the primitives based on the split plane and the split events */
     PrimSideMap primClassification(node.mPrims.size() * 2);
@@ -278,7 +278,7 @@ bool KdTree::trace(const Node* n, Ray& ray, bool firstHit, Mailboxer& mailboxes)
     return ret;
 }
 
-void KdTree::generateEventsForPrimitive(IPrimitive* primitive, const AABBox& voxel, SHAPlaneEventList& events) const
+void KdTree::generateEventsForPrimitive(const IPrimitive* primitive, const AABBox& voxel, SHAPlaneEventList& events) const
 {
     glm::vec3 primLL, primUR;
     primitive->bounds(primLL, primUR);
@@ -464,14 +464,13 @@ KdTree::Node::Node()
 
 KdTree::Node::~Node()
 {
-    PrimIterator it = mPrims.begin();
-    for (; it != mPrims.end(); ++it)
-        delete *it;
-    
     mPrims.clear();
 
     delete mLeft;
+    mLeft = NULL;
+
     delete mRight;
+    mRight = NULL;
 }
 
 void KdTree::Node::updateBBox()
@@ -511,7 +510,7 @@ void KdTree::Node::updateBBox(const unsigned splitAxis, const float value, bool 
     }
 }
 
-KdTree::SHAPlaneEvent::SHAPlaneEvent(IPrimitive* _prim, float _plane, unsigned _axis, SHAPlaneEventType _type)
+KdTree::SHAPlaneEvent::SHAPlaneEvent(const IPrimitive* _prim, float _plane, unsigned _axis, SHAPlaneEventType _type)
     : primitive(_prim)
     , plane(_plane)
     , axis(_axis)

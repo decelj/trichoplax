@@ -10,6 +10,8 @@
 #include "hit.h"
 #include "raytracer.h"
 #include "noise.h"
+#include "isampler.h"
+#include "sampler_info.h"
 
 #define GI_ENABLED 1
 
@@ -31,7 +33,7 @@ inline glm::vec3 cosineSampleHemisphere(float u1, float u2)
     const float x = r * cosf(theta);
     const float y = r * sinf(theta);
 
-    return glm::vec3(x, sqrtf(std::max(0.0f, 1.f - u1)), y);
+    return glm::vec3(x, y, sqrtf(std::max(0.0f, 1.f - u1)));
 }
 
 inline glm::vec3 computeSurfaceLighting(const Ray& ray, const Hit& hit, const BRDF& brdf,
@@ -90,12 +92,13 @@ void Material::shadeRay(const Raytracer& tracer, const Ray& r, glm::vec4& result
     float transmissionWeight = luminance(transmissionColor);
 
     // Transmission
+#if 1
     if (transmissionWeight > 0.f && r.type() != Ray::GI)
     {
         Ray refractedRay(Ray::REFRACTED, hit.P, mBrdf.ior);
         if (refractedRay.refract(hit, r.ior()))
         {
-            refractedRay.bias(0.001f);
+            refractedRay.bias(scene.renderSettings().bias);
             refractedRay.setDepth(r.depth() + 1);
 
             glm::vec4 refractionColor(0.f);
@@ -110,21 +113,24 @@ void Material::shadeRay(const Raytracer& tracer, const Ray& r, glm::vec4& result
             transmissionWeight = 0.f;
         }
     }
+#endif
 
     float opaqueWeight = 1.f - transmissionWeight;
 
     // Reflection
+#if 1
     if (opaqueWeight > 0.f && r.type() != Ray::GI)
     {
         Ray reflected(r, Ray::REFLECTED);
         reflected.reflect(hit, hit.I);
-        reflected.bias(0.001f);
+        reflected.bias(scene.renderSettings().bias);
         reflected.setDepth(r.depth() + 1);
         
         glm::vec4 reflection(0.f);
         tracer.traceAndShade(reflected, reflection);
         result += reflection * glm::vec4(fresnelFactor, 0.f);
     }
+#endif
 
     // Diffuse/spec
     if (opaqueWeight > 0.f)
@@ -141,38 +147,35 @@ void Material::shadeRay(const Raytracer& tracer, const Ray& r, glm::vec4& result
         scene.renderSettings().GISamples > 0 &&
         r.depth() < tracer.maxDepth())
     {
-        glm::vec3 v = hit.N;
-        glm::vec3 u;
-        if (fabs(v.x) > fabs(v.y))
-            u = glm::normalize(glm::vec3(-v.z, 0.f, v.x));
-        else
-            u = glm::normalize(glm::vec3(0.f, -v.z, v.y));
-        glm::vec3 w = glm::normalize(glm::cross(u, v));
-
-        const glm::mat3 basis(u,v,w);
-        
         Noise& noiseGen = tracer.getNoiseGenerator();
         glm::vec3 giColor(0.f);
+
         MultiSampleRay giRay(Ray::GI, scene.renderSettings().GISamples);
         giRay.setOrigin(hit.P);
         giRay.shouldHitBackFaces(false);
         giRay.setDepth(r.depth() + 1);
-        giRay.bias(0.001f);
+        giRay.bias(scene.renderSettings().bias);
+
+        FixedDomainSamplerInfo2D giSamplerInfo(
+            scene.renderSettings().GISamples, 0.9999999f, 0.9999999f);
+        const glm::mat3 toWorld = generateBasis(hit.N);
+
         while (giRay.currentSample())
         {
-            float Xi1 = noiseGen.generateNormalizedFloat();
-            float Xi2 = noiseGen.generateNormalizedFloat();
-            Xi1 = std::min(Xi1, 0.9999f);
-            Xi2 = std::min(Xi2, 0.9999f);
+            float Xi1 = giSamplerInfo.computeXValue(giRay.currentSample(),
+                                                noiseGen.generateNormalizedFloat());
+            float Xi2 = giSamplerInfo.computeYValue(giRay.currentSample(),
+                                                noiseGen.generateNormalizedFloat());
 
-            giRay.setDir(glm::normalize(basis * cosineSampleHemisphere(Xi1, Xi2)));
+            giRay.setDir(glm::normalize(toWorld * cosineSampleHemisphere(Xi1, Xi2)));
             giRay.setMaxDistance(std::numeric_limits<float>::max());
-            TP_ASSERT(glm::dot(hit.N, giRay.dir()) > 0.0);
+            float sampleWeight = glm::dot(hit.N, giRay.dir());
+            TP_ASSERT(sampleWeight > 0.0);
 
             glm::vec4 tmp(0.f);
             tracer.traceAndShade(giRay, tmp);
             
-            giColor += glm::vec3(tmp);
+            giColor += glm::vec3(tmp) * sampleWeight;
             --giRay;
         }
 
@@ -189,8 +192,8 @@ void Material::shadeRay(const Raytracer& tracer, const Ray& r, glm::vec4& result
 }
 
 glm::vec3 Material::sampleLight(const ILight& light, const Hit& hit,
-                                const Raytracer& tracer, unsigned rayDepth,
-                                bool isSpecular) const
+                                const Raytracer& tracer,
+                                unsigned rayDepth, bool isSpecular) const
 {
     glm::vec3 result(0.f);
     glm::vec3 lightColor = light.color();
@@ -204,11 +207,15 @@ glm::vec3 Material::sampleLight(const ILight& light, const Hit& hit,
     MultiSampleRay shadowRay(Ray::SHADOW, light.firstPassShadowRays());
     shadowRay.setDepth(rayDepth);
     shadowRay.setOrigin(hit.P);
-    shadowRay.shouldHitBackFaces(true);
+    shadowRay.bias(light.bias());
+    ISampler* lightSampler = light.generateSamplerForPoint(hit.P);
 
     unsigned lastLitSample = light.firstPassShadowRays();
-    while (light.generateShadowRay(tracer.getNoiseGenerator(), shadowRay))
+    while (shadowRay.currentSample())
     {
+        lightSampler->generateSample(tracer.getNoiseGenerator(), shadowRay);
+        --shadowRay;
+
         float nDotL = std::max(glm::dot(hit.N, shadowRay.dir()), 0.f);
         if (nDotL == 0.f)
         {
@@ -235,8 +242,11 @@ glm::vec3 Material::sampleLight(const ILight& light, const Hit& hit,
         // Inconsistent samples, must be in penumbra
         // Finish shooting rays to resolve lighting
         shadowRay.setNumberOfSamples(light.secondPassShadowRays());
-        while (light.generateShadowRay(tracer.getNoiseGenerator(), shadowRay))
+        while (shadowRay.currentSample())
         {
+            lightSampler->generateSample(tracer.getNoiseGenerator(), shadowRay);
+            --shadowRay;
+
             float nDotL = std::max(glm::dot(hit.N, shadowRay.dir()), 0.f);
             if (nDotL == 0.f)
             {
@@ -254,6 +264,8 @@ glm::vec3 Material::sampleLight(const ILight& light, const Hit& hit,
 
         result /= light.shadowRays();
     }
+
+    delete lightSampler;
 
     return result;
 }

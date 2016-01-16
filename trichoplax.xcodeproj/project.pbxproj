@@ -9,9 +9,9 @@
 /* Begin PBXBuildFile section */
 		2B05D3CC18665DF2005082A9 /* stats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B05D3CA18665DF2005082A9 /* stats.cpp */; };
 		2B05D3CF18665F57005082A9 /* stats_collector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B05D3CD18665F57005082A9 /* stats_collector.cpp */; };
-		2B1283EE1831F963009DCC0E /* timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B1283EC1831F963009DCC0E /* timer.cpp */; };
 		2B1BCAEC186A93DC004F0635 /* env_sphere.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B1BCAEA186A93DC004F0635 /* env_sphere.cpp */; };
 		2B1EC8B51B9FE5F700D5E1B7 /* noise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B1EC8B31B9FE5F700D5E1B7 /* noise.cpp */; };
+		2B2ABF031C4822C200033C4A /* sampler_info.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2ABF021C4822C200033C4A /* sampler_info.cpp */; settings = {ASSET_TAGS = (); }; };
 		2B2D9E3417164FB10098D2C6 /* point_light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2D9E3317164FB10098D2C6 /* point_light.cpp */; };
 		2B2DA0F7171E63EE0098D2C6 /* direct_light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2DA0F6171E63EE0098D2C6 /* direct_light.cpp */; };
 		2B3BEB1119B984C100CB4EEC /* glm.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B3BEB1019B984C100CB4EEC /* glm.framework */; };
@@ -27,6 +27,9 @@
 		2B7B67691710A3DA002C830F /* triangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B67681710A3DA002C830F /* triangle.cpp */; };
 		2B7B67891710A857002C830F /* transform_stack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B67881710A857002C830F /* transform_stack.cpp */; };
 		2B7B683A1710D326002C830F /* ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B68391710D326002C830F /* ray.cpp */; };
+		2B98D7B31C4832DD00C73F03 /* isampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B98D7B11C4832DD00C73F03 /* isampler.cpp */; settings = {ASSET_TAGS = (); }; };
+		2B98D7B61C4833E300C73F03 /* spherical_sampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B98D7B41C4833E300C73F03 /* spherical_sampler.cpp */; settings = {ASSET_TAGS = (); }; };
+		2B98D7B91C494EB900C73F03 /* point_sampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B98D7B71C494EB900C73F03 /* point_sampler.cpp */; settings = {ASSET_TAGS = (); }; };
 		2BAEAF001933A994002605AF /* parser_factory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BAEAEFE1933A994002605AF /* parser_factory.cpp */; };
 		2BAEAF0B1933AC52002605AF /* simple_parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BAEAF091933AC52002605AF /* simple_parser.cpp */; };
 		2BAEAF111933C192002605AF /* assimp_parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BAEAF0F1933C192002605AF /* assimp_parser.cpp */; };
@@ -59,12 +62,13 @@
 		2B05D3CB18665DF2005082A9 /* stats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stats.h; sourceTree = "<group>"; };
 		2B05D3CD18665F57005082A9 /* stats_collector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stats_collector.cpp; sourceTree = "<group>"; };
 		2B05D3CE18665F57005082A9 /* stats_collector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stats_collector.h; sourceTree = "<group>"; };
-		2B1283EC1831F963009DCC0E /* timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = timer.cpp; sourceTree = "<group>"; };
 		2B1283ED1831F963009DCC0E /* timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timer.h; sourceTree = "<group>"; };
 		2B1BCAEA186A93DC004F0635 /* env_sphere.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = env_sphere.cpp; sourceTree = "<group>"; };
 		2B1BCAEB186A93DC004F0635 /* env_sphere.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = env_sphere.h; sourceTree = "<group>"; };
 		2B1EC8B31B9FE5F700D5E1B7 /* noise.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = noise.cpp; sourceTree = "<group>"; };
 		2B1EC8B41B9FE5F700D5E1B7 /* noise.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = noise.h; sourceTree = "<group>"; };
+		2B2ABF011C48227400033C4A /* sampler_info.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sampler_info.h; sourceTree = "<group>"; };
+		2B2ABF021C4822C200033C4A /* sampler_info.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sampler_info.cpp; sourceTree = "<group>"; };
 		2B2D9E2E17164EFD0098D2C6 /* ilight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ilight.h; sourceTree = "<group>"; };
 		2B2D9E3217164FB10098D2C6 /* point_light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = point_light.h; sourceTree = "<group>"; };
 		2B2D9E3317164FB10098D2C6 /* point_light.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = point_light.cpp; sourceTree = "<group>"; };
@@ -104,6 +108,12 @@
 		2B7B67871710A857002C830F /* transform_stack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = transform_stack.h; sourceTree = "<group>"; };
 		2B7B67881710A857002C830F /* transform_stack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = transform_stack.cpp; sourceTree = "<group>"; };
 		2B7B68391710D326002C830F /* ray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = ray.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		2B98D7B11C4832DD00C73F03 /* isampler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = isampler.cpp; sourceTree = "<group>"; };
+		2B98D7B21C4832DD00C73F03 /* isampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = isampler.h; sourceTree = "<group>"; };
+		2B98D7B41C4833E300C73F03 /* spherical_sampler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spherical_sampler.cpp; sourceTree = "<group>"; };
+		2B98D7B51C4833E300C73F03 /* spherical_sampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = spherical_sampler.h; sourceTree = "<group>"; };
+		2B98D7B71C494EB900C73F03 /* point_sampler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = point_sampler.cpp; sourceTree = "<group>"; };
+		2B98D7B81C494EB900C73F03 /* point_sampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = point_sampler.h; sourceTree = "<group>"; };
 		2BAEAEFE1933A994002605AF /* parser_factory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parser_factory.cpp; sourceTree = "<group>"; };
 		2BAEAEFF1933A994002605AF /* parser_factory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parser_factory.h; sourceTree = "<group>"; };
 		2BAEAF081933AB51002605AF /* iparser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iparser.h; sourceTree = "<group>"; };
@@ -156,6 +166,14 @@
 		08FB7795FE84155DC02AAC07 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				2B2ABF011C48227400033C4A /* sampler_info.h */,
+				2B2ABF021C4822C200033C4A /* sampler_info.cpp */,
+				2B98D7B11C4832DD00C73F03 /* isampler.cpp */,
+				2B98D7B21C4832DD00C73F03 /* isampler.h */,
+				2B98D7B41C4833E300C73F03 /* spherical_sampler.cpp */,
+				2B98D7B51C4833E300C73F03 /* spherical_sampler.h */,
+				2B98D7B71C494EB900C73F03 /* point_sampler.cpp */,
+				2B98D7B81C494EB900C73F03 /* point_sampler.h */,
 				2BB1AC341738B14D00336221 /* aabbox.cpp */,
 				2BB1AC331738B14D00336221 /* aabbox.h */,
 				2B794EFC1B2FC47000F6A919 /* aligned_allocator.h */,
@@ -212,7 +230,6 @@
 				2B05D3CE18665F57005082A9 /* stats_collector.h */,
 				2B05D3CA18665DF2005082A9 /* stats.cpp */,
 				2B05D3CB18665DF2005082A9 /* stats.h */,
-				2B1283EC1831F963009DCC0E /* timer.cpp */,
 				2B1283ED1831F963009DCC0E /* timer.h */,
 				2B7B67881710A857002C830F /* transform_stack.cpp */,
 				2B7B67871710A857002C830F /* transform_stack.h */,
@@ -319,9 +336,11 @@
 			files = (
 				2B7B64A1170FBDE0002C830F /* camera.cpp in Sources */,
 				2B05D3CC18665DF2005082A9 /* stats.cpp in Sources */,
+				2B98D7B61C4833E300C73F03 /* spherical_sampler.cpp in Sources */,
 				2B7B64A2170FBDE0002C830F /* image_buffer.cpp in Sources */,
 				2B794EFF1B2FF06200F6A919 /* mailboxer.cpp in Sources */,
 				8DD76F650486A84900D96B5E /* main.cpp in Sources */,
+				2B98D7B31C4832DD00C73F03 /* isampler.cpp in Sources */,
 				2B7B65E6170FC938002C830F /* sampler.cpp in Sources */,
 				2B7B65E7170FC938002C830F /* scene.cpp in Sources */,
 				2B7B65E8170FC938002C830F /* sphere.cpp in Sources */,
@@ -329,7 +348,6 @@
 				2B7B673D171086CE002C830F /* material.cpp in Sources */,
 				2B7B67691710A3DA002C830F /* triangle.cpp in Sources */,
 				2B7B67891710A857002C830F /* transform_stack.cpp in Sources */,
-				2B1283EE1831F963009DCC0E /* timer.cpp in Sources */,
 				2B7B683A1710D326002C830F /* ray.cpp in Sources */,
 				2B2D9E3417164FB10098D2C6 /* point_light.cpp in Sources */,
 				2BE7B8F71C34DB58007C3AD6 /* ilight.cpp in Sources */,
@@ -337,10 +355,12 @@
 				2BB1AC321738AF9A00336221 /* kdtree.cpp in Sources */,
 				2B1EC8B51B9FE5F700D5E1B7 /* noise.cpp in Sources */,
 				2BAEAF111933C192002605AF /* assimp_parser.cpp in Sources */,
+				2B2ABF031C4822C200033C4A /* sampler_info.cpp in Sources */,
 				2BAEAF0B1933AC52002605AF /* simple_parser.cpp in Sources */,
 				2B1BCAEC186A93DC004F0635 /* env_sphere.cpp in Sources */,
 				2BB1AC351738B14D00336221 /* aabbox.cpp in Sources */,
 				2B05D3CF18665F57005082A9 /* stats_collector.cpp in Sources */,
+				2B98D7B91C494EB900C73F03 /* point_sampler.cpp in Sources */,
 				2BD9523F17AE089C000576EB /* multi_sample_ray.cpp in Sources */,
 				2BCF178D17DBAE5B00C35CC3 /* hit.cpp in Sources */,
 				2BAEAF001933A994002605AF /* parser_factory.cpp in Sources */,

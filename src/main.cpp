@@ -7,9 +7,11 @@
 #include "iparser.h"
 #include "timer.h"
 
-int main(int argc, char** argv) {
-    if (argc != 2) {
-        std::cerr << "Must pass an input scene file!" << std::endl;
+int main(int argc, char** argv)
+{
+    if (argc != 2)
+    {
+        std::cerr << "Must provide an input scene file!" << std::endl;
         return -1;
     }
     
@@ -20,7 +22,7 @@ int main(int argc, char** argv) {
     std::string outputImage;
     
     {
-        Timer loadTimer;
+        HighResTimer loadTimer;
         loadTimer.start();
         
         IParser* parser = ParserFactory().create(sceneFile);
@@ -35,7 +37,8 @@ int main(int argc, char** argv) {
         
         delete parser;
         
-        std::cout << "Scene load time: " << loadTimer.elapsed() << std::endl;
+        std::cout << "Scene load time: "
+            << loadTimer.elapsedToString(loadTimer.elapsed()) << std::endl;
     }
 
     Scene::instance().render(outputImage);
