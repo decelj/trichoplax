@@ -139,10 +139,10 @@ void AssimpParser::loadScene(const aiNode* node, TransformStack* tStack)
     
     for (unsigned meshIdx = 0; meshIdx < node->mNumMeshes; ++meshIdx)
     {
-        const aiMesh* mesh = mAiScene->mMeshes[meshIdx];
+        const aiMesh* mesh = mAiScene->mMeshes[node->mMeshes[meshIdx]];
         for (unsigned faceIdx = 0; faceIdx < mesh->mNumFaces; ++faceIdx)
         {
-            const aiFace face = mesh->mFaces[faceIdx];
+            const aiFace& face = mesh->mFaces[faceIdx];
             
             if (face.mNumIndices != 3)
             {

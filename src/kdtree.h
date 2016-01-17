@@ -15,22 +15,24 @@ class Ray;
 class KdTree
 {
     class Node {
+    private:
         typedef std::vector<const IPrimitive*, AlignedAllocator<const IPrimitive*> > PrimitiveVector;
         
     public:
+        typedef PrimitiveVector::const_iterator ConstPrimIterator;
+        typedef PrimitiveVector::iterator PrimIterator;
+
         explicit Node();
         ~Node();
         
         void updateBBox();
         void updateBBox(const unsigned splitAxis, const float value, bool isLeft);
-        inline bool isLeaf() const { return !mRight; }
+        bool isLeaf() const { return right == NULL; }
         
-        AABBox mBBox;
-        Node *mLeft, *mRight;
-        PrimitiveVector mPrims;
-        
-        typedef PrimitiveVector::const_iterator ConstPrimIterator;
-        typedef PrimitiveVector::iterator PrimIterator;
+        AABBox BBox;            // 24 bytes
+        Node *left;             // 8 bytes
+        Node *right;            // 8 bytes
+        PrimitiveVector prims;  // 8 bytes
     };
     
     enum SHAPlaneEventType
@@ -109,13 +111,13 @@ private:
 
 inline void KdTree::addPrimitive(const IPrimitive* p)
 {
-    TP_ASSERT(mRoot->mLeft == NULL);
-    mRoot->mPrims.emplace_back(p);
+    TP_ASSERT(mRoot->left == NULL);
+    mRoot->prims.emplace_back(p);
 }
 
 inline bool KdTree::trace(Ray& ray, bool firstHit, Mailboxer& mailboxes) const
 {
-    if (!mRoot->mBBox.intersect(ray)) return false;
+    if (!mRoot->BBox.intersect(ray)) return false;
     
     return trace(mRoot, ray, firstHit, mailboxes);
 }
