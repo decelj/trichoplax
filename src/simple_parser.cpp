@@ -188,7 +188,10 @@ std::string SimpleParser::parse(const std::string& file, Scene& scene)
             }
         } else if (cmd == "bias") {
             if (readValues(lineStream, 1, values))
+            {
                 bias = values[0];
+                scene.setBias(bias);
+            }
         } else if (cmd == "gisamples") {
             if (readValues(lineStream, 1, values))
             {

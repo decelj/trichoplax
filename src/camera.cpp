@@ -1,3 +1,6 @@
+#include <glm/glm.hpp>
+#include <cmath>
+
 #include "camera.h"
 #include "sample.h"
 #include "ray.h"
@@ -6,16 +9,25 @@ Camera::Camera(const float fov, const glm::vec3& pos, const glm::vec3& lookAt, c
     : mPos(pos)
     , mLookAt(lookAt)
     , mUp(up)
-    , mWidth(width)
-    , mHeight(height)
+    , mWidth(0)
+    , mHeight(0)
     , mFov((fov / 180.f) * static_cast<float>(M_PI))
 {
-    float fovX = 2.f * atanf(tanf(mFov/2.f)*(width / static_cast<float>(height)));
-    mAlpha = tanf(fovX/2.f);
-    mBeta = tanf(mFov/2.f);
     mW = glm::normalize(pos - lookAt);
     mU = glm::normalize(glm::cross(up, mW));
     mV = glm::normalize(glm::cross(mU, mW));
+
+    setWidthHeight(width, height);
+}
+
+void Camera::setWidthHeight(unsigned width, unsigned height)
+{
+    mWidth = width;
+    mHeight = height;
+
+    float fovX = 2.f * std::atanf(std::tanf(mFov/2.f)*(width / static_cast<float>(height)));
+    mAlpha = std::tanf(fovX/2.f);
+    mBeta = std::tanf(mFov/2.f);
 }
 
 void Camera::generateRay(const Sample& s, Ray* ray) const

@@ -39,6 +39,8 @@ public:
     void addLight(ILight* lgt) { mLights.push_back(lgt); }
     void setMaxDepth(unsigned depth) { mSettings.maxDepth = depth; }
     void setNumGISamples(unsigned numSamples) { mSettings.GISamples = numSamples; }
+    void setBias(float bias) { mSettings.bias = bias; }
+    void setImageSize(unsigned width, unsigned height);
     void setEnvSphereImage(const std::string& file);
     void setShadowRays(int num);
 

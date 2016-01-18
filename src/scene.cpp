@@ -124,6 +124,11 @@ void Scene::addPrimitive(IPrimitive* prim)
     mPrimitives.push_front(prim);
 }
 
+void Scene::setImageSize(unsigned width, unsigned height)
+{
+    mCam->setWidthHeight(width, height);
+}
+
 void Scene::setEnvSphereImage(const std::string& file)
 {
     if (mEnvSphere != NULL)
