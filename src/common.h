@@ -45,7 +45,7 @@ inline glm::vec3 linearToGamma(const glm::vec3& v)
 
 inline float luminance(const glm::vec3& color)
 {
-    return glm::dot(color, glm::vec3(0.2126f, 0.7152f, 0.0722f)) / 3.f;
+    return glm::dot(color, glm::vec3(0.2126f, 0.7152f, 0.0722f));
 }
 
 inline float distanceSquared(const glm::vec3& v)

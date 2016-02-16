@@ -23,19 +23,6 @@ inline glm::vec3 estimateFresnel(const glm::vec3& reflectance, float cosTheta, f
     return reflectance + (1.f - reflectance) * powf(1.f - cosTheta, power);
 }
 
-inline glm::vec3 cosineSampleHemisphere(float u1, float u2)
-{
-    // From: http://www.rorydriscoll.com/2009/01/07/better-sampling/
-    // Generate cosine weighted hemispherical samples in tangent space
-    const float r = sqrtf(u1);
-    const float theta = 2.f * (float)M_PI * u2;
-
-    const float x = r * cosf(theta);
-    const float y = r * sinf(theta);
-
-    return glm::vec3(x, y, sqrtf(std::max(0.0f, 1.f - u1)));
-}
-
 inline glm::vec3 computeSurfaceLighting(const Ray& ray, const Hit& hit, const BRDF& brdf,
                                         const glm::vec3& lightColor, const float nDotL,
                                         bool isSpecular)
@@ -156,26 +143,19 @@ void Material::shadeRay(const Raytracer& tracer, const Ray& r, glm::vec4& result
         giRay.setDepth(r.depth() + 1);
         giRay.bias(scene.renderSettings().bias);
 
-        FixedDomainSamplerInfo2D giSamplerInfo(
-            scene.renderSettings().GISamples, 0.9999999f, 0.9999999f);
+        const unsigned giSequenceNumber = noiseGen.generateGISequenceNumber();
         const glm::mat3 toWorld = generateBasis(hit.N);
-
         while (giRay.currentSample())
         {
-            float Xi1 = giSamplerInfo.computeXValue(giRay.currentSample(),
-                                                noiseGen.generateNormalizedFloat());
-            float Xi2 = giSamplerInfo.computeYValue(giRay.currentSample(),
-                                                noiseGen.generateNormalizedFloat());
-
-            giRay.setDir(glm::normalize(toWorld * cosineSampleHemisphere(Xi1, Xi2)));
+            glm::vec3 cosSample = noiseGen.getGISample(giSequenceNumber, giRay.currentSample() - 1);
+            giRay.setDir(toWorld * cosSample);
             giRay.setMaxDistance(std::numeric_limits<float>::max());
-            float sampleWeight = glm::dot(hit.N, giRay.dir());
-            TP_ASSERT(sampleWeight > 0.0);
+            TP_ASSERT(glm::dot(hit.N, giRay.dir()) > 0.0);
 
             glm::vec4 tmp(0.f);
             tracer.traceAndShade(giRay, tmp);
             
-            giColor += glm::vec3(tmp) * sampleWeight;
+            giColor += glm::vec3(tmp);
             --giRay;
         }
 

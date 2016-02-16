@@ -14,6 +14,7 @@
 #include "camera.h"
 #include "env_sphere.h"
 #include "noise.h"
+#include "scene.h"
 
 
 Raytracer::Raytracer(const KdTree* tree, const Camera* cam, const EnvSphere* env,
@@ -70,6 +71,8 @@ void* Raytracer::_run(void *arg)
 
 void Raytracer::run() const
 {
+    mNoiseGen.initGISamples(Scene::instance().renderSettings().GISamples);
+
     SamplePacket packet;
     while (!mIsCanceled && mSampler->buildSamplePacket(packet))
     {
