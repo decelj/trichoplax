@@ -11,7 +11,7 @@
 
 class Triangle : public IPrimitive {
 public:
-    Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, Material *m);
+    Triangle(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c, Material *m);
     
     // IPrimitive
     bool intersect(Ray& ray) const;
