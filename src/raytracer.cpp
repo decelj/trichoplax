@@ -87,7 +87,7 @@ void Raytracer::run() const
             packetResult += rayColor;
         }
 
-        mImgBuffer->commit(*sample, packetResult / Sampler::sSamplesPerPixel);
+        mImgBuffer->commit(*sample, packetResult / (float)Sampler::sSamplesPerPixel);
     }
 }
 
