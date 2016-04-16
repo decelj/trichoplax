@@ -1,5 +1,6 @@
 #include <sys/ioctl.h>
 #include <iostream>
+#include <iomanip>
 #include <limits>
 #include <algorithm>
 #include <iterator>
@@ -61,6 +62,17 @@ KdTree::~KdTree()
     mRoot = NULL;
 }
 
+void KdTree::printTraversalStats(double raysCast) const
+{
+    std::cout << "Traversal Stats:" << std::endl;
+
+    std::cout << std::left << std::setw(22) << "  Box Tests:" << mTraversalStats.boxTests;
+    std::cout << " (" << static_cast<double>(mTraversalStats.boxTests) / raysCast << " per ray)" << std::endl;
+
+    std::cout << std::left << std::setw(22) << "  Primitive Tests: " << mTraversalStats.primitiveTests;
+    std::cout << " (" << static_cast<double>(mTraversalStats.primitiveTests) / raysCast << " per ray)" << std::endl;
+}
+
 void KdTree::build()
 {
     HighResTimer t;
@@ -78,14 +90,15 @@ void KdTree::build()
     
     initialEvents.sort();
     build(mRoot, initialEvents, 0);
-    
-    std::cout << "KdTree: Max depth:                 " << mMaxDepth << std::endl;
-    std::cout << "KdTree: Min depth:                 " << mMinDepth << std::endl;
-    std::cout << "KdTree: Max primitives per node:   " << mMaxPrimsPerNode << std::endl;
-    std::cout << "KdTree: Total nodes:               " << mTotalNodes << std::endl;
-    std::cout << "KdTree: Leaf nodes:                " << mLeafNodes << std::endl;
-    std::cout << "KdTree: Total primatives:          " << mTotalNumPrims << std::endl;
-    std::cout << "KdTree: Build time:                " << t.elapsedToString(t.elapsed()) << std::endl;
+
+    std::cout << "KdTree Build Stats:" << std::endl;
+    std::cout << std::left << std::setw(30) << "  Max depth:" << mMaxDepth << std::endl;
+    std::cout << std::left << std::setw(30) << "  Min depth:" << mMinDepth << std::endl;
+    std::cout << std::left << std::setw(30) << "  Max primitives per node:" << mMaxPrimsPerNode << std::endl;
+    std::cout << std::left << std::setw(30) << "  Total nodes:" << mTotalNodes << std::endl;
+    std::cout << std::left << std::setw(30) << "  Leaf nodes:" << mLeafNodes << std::endl;
+    std::cout << std::left << std::setw(30) << "  Total primatives:" << mTotalNumPrims << std::endl;
+    std::cout << std::left << std::setw(30) << "  Build time:" << t.elapsedToString(t.elapsed()) << std::endl;
 }
 
 void KdTree::build(Node* node, SHAPlaneEventList& events, unsigned int depth)
@@ -266,6 +279,7 @@ bool KdTree::trace(const Node* n, Ray& ray, bool firstHit, Mailboxer& mailboxes)
         {
             if (!mailboxes.Tested((*it)->id()))
             {
+                mTraversalStats.incrementPrimitiveTests();
                 ret |= (*it)->intersect(ray);
                 mailboxes.Mark((*it)->id());
             }
@@ -273,14 +287,19 @@ bool KdTree::trace(const Node* n, Ray& ray, bool firstHit, Mailboxer& mailboxes)
     }
     else
     {
+        mTraversalStats.incrementBoxTests();
         if (n->left->BBox.intersect(ray))
         {
             ret |= trace(n->left, ray, firstHit, mailboxes);
         }
 
-        if (!(ret && firstHit) && n->right->BBox.intersect(ray))
+        if (!(ret && firstHit))
         {
-            ret |= trace(n->right, ray, firstHit, mailboxes);
+            mTraversalStats.incrementBoxTests();
+            if (n->right->BBox.intersect(ray))
+            {
+                ret |= trace(n->right, ray, firstHit, mailboxes);
+            }
         }
     }
     
@@ -528,3 +547,8 @@ KdTree::SHAPlaneEvent::SHAPlaneEvent(const IPrimitive* _prim, float _plane, unsi
 {
 }
 
+KdTree::TraversalStats::TraversalStats()
+    : boxTests(0)
+    , primitiveTests(0)
+{
+}

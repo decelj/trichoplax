@@ -2,6 +2,7 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
+#include <locale>
 #include <vector>
 #include <stdexcept>
 #include <glm/glm.hpp>
@@ -42,7 +43,10 @@ std::string SimpleParser::parse(const std::string& file, Scene& scene)
     in.open(file);
     if (!in.is_open())
         throw std::runtime_error("error opening scene file!");
-    
+
+    const std::locale oldLocale = std::locale();
+    std::locale::global(std::locale("C"));
+
     std::string line, cmd, outputImage;
     TransformStack tStack;
     std::vector<glm::vec3> verticies;
@@ -201,6 +205,8 @@ std::string SimpleParser::parse(const std::string& file, Scene& scene)
             std::cerr << "Unknown command: " << cmd << std::endl;
         }
     } while (in);
+
+    std::locale::global(oldLocale);
     
     delete currMaterial;
     return outputImage;

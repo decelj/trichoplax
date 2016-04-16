@@ -8,9 +8,12 @@
 #include "aabbox.h"
 #include "common.h"
 
+#include <atomic>
+
 class Mailboxer;
 class IPrimitive;
 class Ray;
+
 
 class KdTree
 {
@@ -69,6 +72,17 @@ class KdTree
         unsigned aaAxis;
         Side side;
     };
+
+    struct TraversalStats
+    {
+        TraversalStats();
+
+        void incrementBoxTests();
+        void incrementPrimitiveTests();
+
+        std::atomic_ullong boxTests;
+        std::atomic_ullong primitiveTests;
+    };
     
 public:
     explicit KdTree();
@@ -80,6 +94,7 @@ public:
     
     void addPrimitive(const IPrimitive* p);
     size_t numberOfPrimitives() const { return mTotalNumPrims; }
+    void printTraversalStats(double raysCast) const;
     
 private:
     void build(Node* node, SHAPlaneEventList& events, unsigned int depth);
@@ -98,14 +113,15 @@ private:
     void DumpSplitEvents(SHAPlaneEventList::const_iterator begin,
                          SHAPlaneEventList::const_iterator end, unsigned aaAxis=4) const;
     
-    Node*           mRoot;
-    unsigned        mMaxDepth;
-    unsigned        mMinDepth;
-    size_t          mLargeNodes;
-    size_t          mLeafNodes;
-    size_t          mTotalNodes;
-    size_t          mMaxPrimsPerNode;
-    size_t          mTotalNumPrims;
+    Node*                   mRoot;
+    mutable TraversalStats  mTraversalStats;
+    unsigned                mMaxDepth;
+    unsigned                mMinDepth;
+    size_t                  mLargeNodes;
+    size_t                  mLeafNodes;
+    size_t                  mTotalNodes;
+    size_t                  mMaxPrimsPerNode;
+    size_t                  mTotalNumPrims;
 };
 
 
@@ -117,6 +133,7 @@ inline void KdTree::addPrimitive(const IPrimitive* p)
 
 inline bool KdTree::trace(Ray& ray, bool firstHit, Mailboxer& mailboxes) const
 {
+    mTraversalStats.incrementBoxTests();
     if (!mRoot->BBox.intersect(ray)) return false;
     
     return trace(mRoot, ray, firstHit, mailboxes);
@@ -132,6 +149,16 @@ inline bool KdTree::SHAPlaneEvent::operator<(const SHAPlaneEvent& rhs) const
     {
         return plane < rhs.plane;
     }
+}
+
+inline void KdTree::TraversalStats::incrementBoxTests()
+{
+    boxTests.fetch_add(1, std::memory_order_relaxed);
+}
+
+inline void KdTree::TraversalStats::incrementPrimitiveTests()
+{
+    primitiveTests.fetch_add(1, std::memory_order_relaxed);
 }
 
 #endif

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <locale>
 #include <string>
 #include <limits>
 
@@ -145,6 +146,9 @@ void applyCLOverrides(const Args& args, Scene& scene)
 
 int main(int argc, char** argv)
 {
+    std::locale::global(std::locale("en_US.UTF-8"));
+    std::cout.imbue(std::locale());
+
     if (argc <  2)
     {
         std::cerr << "Must provide an input scene file!" << std::endl;

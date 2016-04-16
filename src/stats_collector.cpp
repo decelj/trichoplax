@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 
 #include "stats_collector.h"
 #include "ray.h"
@@ -10,6 +11,8 @@ StatsCollector::StatsCollector()
 }
 
 void StatsCollector::print() const {
+    std::cout << "Ray Type Stats:" << std::endl;
+
     for (int i = 0; i < Ray::TYPE_COUNT; ++i) {
         size_t sum = 0;
         for (auto it = mStats.begin(); it != mStats.end(); ++it)
@@ -17,21 +20,40 @@ void StatsCollector::print() const {
         
         switch (i) {
             case Ray::PRIMARY:
-                std::cout << "Primary rays: " << sum << std::endl;
+                std::cout << std::left << std::setw(20) <<
+                    "  Primary rays: " << sum << std::endl;
                 break;
             case Ray::REFLECTED:
-                std::cout << "Reflected rays: " << sum << std::endl;
+                std::cout << std::left << std::setw(20) <<
+                    "  Reflected rays: " << sum << std::endl;
                 break;
             case Ray::REFRACTED:
-                std::cout << "Refracted rays: " << sum << std::endl;
+                std::cout << std::left << std::setw(20) <<
+                    "  Refracted rays: " << sum << std::endl;
                 break;
             case Ray::SHADOW:
-                std::cout << "Shadow rays: " << sum << std::endl;
+                std::cout << std::left << std::setw(20) <<
+                    "  Shadow rays: " << sum << std::endl;
                 break;
             case Ray::GI:
-                std::cout << "GI rays: " << sum << std::endl;
+                std::cout << std::left << std::setw(20) <<
+                    "  GI rays: " << sum << std::endl;
             default:
                 break;
         }
     }
+}
+
+unsigned long long StatsCollector::totalRaysCast() const
+{
+    unsigned long long count = 0;
+    for (auto it = mStats.begin(); it != mStats.end(); ++it)
+    {
+        for (unsigned i = 0; i < Ray::TYPE_COUNT; ++i)
+        {
+            count += (*it)->mValues[i];
+        }
+    }
+
+    return count;
 }

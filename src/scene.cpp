@@ -180,7 +180,10 @@ void Scene::render(const std::string& filename)
     mImgBuffer->write(filename);
     
     // Print stats
+    std::cout << std::endl;
     collector.print();
+    mKdTree->printTraversalStats(collector.totalRaysCast());
+    std::cout << std::endl;
     std::cout << "Render time: " << t.elapsedToString(t.elapsed()) << std::endl;
     
     // Must cleanup threads after we've printed the collected stats since each
