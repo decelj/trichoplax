@@ -198,16 +198,6 @@ void AssimpParser::loadMaterials()
         }
         material->setDiffuse(gammaToLinear(toVec3(value)));
         
-        if (aiMaterial->Get(AI_MATKEY_COLOR_SPECULAR, value) != AI_SUCCESS)
-        {
-            throw std::runtime_error("error reading material!");
-        }
-        if (aiMaterial->Get(AI_MATKEY_SHININESS_STRENGTH, valueF) != AI_SUCCESS)
-        {
-            valueF = 1.f; // TODO: this seems to error sometimes, not sure why...
-        }
-        material->setSpecular(gammaToLinear(toVec3(value)*valueF));
-        
         if (aiMaterial->Get(AI_MATKEY_COLOR_EMISSIVE, value) != AI_SUCCESS)
         {
             throw std::runtime_error("error reading material!");
@@ -225,13 +215,19 @@ void AssimpParser::loadMaterials()
             throw std::runtime_error("error reading material!");
         }
         material->setIor(valueF);
+
+        if (aiMaterial->Get(AI_MATKEY_REFLECTIVITY, valueF) != AI_SUCCESS)
+        {
+            valueF = 1.f; // TODO: this seems to error sometimes, not sure why...
+        }
+        material->setReflectivity(valueF);
         
         if (aiMaterial->Get(AI_MATKEY_SHININESS, valueF) != AI_SUCCESS)
         {
             throw std::runtime_error("error reading material!");
         }
-        material->setShininess(valueF);
+        material->setRoughness(1.f - valueF);
         
-        mMaterials.push_back(std::move(material));
+        mMaterials.emplace_back(std::move(material));
     }
 }

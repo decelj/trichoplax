@@ -16,16 +16,16 @@ class Material {
 public:
     explicit Material();
     explicit Material(const glm::vec3& Ka, const glm::vec3& Ke,
-                      const glm::vec3& Kd, const glm::vec3& Ks,
-                      const glm::vec3& Kt, const float Kr, const float ior);
+                      const glm::vec3& Kd, const glm::vec3& Kt,
+                      float Kr, float roughness, float ior);
     Material* clone() const;
     
     void setAmbient(const glm::vec3& Ka);
     void setEmissive(const glm::vec3& Ke);
     void setDiffuse(const glm::vec3& Kd);
-    void setSpecular(const glm::vec3& Ks);
     void setTransparency(const glm::vec3& Kt);
-    void setShininess(float Kr);
+    void setReflectivity(float Kr);
+    void setRoughness(float roughness);
     void setIor(float Ior);
     
     void shadeRay(const Raytracer& tracer, const Ray& r, glm::vec4& result) const;
@@ -48,37 +48,37 @@ inline Material* Material::clone() const
 
 inline void Material::setAmbient(const glm::vec3& Ka)
 {
-    mBrdf.Ka = Ka;
+    mBrdf.setKa(Ka);
 }
 
 inline void Material::setEmissive(const glm::vec3& Ke)
 {
-    mBrdf.Ke = Ke;
+    mBrdf.setKe(Ke);
 }
 
 inline void Material::setDiffuse(const glm::vec3& Kd)
 {
-    mBrdf.Kd = Kd;
-}
-
-inline void Material::setSpecular(const glm::vec3& Ks)
-{
-    mBrdf.Ks = Ks;
+    mBrdf.setKd(Kd);
 }
 
 inline void Material::setTransparency(const glm::vec3& Kt)
 {
-    mBrdf.Kt = Kt;
+    mBrdf.setKt(Kt);
 }
 
-inline void Material::setShininess(float Kr)
+inline void Material::setRoughness(float roughness)
 {
-    mBrdf.Kr = Kr;
+    mBrdf.setRoughness(roughness);
 }
 
-inline void Material::setIor(float Ior)
+inline void Material::setReflectivity(float Kr)
 {
-    mBrdf.ior = Ior;
+    mBrdf.setKr(Kr);
+}
+
+inline void Material::setIor(float ior)
+{
+    mBrdf.setIOR(ior);
 }
 
 #endif

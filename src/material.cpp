@@ -18,7 +18,8 @@
 namespace
 {
 
-inline glm::vec3 estimateFresnel(const glm::vec3& reflectance, float cosTheta, float power=5.f)
+template<typename T>
+inline T estimateFresnel(const T& reflectance, float cosTheta, float power=5.f)
 {
     return reflectance + (1.f - reflectance) * powf(1.f - cosTheta, power);
 }
@@ -27,20 +28,18 @@ inline glm::vec3 computeSurfaceLighting(const Ray& ray, const Hit& hit, const BR
                                         const glm::vec3& lightColor, const float nDotL,
                                         bool isSpecular)
 {
+#if 0
     glm::vec3 specularColor(0.f);
     if(isSpecular)
     {
         const glm::vec3 H = glm::normalize(ray.dir() + hit.V);
         float nDotH = std::max(glm::dot(hit.N, H), 0.f);
         float specularPower = powf(nDotH, brdf.Kr);
-        specularColor = brdf.Ks * specularPower * lightColor;
+        specularColor = brdf.Ks() * specularPower * lightColor;
     }
+#endif
 
-    glm::vec3 diffuseWeight = 1.f - specularColor;
-
-    glm::vec3 outColor = brdf.Kd * lightColor * nDotL * diffuseWeight;
-    outColor += specularColor;
-
+    glm::vec3 outColor = brdf.Kd() * lightColor * nDotL;
     return outColor;
 }
 
@@ -49,14 +48,14 @@ inline glm::vec3 computeSurfaceLighting(const Ray& ray, const Hit& hit, const BR
 
 Material::Material()
     : mBrdf(glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f),
-            glm::vec3(0.f), glm::vec3(0.f), 0.f, 1.f)
+            glm::vec3(0.f), 0.f, 1.f, 0.f)
 {
 }
 
 Material::Material(const glm::vec3& Ka, const glm::vec3& Ke,
-         const glm::vec3& Kd, const glm::vec3& Ks,
-         const glm::vec3& Kt, const float Kr, const float ior)
-    : mBrdf(Ka, Ke, Kd, Ks, Kt, Kr, ior)
+         const glm::vec3& Kd, const glm::vec3& Kt,
+         float Kr, float roughness, float ior)
+    : mBrdf(Ka, Ke, Kd, Kt, Kr, roughness, ior)
 {
 }
 
@@ -68,21 +67,21 @@ Material::Material(const Material& other)
 void Material::shadeRay(const Raytracer& tracer, const Ray& r, glm::vec4& result) const
 {
     // Ambient and emissive
-    glm::vec3 opaqueColor = mBrdf.Ka + mBrdf.Ke;
+    glm::vec3 opaqueColor = mBrdf.Ka() + mBrdf.Ke();
     
     const Scene& scene = Scene::instance();
     const Hit hit(r);
 
     const float nDotV = glm::dot(hit.N, hit.V);
-    glm::vec3 fresnelFactor = estimateFresnel(mBrdf.Ks, nDotV);
-    glm::vec3 transmissionColor = (1.f - fresnelFactor) * mBrdf.Kt;
+    float fresnelFactor = estimateFresnel(mBrdf.Kr(), nDotV);
+    glm::vec3 transmissionColor = (1.f - fresnelFactor) * mBrdf.Kt();
     float transmissionWeight = luminance(transmissionColor);
 
     // Transmission
 #if 1
     if (transmissionWeight > 0.f && r.type() != Ray::GI)
     {
-        Ray refractedRay(Ray::REFRACTED, hit.P, mBrdf.ior);
+        Ray refractedRay(Ray::REFRACTED, hit.P, mBrdf.IOR());
         if (refractedRay.refract(hit, r.ior()))
         {
             refractedRay.bias(scene.renderSettings().bias);
@@ -96,7 +95,7 @@ void Material::shadeRay(const Raytracer& tracer, const Ray& r, glm::vec4& result
         }
         else
         {
-            fresnelFactor = glm::vec3(1.f);
+            fresnelFactor = 1.f;
             transmissionWeight = 0.f;
         }
     }
@@ -115,14 +114,14 @@ void Material::shadeRay(const Raytracer& tracer, const Ray& r, glm::vec4& result
         
         glm::vec4 reflection(0.f);
         tracer.traceAndShade(reflected, reflection);
-        result += reflection * glm::vec4(fresnelFactor, 0.f);
+        result += reflection * glm::vec4(glm::vec3(fresnelFactor), 0.f);
     }
 #endif
 
     // Diffuse/spec
     if (opaqueWeight > 0.f)
     {
-        const bool isSpecular = luminance(mBrdf.Ks) > 0.f;
+        const bool isSpecular = mBrdf.roughness() < 1.f;
         for (Scene::ConstLightIter it = scene.lightsBegin(); it != scene.lightsEnd(); ++it)
         {
             opaqueColor += sampleLight(**it, hit, tracer, r.depth(), isSpecular);
@@ -161,7 +160,7 @@ void Material::shadeRay(const Raytracer& tracer, const Ray& r, glm::vec4& result
 
         float invNumSamples = 1.f / static_cast<float>(scene.renderSettings().GISamples);
         giColor *= invNumSamples;
-        giColor *= mBrdf.Kd;
+        giColor *= mBrdf.Kd();
 
         opaqueColor += giColor;
     }

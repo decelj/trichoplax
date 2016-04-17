@@ -153,18 +153,15 @@ std::string SimpleParser::parse(const std::string& file, Scene& scene)
                 currMaterial->setDiffuse(
                     gammaToLinear(glm::vec3(values[0], values[1], values[2])));
             }
-        } else if (cmd == "specular") {
-            if (readValues(lineStream, 3, values))
-            {
-                currMaterial->setSpecular(
-                    gammaToLinear(glm::vec3(values[0], values[1], values[2])));
-            }
         } else if (cmd == "transparency") {
             if (readValues(lineStream, 3, values))
                 currMaterial->setTransparency(glm::vec3(values[0], values[1], values[2]));
-        } else if (cmd == "shininess") {
+        } else if (cmd == "reflectivity") {
             if (readValues(lineStream, 1, values))
-                currMaterial->setShininess(values[0]);
+                currMaterial->setReflectivity(values[0]);
+        } else if (cmd == "roughness") {
+            if (readValues(lineStream, 1, values))
+                currMaterial->setRoughness(values[0]);
         } else if (cmd == "ior") {
             if (readValues(lineStream, 1, values))
                 currMaterial->setIor(values[0]);
