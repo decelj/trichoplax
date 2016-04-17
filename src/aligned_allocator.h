@@ -39,11 +39,7 @@ public:
     
     ~AlignedAllocator() {}
     
-    inline pointer address(reference r) { return &r; }
-    inline const_pointer address(const_refernce r) { return &r; }
-    
-    inline pointer allocate(size_type count,
-                            typename std::allocator<void>::const_pointer = 0)
+    inline pointer allocate(size_type count, std::allocator<void>::const_pointer hint=0)
     {
         void* data;
         posix_memalign(&data, Alignment, count * sizeof(T));
@@ -54,14 +50,6 @@ public:
     {
         free(p);
     }
-    
-    inline size_type max_size() const
-    {
-        return std::numeric_limits<size_type>::max() / sizeof(T);
-    }
-    
-    inline void construct(pointer p, const T& t) { new(p) T(t); }
-    inline void destroy(pointer p) { p->~T(); }
     
     inline bool operator==(const AlignedAllocator& other) const
     {
