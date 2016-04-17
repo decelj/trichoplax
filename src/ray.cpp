@@ -16,7 +16,7 @@ Ray::Ray(const TYPE t)
     , mIor(1.0f)
     , mMinT(0.f)
     , mMaxT(std::numeric_limits<float>::max())
-    , mHitPrim(NULL)
+    , mHitPrim(nullptr)
     , mDidHitBack(false)
     , mShouldHitBack(false)
 {
@@ -31,7 +31,7 @@ Ray::Ray(const TYPE t, const glm::vec3& origin, const float ior)
     , mIor(ior)
     , mMinT(0.f)
     , mMaxT(std::numeric_limits<float>::max())
-    , mHitPrim(NULL)
+    , mHitPrim(nullptr)
     , mDidHitBack(false)
     , mShouldHitBack(false)
 {
@@ -100,7 +100,7 @@ bool Ray::refract(const Hit& hit, float inIOR)
 
 void Ray::shade(const Raytracer& tracer, glm::vec4& result) const
 {
-    TP_ASSERT(mHitPrim != NULL);
+    TP_ASSERT(mHitPrim != nullptr);
     mHitPrim->material()->shadeRay(tracer, *this, result);
 }
 

@@ -49,14 +49,14 @@ Scene::RenderSettings::RenderSettings()
 
 
 // Global static pointer for singleton
-Scene* Scene::sInstance = NULL;
+Scene* Scene::sInstance = nullptr;
 
 Scene::Scene()
-    : mCam(NULL)
-    , mSampler(NULL)
-    , mImgBuffer(NULL)
+    : mCam(nullptr)
+    , mSampler(nullptr)
+    , mImgBuffer(nullptr)
     , mKdTree(new KdTree)
-    , mEnvSphere(NULL)
+    , mEnvSphere(nullptr)
     , mLights()
     , mSettings()
 {
@@ -65,19 +65,19 @@ Scene::Scene()
 Scene::~Scene()
 {
     delete mCam;
-    mCam = NULL;
+    mCam = nullptr;
     
     delete mSampler;
-    mSampler = NULL;
+    mSampler = nullptr;
     
     delete mImgBuffer;
-    mImgBuffer = NULL;
+    mImgBuffer = nullptr;
     
     delete mEnvSphere;
-    mEnvSphere = NULL;
+    mEnvSphere = nullptr;
 
     delete mKdTree;
-    mKdTree = NULL;
+    mKdTree = nullptr;
 
     for (auto light : mLights)
     {
@@ -99,14 +99,14 @@ Scene& Scene::instance()
 
 void Scene::create()
 {
-    TP_ASSERT(sInstance == NULL);
+    TP_ASSERT(sInstance == nullptr);
     sInstance = new Scene;
 }
 
 void Scene::destroy()
 {
     delete sInstance;
-    sInstance = NULL;
+    sInstance = nullptr;
 }
 
 void Scene::createBuffer()
@@ -131,7 +131,7 @@ void Scene::setImageSize(unsigned width, unsigned height)
 
 void Scene::setEnvSphereImage(const std::string& file)
 {
-    if (mEnvSphere != NULL)
+    if (mEnvSphere != nullptr)
     {
         std::cerr << "Warning: overriding existing env sphere" << std::endl;
         delete mEnvSphere;
@@ -141,7 +141,7 @@ void Scene::setEnvSphereImage(const std::string& file)
 
 void Scene::render(const std::string& filename)
 {
-    TP_ASSERT(mCam != NULL);
+    TP_ASSERT(mCam != nullptr);
     createBuffer();
     mKdTree->build();
     

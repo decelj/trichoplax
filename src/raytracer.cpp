@@ -66,8 +66,8 @@ void* Raytracer::_run(void *arg)
     Raytracer* tracer = static_cast<Raytracer*>(arg);
     tracer->run();
     
-    pthread_exit(NULL);
-    return NULL;
+    pthread_exit(nullptr);
+    return nullptr;
 }
 
 void Raytracer::run() const
@@ -132,7 +132,7 @@ bool Raytracer::traceAndShade(Ray& ray, glm::vec4& result) const
         return true;
     }
     
-    if (mEnv != NULL)
+    if (mEnv != nullptr)
         mEnv->sample(ray, result);
     
     return false;

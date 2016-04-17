@@ -7,7 +7,7 @@
 
 
 EnvSphere::EnvSphere(const std::string& file)
-    : mImg(NULL)
+    : mImg(nullptr)
     , mWidth(0)
     , mHeight(0)
 {
@@ -24,7 +24,7 @@ EnvSphere::EnvSphere(const std::string& file)
         fiImage = FreeImage_Load(format, file.c_str());
     }
     
-    if (fiImage == NULL)
+    if (fiImage == nullptr)
     {
         std::cerr << "Error loading env sphere: " << file << std::endl;
     }
@@ -56,7 +56,7 @@ EnvSphere::EnvSphere(const std::string& file)
 EnvSphere::~EnvSphere()
 {
     delete [] mImg;
-    mImg = NULL;
+    mImg = nullptr;
 }
 
 void EnvSphere::sample(const Ray& ray, glm::vec4& result) const

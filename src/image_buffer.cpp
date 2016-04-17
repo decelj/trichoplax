@@ -7,7 +7,7 @@
 #include "common.h"
 
 ImageBuffer::ImageBuffer(unsigned width, unsigned height)
-    : mPixels(NULL)
+    : mPixels(nullptr)
     , mWidth(width)
     , mHeight(height)
 {
@@ -18,7 +18,7 @@ ImageBuffer::ImageBuffer(unsigned width, unsigned height)
 ImageBuffer::~ImageBuffer()
 {
     delete [] mPixels;
-    mPixels = NULL;
+    mPixels = nullptr;
 }
 
 void ImageBuffer::commit(const Sample& sample, const glm::vec4& color)

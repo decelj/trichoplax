@@ -19,7 +19,7 @@ struct aiCamera;
 class AssimpParser : public IParser
 {
 public:
-    AssimpParser() : mScene(NULL), mAiScene(NULL), mMaterials(0),
+    AssimpParser() : mScene(nullptr), mAiScene(nullptr), mMaterials(0),
         mCameraIdx(0) // TODO allow user to select camera
     { }
     virtual ~AssimpParser();

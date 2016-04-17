@@ -40,7 +40,7 @@ private:
         inline const Node& left() const { return *mLeft; }
         inline const Node& right() const { return *mRight; }
 
-        inline bool isLeaf() const { return mRight == NULL; }
+        inline bool isLeaf() const { return mLeft == nullptr; }
         inline const AABBox& bounds() const { return mBBox; }
         inline size_t primitiveCount() const { return mPrims.size(); }
         inline bool intersectBounds(const Ray& ray) const { return mBBox.intersect(ray); }
@@ -146,7 +146,7 @@ private:
 
 inline void KdTree::addPrimitive(const IPrimitive* p)
 {
-    TP_ASSERT(mRoot->left() == NULL);
+    TP_ASSERT(mRoot->left() == nullptr);
     mRoot->addPrimitive(p);
 }
 
