@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 #include "hit.h"
+#include "common.h"
 
 class IPrimitive;
 class Raytracer;
@@ -80,6 +81,8 @@ private:
 
 inline void Ray::hit(const IPrimitive* primitive, float t, bool hitBackFace)
 {
+    TP_ASSERT(t <= mMaxT);
+
     mMaxT = t;
     mHitPrim = primitive;
     mDidHitBack = hitBackFace;

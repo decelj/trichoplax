@@ -23,6 +23,7 @@ Raytracer::Raytracer(const KdTree* tree, const Camera* cam, const EnvSphere* env
     : mNoiseGen()
     , mMailboxes(tree->numberOfPrimitives())
     , mKdTree(tree)
+    , mTraversalStack(mKdTree->allocateTraversalBuffer())
     , mCamera(cam)
     , mEnv(env)
     , mImgBuffer(imgBuffer)
@@ -115,7 +116,7 @@ bool Raytracer::trace(Ray& ray, bool firstHit) const
     
     mStats.increment(ray.type());
     mMailboxes.IncrementRayId();
-    return mKdTree->trace(ray, firstHit, mMailboxes);
+    return mKdTree->trace(ray, firstHit, mTraversalStack, mMailboxes);
 }
 
 bool Raytracer::traceAndShade(Ray& ray, glm::vec4& result) const

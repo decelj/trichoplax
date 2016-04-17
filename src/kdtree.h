@@ -17,7 +17,9 @@ class Ray;
 
 class KdTree
 {
-    class Node {
+private:
+    class Node
+    {
     private:
         typedef std::vector<const IPrimitive*, AlignedAllocator<const IPrimitive*> > PrimitiveVector;
         
@@ -27,15 +29,30 @@ class KdTree
 
         explicit Node();
         ~Node();
-        
-        void updateBBox();
-        void updateBBox(const unsigned splitAxis, const float value, bool isLeft);
-        bool isLeaf() const { return right == NULL; }
-        
-        AABBox BBox;            // 24 bytes
-        Node *left;             // 8 bytes
-        Node *right;            // 8 bytes
-        PrimitiveVector prims;  // 8 bytes
+
+        inline void addPrimitive(const IPrimitive* prim) { mPrims.emplace_back(prim); }
+        inline void clearPrimitves() { mPrims.clear(); }
+        void updateBounds();
+        void split(const unsigned splitAxis, const float plane);
+
+        inline Node* left() { return mLeft; }
+        inline Node* right() { return mRight; }
+        inline const Node& left() const { return *mLeft; }
+        inline const Node& right() const { return *mRight; }
+
+        inline bool isLeaf() const { return mRight == NULL; }
+        inline const AABBox& bounds() const { return mBBox; }
+        inline size_t primitiveCount() const { return mPrims.size(); }
+        inline bool intersectBounds(const Ray& ray) const { return mBBox.intersect(ray); }
+
+        inline ConstPrimIterator beginPrimitives() const { return mPrims.begin(); }
+        inline ConstPrimIterator endPrimitives() const { return mPrims.end(); }
+
+    private:
+        AABBox mBBox;            // 48 bytes
+        Node* mLeft;             // 8 bytes
+        Node* mRight;            // 8 bytes
+        PrimitiveVector mPrims;  // 8 bytes
     };
     
     enum SHAPlaneEventType
@@ -85,20 +102,22 @@ class KdTree
     };
     
 public:
+    typedef std::vector<const Node*, AlignedAllocator<const Node*> > TraversalBuffer;
+
     explicit KdTree();
     ~KdTree();
     
     void build();
     
-    bool trace(Ray& ray, bool firstHit, Mailboxer& mailboxes) const;
+    bool trace(Ray& ray, bool firstHit, TraversalBuffer& traversalStack, Mailboxer& mailboxes) const;
     
     void addPrimitive(const IPrimitive* p);
     size_t numberOfPrimitives() const { return mTotalNumPrims; }
     void printTraversalStats(double raysCast) const;
+    TraversalBuffer allocateTraversalBuffer() const;
     
 private:
     void build(Node* node, SHAPlaneEventList& events, unsigned int depth);
-    bool trace(const Node* n, Ray& ray, bool firstHit, Mailboxer& mailboxes) const;
 
     void split(SHAPlaneEventList& outLeftEvents, SHAPlaneEventList& outRightEvents,
                Node& node, const SHASplitPlane& plane, SHAPlaneEventList& events) const;
@@ -127,16 +146,8 @@ private:
 
 inline void KdTree::addPrimitive(const IPrimitive* p)
 {
-    TP_ASSERT(mRoot->left == NULL);
-    mRoot->prims.emplace_back(p);
-}
-
-inline bool KdTree::trace(Ray& ray, bool firstHit, Mailboxer& mailboxes) const
-{
-    mTraversalStats.incrementBoxTests();
-    if (!mRoot->BBox.intersect(ray)) return false;
-    
-    return trace(mRoot, ray, firstHit, mailboxes);
+    TP_ASSERT(mRoot->left() == NULL);
+    mRoot->addPrimitive(p);
 }
 
 inline bool KdTree::SHAPlaneEvent::operator<(const SHAPlaneEvent& rhs) const

@@ -61,7 +61,7 @@ KdTree::KdTree()
 KdTree::~KdTree()
 {
     delete mRoot;
-    mRoot = NULL;
+    mRoot = nullptr;
 }
 
 void KdTree::printTraversalStats(double raysCast) const
@@ -75,19 +75,24 @@ void KdTree::printTraversalStats(double raysCast) const
     std::cout << " (" << static_cast<double>(mTraversalStats.primitiveTests) / raysCast << " per ray)" << std::endl;
 }
 
+KdTree::TraversalBuffer KdTree::allocateTraversalBuffer() const
+{
+    return TraversalBuffer(mMaxDepth + 2, nullptr);
+}
+
 void KdTree::build()
 {
     HighResTimer t;
     t.start();
     
-    mRoot->updateBBox();
-    mTotalNumPrims = mRoot->prims.size();
+    mRoot->updateBounds();
+    mTotalNumPrims = mRoot->primitiveCount();
     
     SHAPlaneEventList initialEvents;
-    Node::PrimIterator it = mRoot->prims.begin();
-    for (; it != mRoot->prims.end(); ++it)
+    Node::ConstPrimIterator it = mRoot->beginPrimitives();
+    for (; it != mRoot->endPrimitives(); ++it)
     {
-        generateEventsForPrimitive(*it, mRoot->BBox, initialEvents);
+        generateEventsForPrimitive(*it, mRoot->bounds(), initialEvents);
     }
     
     initialEvents.sort();
@@ -107,16 +112,16 @@ void KdTree::build(Node* node, SHAPlaneEventList& events, unsigned int depth)
 {
     ++mTotalNodes;
 
-    const float leafCost = INTERSECTION_COST * node->prims.size();
+    const float leafCost = INTERSECTION_COST * node->primitiveCount();
     float splitCost = 0.f;
-    SHASplitPlane splitPlane = findSplitPlane(&splitCost, node->BBox, events, node->prims.size());
+    SHASplitPlane splitPlane = findSplitPlane(&splitCost, node->bounds(), events, node->primitiveCount());
 
     // Base case
-    if (leafCost < splitCost || node->prims.size() == 1)
+    if (leafCost < splitCost || node->primitiveCount() == 1)
     {
         mMaxDepth = std::max(depth, mMaxDepth);
         mMinDepth = std::min(depth, mMinDepth);
-        mMaxPrimsPerNode = std::max(node->prims.size(), mMaxPrimsPerNode);
+        mMaxPrimsPerNode = std::max(node->primitiveCount(), mMaxPrimsPerNode);
         ++mLeafNodes;
     }
     else
@@ -125,8 +130,8 @@ void KdTree::build(Node* node, SHAPlaneEventList& events, unsigned int depth)
         split(leftEvents, rightEvents, *node, splitPlane, events);
         events.clear();
         
-        build(node->left, leftEvents, depth+1);
-        build(node->right, rightEvents, depth+1);
+        build(node->left(), leftEvents, depth+1);
+        build(node->right(), rightEvents, depth+1);
     }
 }
 
@@ -142,8 +147,8 @@ void KdTree::split(SHAPlaneEventList& outLeftEvents, SHAPlaneEventList& outRight
     typedef std::unordered_map<const IPrimitive*, PrimSide> PrimSideMap;
     
     /* Classify the primitives based on the split plane and the split events */
-    PrimSideMap primClassification(node.prims.size() * 2);
-    for (Node::PrimIterator it = node.prims.begin(); it != node.prims.end(); ++it)
+    PrimSideMap primClassification(node.primitiveCount() * 2);
+    for (Node::ConstPrimIterator it = node.beginPrimitives(); it != node.endPrimitives(); ++it)
         primClassification[*it] = PS_BOTH;
 
     for (SHAPlaneEventList::const_iterator it = events.begin(); it != events.end(); ++it)
@@ -172,31 +177,28 @@ void KdTree::split(SHAPlaneEventList& outLeftEvents, SHAPlaneEventList& outRight
     }
     
     /* Split the node */
-    node.prims.clear();
-    node.left = new Node;
-    node.right = new Node;
+    node.clearPrimitves();
+    node.split(plane.aaAxis, plane.plane);
 
     for (PrimSideMap::const_iterator it = primClassification.begin(); it != primClassification.end(); ++it)
     {
         switch (it->second)
         {
             case PS_LEFT:
-                node.left->prims.push_back(it->first);
+                node.left()->addPrimitive(it->first);
                 break;
                 
             case PS_RIGHT:
-                node.right->prims.push_back(it->first);
+                node.right()->addPrimitive(it->first);
                 break;
                 
             case PS_BOTH:
             default:
-                node.left->prims.push_back(it->first);
-                node.right->prims.push_back(it->first);
+                node.left()->addPrimitive(it->first);
+                node.right()->addPrimitive(it->first);
                 break;
         }
     }
-
-    node.BBox.split(&node.left->BBox, &node.right->BBox, plane.plane, plane.aaAxis);
     
     /* Generate SHAPlaneEvents for left and right nodes */
     SHAPlaneEventList newLeftEvents;
@@ -214,27 +216,34 @@ void KdTree::split(SHAPlaneEventList& outLeftEvents, SHAPlaneEventList& outRight
         {
         case PS_LEFT:
             TP_ASSERT(
-                std::find(node.right->prims.begin(), node.right->prims.end(), primIt->first)
-                    == node.right->prims.end());
+                std::find(node.right()->beginPrimitives(),
+                          node.right()->endPrimitives(), primIt->first)
+                    == node.right()->endPrimitives());
             outLeftEvents.emplace_back(*it);
             break;
             
         case PS_RIGHT:
             TP_ASSERT(
-                std::find(node.left->prims.begin(), node.left->prims.end(), primIt->first)
-                    == node.left->prims.end());
+                std::find(node.left()->beginPrimitives(),
+                          node.left()->endPrimitives(), primIt->first)
+                    == node.left()->endPrimitives());
             outRightEvents.emplace_back(*it);
             break;
             
         case PS_BOTH:
             TP_ASSERT(
-              std::find(node.left->prims.begin(), node.left->prims.end(), primIt->first)
-                  != node.left->prims.end());
+                  std::find(node.left()->beginPrimitives(),
+                            node.left()->endPrimitives(), primIt->first)
+                  != node.left()->endPrimitives());
             TP_ASSERT(
-              std::find(node.right->prims.begin(), node.right->prims.end(), primIt->first)
-                  != node.right->prims.end());
-            generateEventsForPrimitive(it->primitive, node.left->BBox, newLeftEvents);
-            generateEventsForPrimitive(it->primitive, node.right->BBox, newRightEvents);
+                  std::find(node.right()->beginPrimitives(),
+                            node.right()->endPrimitives(), primIt->first)
+                  != node.right()->endPrimitives());
+
+            generateEventsForPrimitive(it->primitive,
+                                       node.left()->bounds(), newLeftEvents);
+            generateEventsForPrimitive(it->primitive,
+                                       node.right()->bounds(), newRightEvents);
             primClassification.erase(primIt);
             break;
 
@@ -273,43 +282,98 @@ void KdTree::split(SHAPlaneEventList& outLeftEvents, SHAPlaneEventList& outRight
     }
 }
 
-bool KdTree::trace(const Node* n, Ray& ray, bool firstHit, Mailboxer& mailboxes) const
+bool KdTree::trace(Ray& ray, bool firstHit, TraversalBuffer& traversalStack, Mailboxer& mailboxes) const
 {
-    bool ret = false;
-    
-    // Base case
-    if (n->isLeaf())
-    {
-        Node::ConstPrimIterator it = n->prims.begin();
-        for (; it != n->prims.end() && !(firstHit && ret); ++it)
-        {
-            if (!mailboxes.Tested((*it)->id()))
-            {
-                mTraversalStats.incrementPrimitiveTests();
-                ret |= (*it)->intersect(ray);
-                mailboxes.Mark((*it)->id());
-            }
-        }
-    }
-    else
-    {
-        mTraversalStats.incrementBoxTests();
-        if (n->left->BBox.intersect(ray))
-        {
-            ret |= trace(n->left, ray, firstHit, mailboxes);
-        }
+    mTraversalStats.incrementBoxTests();
+    if (!mRoot->intersectBounds(ray))
+        return false;
 
-        if (!(ret && firstHit))
+    bool hitPrimitive = false;
+    const Node* lastChild = nullptr;
+    traversalStack[1] = mRoot;
+    TraversalBuffer::iterator currentStackIt = traversalStack.begin() + 1;
+
+    while (*currentStackIt)
+    {
+        const Node* currentNode = *currentStackIt;
+        if (currentNode->isLeaf())
+        {
+            lastChild = currentNode;
+            Node::ConstPrimIterator it = currentNode->beginPrimitives();
+            for (; it != currentNode->endPrimitives() && !(firstHit && hitPrimitive); ++it)
+            {
+                if (!mailboxes.Tested((*it)->id()))
+                {
+                    mTraversalStats.incrementPrimitiveTests();
+                    if ((*it)->intersect(ray))
+                    {
+                        if (firstHit)
+                        {
+                            return true;
+                        }
+
+                        hitPrimitive = true;
+                    }
+
+                    mailboxes.Mark((*it)->id());
+                }
+            }
+
+            // Pop leaf node
+            TP_ASSERT(currentStackIt != traversalStack.begin());
+            --currentStackIt;
+            lastChild = currentNode;
+        }
+        else if (lastChild == &currentNode->right())
+        {
+            // Finished traversing all descendants of this node, pop
+            TP_ASSERT(currentStackIt != traversalStack.begin());
+            --currentStackIt;
+            lastChild = currentNode;
+        }
+        else if (lastChild == &currentNode->left())
         {
             mTraversalStats.incrementBoxTests();
-            if (n->right->BBox.intersect(ray))
+            if (currentNode->right().intersectBounds(ray))
             {
-                ret |= trace(n->right, ray, firstHit, mailboxes);
+                // Hit right node, push right node
+                ++currentStackIt;
+                TP_ASSERT(currentStackIt != traversalStack.end());
+                *currentStackIt = &currentNode->right();
+            }
+            else
+            {
+                // Finished traversing all descendants of this node, pop
+                TP_ASSERT(currentStackIt != traversalStack.begin());
+                --currentStackIt;
+                lastChild = currentNode;
+            }
+        }
+        else
+        {
+            mTraversalStats.incrementBoxTests();
+            if (currentNode->left().intersectBounds(ray))
+            {
+                // Hit left node, push left node
+                ++currentStackIt;
+                TP_ASSERT(currentStackIt != traversalStack.end());
+                *currentStackIt = &currentNode->left();
+            }
+            else
+            {
+                // If we didn't hit the left node we better hit the right one
+                // otherwise why did the parent node box test succeed?
+                TP_ASSERT(currentNode->right().intersectBounds(ray));
+
+                // Hit right node only, push right node
+                ++currentStackIt;
+                TP_ASSERT(currentStackIt != traversalStack.end());
+                *currentStackIt = &currentNode->right();
             }
         }
     }
     
-    return ret;
+    return hitPrimitive;
 }
 
 void KdTree::generateEventsForPrimitive(const IPrimitive* primitive, const AABBox& voxel, SHAPlaneEventList& events) const
@@ -425,7 +489,7 @@ KdTree::SHASplitPlane KdTree::findSplitPlane(float* lowestCostOut,
 void KdTree::SHACost(float* outCost, SHASplitPlane::Side* outSide, float plane, unsigned aaAxis, const AABBox& voxel, unsigned numLeftPrims, unsigned numRightPrims, unsigned numPlanarPrims) const
 {
     AABBox leftVoxel, rightVoxel;
-    voxel.split(&leftVoxel, &rightVoxel, plane, aaAxis);
+    voxel.split(&leftVoxel, &rightVoxel, aaAxis, plane);
     
     float probabilityHitLeft = leftVoxel.surfaceArea() / voxel.surfaceArea();
     float probabilityHitRight = rightVoxel.surfaceArea() / voxel.surfaceArea();
@@ -489,33 +553,35 @@ void KdTree::DumpSplitEvents(SHAPlaneEventList::const_iterator begin, SHAPlaneEv
 
 
 KdTree::Node::Node()
-: BBox()
-, left(NULL)
-, right(NULL)
-, prims()
+    : mBBox()
+    , mLeft(nullptr)
+    , mRight(nullptr)
+    , mPrims()
 {
 }
 
 KdTree::Node::~Node()
 {
-    prims.clear();
+    mPrims.clear();
 
-    delete left;
-    left = NULL;
-
-    delete right;
-    right = NULL;
+    if (mLeft)
+    {
+        mLeft->~Node();
+        mRight->~Node();
+        AlignedAllocator<Node>().deallocate(mLeft, 2);
+    }
 }
 
-void KdTree::Node::updateBBox()
+void KdTree::Node::updateBounds()
 {
     glm::vec3 ur(std::numeric_limits<float>::lowest());
     glm::vec3 ll(std::numeric_limits<float>::max());
     glm::vec3 primUr;
     glm::vec3 primLl;
     
-    ConstPrimIterator it = prims.begin();
-    for (; it != prims.end(); ++it) {
+    ConstPrimIterator it = beginPrimitives();
+    for (; it != endPrimitives(); ++it)
+    {
         (*it)->bounds(primLl, primUr);
 
         for (int i = 0; i < 3; i++)
@@ -525,26 +591,20 @@ void KdTree::Node::updateBBox()
         }
     }
     
-    BBox.update(ll, ur);
+    mBBox.update(ll, ur);
 }
 
-void KdTree::Node::updateBBox(const unsigned splitAxis, const float value, bool isLeft)
+void KdTree::Node::split(const unsigned splitAxis, const float plane)
 {
-    updateBBox();
-    
-    /* Clip bounding box to selected split */
-    if (isLeft)
-    {
-        glm::vec3 ur = BBox.ur();
-        ur[splitAxis] = value;
-        BBox.update(BBox.ll(), ur);
-    }
-    else
-    {
-        glm::vec3 ll = BBox.ll();
-        ll[splitAxis] = value;
-        BBox.update(ll, BBox.ur());
-    }
+    TP_ASSERT(mLeft == nullptr);
+    TP_ASSERT(mRight == nullptr);
+
+    // Allocate two children next to one another, aligned to cache line
+    void* ptr = AlignedAllocator<Node>().allocate(2);
+    mLeft = new(ptr) Node;
+    mRight = new(((Node*)ptr) + 1) Node;
+
+    mBBox.split(&mLeft->mBBox, &mRight->mBBox, splitAxis, plane);
 }
 
 KdTree::SHAPlaneEvent::SHAPlaneEvent(const IPrimitive* _prim, float _plane, unsigned _axis, SHAPlaneEventType _type)

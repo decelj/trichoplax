@@ -37,7 +37,7 @@ public:
     }
     
     float surfaceArea() const;
-    void split(AABBox* outLeft, AABBox* outRight, float plane, unsigned axis) const;
+    void split(AABBox* outLeft, AABBox* outRight, unsigned axis, float plane) const;
 private:
     glm::vec3 mBounds[2];
 };

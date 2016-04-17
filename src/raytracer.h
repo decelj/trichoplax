@@ -7,9 +7,9 @@
 #include "stats.h"
 #include "mailboxer.h"
 #include "noise.h"
+#include "kdtree.h"
 
 class Ray;
-class KdTree;
 class Camera;
 class Sampler;
 class ImageBuffer;
@@ -39,7 +39,6 @@ public:
     }
     
     Noise& getNoiseGenerator() const { return mNoiseGen; }
-    
     unsigned maxDepth() const { return mMaxDepth; }
 	
 private:
@@ -52,19 +51,19 @@ private:
     
     bool trace(Ray& ray, bool firstHit=false) const;
 
-    mutable Noise mNoiseGen;
-    mutable Mailboxer mMailboxes;
+    mutable Noise                   mNoiseGen;
+    mutable Mailboxer               mMailboxes;
+    const KdTree*                   mKdTree;
+    mutable KdTree::TraversalBuffer mTraversalStack;
+    const Camera*                   mCamera;
+    const EnvSphere*                mEnv;
+    ImageBuffer* const              mImgBuffer;
+    Sampler* const                  mSampler;
 
-    const KdTree* mKdTree;
-    const Camera* mCamera;
-    const EnvSphere* mEnv;
-    ImageBuffer* const mImgBuffer;
-    Sampler* const mSampler;
-
-    mutable Stats mStats;
-    const unsigned int mMaxDepth;
-    pthread_t mThreadId;
-    bool mIsCanceled;
+    mutable Stats                   mStats;
+    const unsigned int              mMaxDepth;
+    pthread_t                       mThreadId;
+    bool                            mIsCanceled;
 };
 
 #endif

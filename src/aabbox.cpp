@@ -30,7 +30,7 @@ short AABBox::longestAxis() const
     return 2;
 }
 
-void AABBox::split(AABBox* outLeft, AABBox* outRight, float plane, unsigned axis) const
+void AABBox::split(AABBox* outLeft, AABBox* outRight, const unsigned axis, const float plane) const
 {
     glm::vec3 leftUR = mBounds[1];
     leftUR[axis] = plane;
