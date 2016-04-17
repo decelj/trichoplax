@@ -10,15 +10,20 @@ StatsCollector::StatsCollector()
     mStats.clear();
 }
 
-void StatsCollector::print() const {
+void StatsCollector::print() const
+{
     std::cout << "Ray Type Stats:" << std::endl;
 
-    for (int i = 0; i < Ray::TYPE_COUNT; ++i) {
+    for (unsigned i = 0; i < Ray::TYPE_COUNT; ++i)
+    {
         size_t sum = 0;
-        for (auto it = mStats.begin(); it != mStats.end(); ++it)
-            sum += (*it)->mValues[i];
+        for (const Stats* stats : mStats)
+        {
+            sum += stats->mValues[i];
+        }
         
-        switch (i) {
+        switch (i)
+        {
             case Ray::PRIMARY:
                 std::cout << std::left << std::setw(20) <<
                     "  Primary rays: " << sum << std::endl;
@@ -47,11 +52,11 @@ void StatsCollector::print() const {
 unsigned long long StatsCollector::totalRaysCast() const
 {
     unsigned long long count = 0;
-    for (auto it = mStats.begin(); it != mStats.end(); ++it)
+    for (const Stats* stats : mStats)
     {
         for (unsigned i = 0; i < Ray::TYPE_COUNT; ++i)
         {
-            count += (*it)->mValues[i];
+            count += stats->mValues[i];
         }
     }
 

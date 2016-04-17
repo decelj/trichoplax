@@ -43,8 +43,6 @@ public:
     unsigned maxDepth() const { return mMaxDepth; }
 	
 private:
-    explicit Raytracer(); // Don't use the default constructor!
-    
     // Not copyable
     Raytracer(const Raytracer&) = delete;
     Raytracer& operator=(const Raytracer&) = delete;

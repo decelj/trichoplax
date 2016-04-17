@@ -24,8 +24,10 @@ void dumpPrimitiveListBounds(std::vector<IPrimitive*, AlignedAllocator<IPrimitiv
 {
     std::sort(prims.begin(), prims.end(), [axis](IPrimitive* a, IPrimitive* b)
               { glm::vec3 all, aur, bll, bur; a->bounds(all, aur); b->bounds(bll, bur); return all[axis] < bll[axis]; });
+
     glm::vec3 ll, ur;
-    for (auto it  = prims.begin(); it != prims.end(); ++it) {
+    for (auto it  = prims.begin(); it != prims.end(); ++it)
+    {
         (*it)->bounds(ll, ur);
         std::cout << "(" << (*it)->id() << ") " << ll[axis] << ", " << ur[axis] << std::endl;
     }
@@ -33,7 +35,7 @@ void dumpPrimitiveListBounds(std::vector<IPrimitive*, AlignedAllocator<IPrimitiv
     
 inline float calculateSplitCost(float probabilityHitLeft, float probabilityHitRight, unsigned numPrimsLeft, unsigned numPrimsRight)
 {
-    // TODO: This causes infite recusion trying to create empty nodes with zero volume. Fix me.
+    // TODO: This causes infinite recursion trying to create empty nodes with zero volume. Fix me.
     //float modifer = numPrimsLeft == 0 || numPrimsRight == 0 ? .8f : 1.f;
     float cost = INTERSECTION_COST * (probabilityHitLeft * (float)numPrimsLeft + probabilityHitRight * (float)numPrimsRight);
     cost += TRAVERSAL_COST;
@@ -41,18 +43,18 @@ inline float calculateSplitCost(float probabilityHitLeft, float probabilityHitRi
 
     return cost;
 }
-} // annonymous namspace
+} // anonymous namespace
 
 
 KdTree::KdTree()
-: mRoot(new Node)
-, mMaxDepth(0)
-, mMinDepth(std::numeric_limits<unsigned>::max())
-, mLargeNodes(0)
-, mLeafNodes(0)
-, mTotalNodes(0)
-, mMaxPrimsPerNode(0)
-, mTotalNumPrims(0)
+    : mRoot(new Node)
+    , mMaxDepth(0)
+    , mMinDepth(std::numeric_limits<unsigned>::max())
+    , mLargeNodes(0)
+    , mLeafNodes(0)
+    , mTotalNodes(0)
+    , mMaxPrimsPerNode(0)
+    , mTotalNumPrims(0)
 {
 }
 
@@ -97,7 +99,7 @@ void KdTree::build()
     std::cout << std::left << std::setw(30) << "  Max primitives per node:" << mMaxPrimsPerNode << std::endl;
     std::cout << std::left << std::setw(30) << "  Total nodes:" << mTotalNodes << std::endl;
     std::cout << std::left << std::setw(30) << "  Leaf nodes:" << mLeafNodes << std::endl;
-    std::cout << std::left << std::setw(30) << "  Total primatives:" << mTotalNumPrims << std::endl;
+    std::cout << std::left << std::setw(30) << "  Total primitives:" << mTotalNumPrims << std::endl;
     std::cout << std::left << std::setw(30) << "  Build time:" << t.elapsedToString(t.elapsed()) << std::endl;
 }
 
@@ -176,7 +178,8 @@ void KdTree::split(SHAPlaneEventList& outLeftEvents, SHAPlaneEventList& outRight
 
     for (PrimSideMap::const_iterator it = primClassification.begin(); it != primClassification.end(); ++it)
     {
-        switch (it->second) {
+        switch (it->second)
+        {
             case PS_LEFT:
                 node.left->prims.push_back(it->first);
                 break;
@@ -207,7 +210,8 @@ void KdTree::split(SHAPlaneEventList& outLeftEvents, SHAPlaneEventList& outRight
             continue;
         }
 
-        switch (primIt->second) {
+        switch (primIt->second)
+        {
         case PS_LEFT:
             TP_ASSERT(
                 std::find(node.right->prims.begin(), node.right->prims.end(), primIt->first)
@@ -247,7 +251,8 @@ void KdTree::split(SHAPlaneEventList& outLeftEvents, SHAPlaneEventList& outRight
     SHAPlaneEventList::iterator newEventsIt = newLeftEvents.begin();
     for (; newEventsIt != newLeftEvents.end(); ++newEventsIt)
     {
-        while (outEventsIt != outLeftEvents.end() && *outEventsIt < *newEventsIt) {
+        while (outEventsIt != outLeftEvents.end() && *outEventsIt < *newEventsIt)
+        {
             ++outEventsIt;
         }
         
@@ -259,7 +264,8 @@ void KdTree::split(SHAPlaneEventList& outLeftEvents, SHAPlaneEventList& outRight
     newEventsIt = newRightEvents.begin();
     for (; newEventsIt != newRightEvents.end(); ++newEventsIt)
     {
-        while (outEventsIt != outRightEvents.end() && *outEventsIt < *newEventsIt) {
+        while (outEventsIt != outRightEvents.end() && *outEventsIt < *newEventsIt)
+        {
             ++outEventsIt;
         }
         
@@ -332,7 +338,7 @@ void KdTree::generateEventsForPrimitive(const IPrimitive* primitive, const AABBo
         }
         else
         {
-            // Sum of the areas of the voxel faces which are orthognal to the
+            // Sum of the areas of the voxel faces which are orthogonal to the
             // clip plane
             const float area = clippedBoxWHD[axis] * clippedBoxWHD[(axis + 1) % 3]
                 + clippedBoxWHD[axis] * clippedBoxWHD[(axis + 2) % 3];
@@ -503,7 +509,7 @@ KdTree::Node::~Node()
 
 void KdTree::Node::updateBBox()
 {
-    glm::vec3 ur(-std::numeric_limits<float>::max());
+    glm::vec3 ur(std::numeric_limits<float>::lowest());
     glm::vec3 ll(std::numeric_limits<float>::max());
     glm::vec3 primUr;
     glm::vec3 primLl;
@@ -511,7 +517,9 @@ void KdTree::Node::updateBBox()
     ConstPrimIterator it = prims.begin();
     for (; it != prims.end(); ++it) {
         (*it)->bounds(primLl, primUr);
-        for (int i = 0; i < 3; i++) {
+
+        for (int i = 0; i < 3; i++)
+        {
             ur[i] = std::max(ur[i], primUr[i]);
             ll[i] = std::min(ll[i], primLl[i]);
         }

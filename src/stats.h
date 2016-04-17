@@ -13,8 +13,8 @@ public:
     void increment(const Ray::TYPE v) { ++mValues[v]; }
     
 private:
-    Stats(Stats&) = delete;
-    Stats& operator=(Stats&) = delete;
+    Stats(const Stats&) = delete;
+    Stats& operator=(const Stats&) = delete;
 
     unsigned long long mValues[Ray::TYPE_COUNT];
 };
