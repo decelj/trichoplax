@@ -8,11 +8,11 @@ class MultiSampleRay : public Ray {
 public:
     explicit MultiSampleRay(const Ray::TYPE t, unsigned samples);
 
-    unsigned numberOfSamples() const { return mSamples; }
-    unsigned currentSample() const { return mCurrentSample; }
-    void decrementSampleCount() { --mCurrentSample; }
-    void zeroSampleCount() { mCurrentSample = 0; }
-    void setNumberOfSamples(unsigned numSamples);
+    inline unsigned numberOfSamples() const { return mSamples; }
+    inline unsigned currentSample() const { return mCurrentSample; }
+    inline void decrementSampleCount() { --mCurrentSample; }
+    inline void zeroSampleCount() { mCurrentSample = 0; }
+    inline void setNumberOfSamples(unsigned numSamples);
     
     MultiSampleRay& operator--() { --mCurrentSample; return *this; }
     
