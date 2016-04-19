@@ -32,15 +32,17 @@ private:
 
         inline void addPrimitive(const IPrimitive* prim) { mPrims.emplace_back(prim); }
         inline void clearPrimitves() { mPrims.clear(); }
+        inline bool isEmpty() { return mPrims.empty(); }
         void updateBounds();
         void split(const unsigned splitAxis, const float plane);
+        bool pruneEmptyLeafNodes();
 
         inline Node* left() { return mLeft; }
         inline Node* right() { return mRight; }
-        inline const Node& left() const { return *mLeft; }
-        inline const Node& right() const { return *mRight; }
+        inline const Node* left() const { return mLeft; }
+        inline const Node* right() const { return mRight; }
 
-        inline bool isLeaf() const { return mLeft == nullptr; }
+        inline bool isLeaf() const { return mLeft == nullptr && mRight == nullptr; }
         inline const AABBox& bounds() const { return mBBox; }
         inline size_t primitiveCount() const { return mPrims.size(); }
         inline bool intersectBounds(const Ray& ray) const { return mBBox.intersect(ray); }

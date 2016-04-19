@@ -132,6 +132,12 @@ void KdTree::build(Node* node, SHAPlaneEventList& events, unsigned int depth)
         
         build(node->left(), leftEvents, depth+1);
         build(node->right(), rightEvents, depth+1);
+
+        if (node->pruneEmptyLeafNodes())
+        {
+            --mLeafNodes;
+            --mTotalNodes;
+        }
     }
 }
 
@@ -289,7 +295,7 @@ bool KdTree::trace(Ray& ray, bool firstHit, TraversalBuffer& traversalStack, Mai
         return false;
 
     bool hitPrimitive = false;
-    const Node* lastChild = nullptr;
+    const Node* lastChild = mRoot;
     traversalStack[1] = mRoot;
     TraversalBuffer::iterator currentStackIt = traversalStack.begin() + 1;
 
@@ -324,22 +330,21 @@ bool KdTree::trace(Ray& ray, bool firstHit, TraversalBuffer& traversalStack, Mai
             --currentStackIt;
             lastChild = currentNode;
         }
-        else if (lastChild == &currentNode->right())
+        else if (lastChild == currentNode->right())
         {
             // Finished traversing all descendants of this node, pop
             TP_ASSERT(currentStackIt != traversalStack.begin());
             --currentStackIt;
             lastChild = currentNode;
         }
-        else if (lastChild == &currentNode->left())
+        else if (lastChild == currentNode->left())
         {
-            mTraversalStats.incrementBoxTests();
-            if (currentNode->right().intersectBounds(ray))
+            if (currentNode->right() && currentNode->right()->intersectBounds(ray))
             {
                 // Hit right node, push right node
                 ++currentStackIt;
                 TP_ASSERT(currentStackIt != traversalStack.end());
-                *currentStackIt = &currentNode->right();
+                *currentStackIt = currentNode->right();
             }
             else
             {
@@ -348,28 +353,49 @@ bool KdTree::trace(Ray& ray, bool firstHit, TraversalBuffer& traversalStack, Mai
                 --currentStackIt;
                 lastChild = currentNode;
             }
+
+            if (currentNode->right())
+            {
+                mTraversalStats.incrementBoxTests();
+            }
         }
         else
         {
-            mTraversalStats.incrementBoxTests();
-            if (currentNode->left().intersectBounds(ray))
+            bool haveLeftNode = currentNode->left() != nullptr;
+            if (haveLeftNode && currentNode->left()->intersectBounds(ray))
             {
                 // Hit left node, push left node
                 ++currentStackIt;
                 TP_ASSERT(currentStackIt != traversalStack.end());
-                *currentStackIt = &currentNode->left();
+                *currentStackIt = currentNode->left();
             }
             else
             {
-                // If we didn't hit the left node we better hit the right one
-                // otherwise why did the parent node box test succeed?
-                TP_ASSERT(currentNode->right().intersectBounds(ray));
+                if (currentNode->right() &&
+                    (haveLeftNode || currentNode->right()->intersectBounds(ray)))
+                {
+                    // If we didn't hit the left node we better hit the right one
+                    // otherwise why did the parent node box test succeed?
+                    if (haveLeftNode)
+                    {
+                        TP_ASSERT(currentNode->right()->intersectBounds(ray));
+                    }
 
-                // Hit right node only, push right node
-                ++currentStackIt;
-                TP_ASSERT(currentStackIt != traversalStack.end());
-                *currentStackIt = &currentNode->right();
+                    // Hit right node only, push right node
+                    ++currentStackIt;
+                    TP_ASSERT(currentStackIt != traversalStack.end());
+                    *currentStackIt = currentNode->right();
+                }
+                else
+                {
+                    // Finished traversing all descendants of this node, pop
+                    TP_ASSERT(currentStackIt != traversalStack.begin());
+                    --currentStackIt;
+                    lastChild = currentNode;
+                }
             }
+
+            mTraversalStats.incrementBoxTests();
         }
     }
     
@@ -567,8 +593,13 @@ KdTree::Node::~Node()
     if (mLeft)
     {
         mLeft->~Node();
+        AlignedAllocator<Node>().deallocate(mLeft, 1);
+    }
+
+    if (mRight)
+    {
         mRight->~Node();
-        AlignedAllocator<Node>().deallocate(mLeft, 2);
+        AlignedAllocator<Node>().deallocate(mRight, 1);
     }
 }
 
@@ -599,12 +630,36 @@ void KdTree::Node::split(const unsigned splitAxis, const float plane)
     TP_ASSERT(mLeft == nullptr);
     TP_ASSERT(mRight == nullptr);
 
-    // Allocate two children next to one another, aligned to cache line
-    void* ptr = AlignedAllocator<Node>().allocate(2);
-    mLeft = new(ptr) Node;
-    mRight = new(((Node*)ptr) + 1) Node;
+    mLeft = AlignedAllocator<Node>().allocate(1);
+    mRight = AlignedAllocator<Node>().allocate(1);
+    new (mLeft) Node;
+    new (mRight) Node;
 
     mBBox.split(&mLeft->mBBox, &mRight->mBBox, splitAxis, plane);
+}
+
+bool KdTree::Node::pruneEmptyLeafNodes()
+{
+    if (mLeft->isLeaf() && mLeft->isEmpty())
+    {
+        TP_ASSERT(!mRight->isEmpty() || !mRight->isLeaf());
+
+        mLeft->~Node();
+        AlignedAllocator<Node>().deallocate(mLeft, 1);
+        mLeft = nullptr;
+        return true;
+    }
+    else if (mRight->isLeaf() && mRight->isEmpty())
+    {
+        TP_ASSERT(!mLeft->isEmpty() || !mLeft->isLeaf());
+
+        mRight->~Node();
+        AlignedAllocator<Node>().deallocate(mRight, 1);
+        mRight = nullptr;
+        return true;
+    }
+
+    return false;
 }
 
 KdTree::SHAPlaneEvent::SHAPlaneEvent(const IPrimitive* _prim, float _plane, unsigned _axis, SHAPlaneEventType _type)
