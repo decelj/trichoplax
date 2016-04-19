@@ -6,7 +6,7 @@
 
 Hit::Hit(const Ray& r)
     : P(r.point(r.mMaxT))
-    , Ng(r.mHitPrim->normal(P))
+    , Ng(r.mHitPrim->normal(P, r.mHitBarycentrics))
     , N(r.didHitBackFace() ? -Ng : Ng)
     , V(-r.mDir)
     , I(r.mDir)

@@ -6,11 +6,13 @@
 #include <algorithm>
 #include <limits>
 
-Sphere::Sphere(const glm::vec3& center, const float radius, Material *m, glm::mat4 t) :
-    IPrimitive(), mCenter(center),
-    mLL(std::numeric_limits<float>::max()),
-    mUR(-std::numeric_limits<float>::max()),
-    mRadius(radius), mT(t)
+Sphere::Sphere(const glm::vec3& center, const float radius, Material *m, glm::mat4 t)
+    : IPrimitive()
+    , mCenter(center)
+    , mLL(std::numeric_limits<float>::max())
+    , mUR(std::numeric_limits<float>::lowest())
+    , mRadius(radius)
+    , mT(t)
 {
     mTInverse = glm::inverse(mT);
     mTInverseTranspose = glm::transpose(mTInverse);
@@ -29,8 +31,10 @@ Sphere::Sphere(const glm::vec3& center, const float radius, Material *m, glm::ma
     points[6] = glm::vec3(mT * glm::vec4(utll + glm::vec3(mRadius*2, 0, mRadius*2), 1.f));
     points[7] = glm::vec3(mT * glm::vec4(utll + glm::vec3(mRadius*2, mRadius*2, mRadius*2), 1.f));
     
-    for (unsigned i = 0; i < 8; ++i) {
-        for (unsigned int j = 0; j < 3; ++j) {
+    for (unsigned i = 0; i < 8; ++i)
+    {
+        for (unsigned int j = 0; j < 3; ++j)
+        {
             mLL[j] = std::min(mLL[j], points[i][j]);
             mUR[j] = std::max(mUR[j], points[i][j]);
         }
@@ -63,13 +67,18 @@ bool Sphere::intersect(Ray& ray) const
     // One negative, one positive root -> point inside sphere, hit backface
     // Two positive roots -> point outside sphere
     float t;
-    if (sln1 < 0.f) {
+    if (sln1 < 0.f)
+    {
         if (!ray.shouldHitBackFaces() || sln2 < 0.f) return false;
         t = sln2;
-    } else if (sln2 < 0.f) {
+    }
+    else if (sln2 < 0.f)
+    {
         if (!ray.shouldHitBackFaces()) return false;
         t = sln1;
-    } else {
+    }
+    else
+    {
         t = sln1 < sln2 ? sln1 : sln2;
     }
     
@@ -78,15 +87,16 @@ bool Sphere::intersect(Ray& ray) const
     //       test against transformed t, if hit transform t by mT
     glm::vec3 hitP = glm::vec3(mT * glm::vec4(transformed.point(t), 1.f));
     t = ray.t(hitP);
-    if (ray.hits(t)) {
-        ray.hit(this, t, sln1 < 0.f || sln2 < 0.f);
+    if (ray.hits(t))
+    {
+        ray.hit(this, t, glm::vec2(0.f), sln1 < 0.f || sln2 < 0.f);
         return true;
     }
     
     return false;
 }
 
-glm::vec3 Sphere::normal(const glm::vec3& p) const
+glm::vec3 Sphere::normal(const glm::vec3& p, const glm::vec2& /*barycentrics*/) const
 {
     // TODO: This is kinda bad, we should fix it
     // p is in world space, transform it to object space

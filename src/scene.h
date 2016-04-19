@@ -10,16 +10,16 @@
 class Camera;
 class Sampler;
 class ImageBuffer;
+class Mesh;
 class ILight;
 class Ray;
-class IPrimitive;
 class EnvSphere;
 
 class Scene
 {
 private:
     typedef std::vector<ILight*> LightVector;
-    typedef std::forward_list<IPrimitive*> PrimitiveList;
+    typedef std::forward_list<Mesh*> MeshList;
 
 public:
     typedef LightVector::const_iterator ConstLightIter;
@@ -33,16 +33,17 @@ public:
         float bias;
     };
 
+    void prepareForRendering();
     void render(const std::string& filename);
     void setCamera(Camera* cam) { mCam = cam; }
-    void addPrimitive(IPrimitive* prim);
+    Mesh& allocateMesh(unsigned numberOfVerticies);
     void addLight(ILight* lgt) { mLights.push_back(lgt); }
     void setMaxDepth(unsigned depth) { mSettings.maxDepth = depth; }
     void setNumGISamples(unsigned numSamples) { mSettings.GISamples = numSamples; }
     void setBias(float bias) { mSettings.bias = bias; }
     void setImageSize(unsigned width, unsigned height);
     void setEnvSphereImage(const std::string& file);
-    void setShadowRays(int num);
+    void setShadowRays(unsigned num);
 
     const RenderSettings& renderSettings() const { return mSettings; }
     
@@ -66,7 +67,7 @@ private:
     EnvSphere*              mEnvSphere;
     LightVector             mLights;
     RenderSettings          mSettings;
-    PrimitiveList           mPrimitives;
+    MeshList                mMeshes;
     
     static Scene* sInstance;
 };

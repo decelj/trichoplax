@@ -24,7 +24,7 @@ public:
     unsigned secondPassShadowRays() const;
     
 protected:
-    ILight(const glm::vec3& kd, float radius, float bias, unsigned shadowRays);
+    ILight(const glm::vec3& kd, float radius, float bias);
 
     ILight(const ILight&) = delete;
     ILight& operator=(const ILight&) = delete;

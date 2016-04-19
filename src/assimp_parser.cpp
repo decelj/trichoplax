@@ -16,16 +16,24 @@
 #include "point_light.h"
 #include "direct_light.h"
 #include "camera.h"
+#include "mesh.h"
 
 #undef AI_CONFIG_PP_SBP_REMOVE
 #define AI_CONFIG_PP_SBP_REMOVE aiPrimitiveType_POINTS | aiPrimitiveType_LINES
 
-namespace {
+namespace
+{
     
 template<typename T>
 inline glm::vec3 toVec3(const T& vec)
 {
     return glm::vec3(vec[0], vec[1], vec[2]);
+}
+
+template<typename T>
+inline glm::vec2 toVec2(const T& vec)
+{
+    return glm::vec2(vec[0], vec[1]);
 }
 
 inline glm::mat4 toMat4(const aiMatrix4x4& mat)
@@ -36,9 +44,9 @@ inline glm::mat4 toMat4(const aiMatrix4x4& mat)
                      mat.a4, mat.b4, mat.c4, mat.d4);
 }
 
-PointLight* parsePointLight(const aiLight* aiLight, const TransformStack* tStack)
+PointLight* parsePointLight(const aiLight* aiLight, const TransformStack& tStack)
 {
-    return new PointLight(tStack->transformPoint(toVec3(aiLight->mPosition)),
+    return new PointLight(tStack.transformPoint(toVec3(aiLight->mPosition)),
                           toVec3(aiLight->mColorDiffuse),
                           0.f /*radius*/, .1f /*bias*/,
                           aiLight->mAttenuationConstant,
@@ -46,14 +54,22 @@ PointLight* parsePointLight(const aiLight* aiLight, const TransformStack* tStack
                           aiLight->mAttenuationQuadratic);
 }
 
-DirectLight* parseDirectLight(const aiLight* aiLight, const TransformStack* tStack)
+DirectLight* parseDirectLight(const aiLight* aiLight, const TransformStack& tStack)
 {
-    return new DirectLight(tStack->transformNormal(toVec3(aiLight->mDirection)),
+    return new DirectLight(tStack.transformNormal(toVec3(aiLight->mDirection)),
                            toVec3(aiLight->mColorDiffuse),
                            .1f /*bias*/);
 }
 } // anonymous namespace
 
+
+AssimpParser::AssimpParser()
+    : mScene(nullptr)
+    , mAiScene(nullptr)
+    , mMaterials(0)
+    , mCameraIdx(0) // TODO allow user to select camera
+{
+}
 
 AssimpParser::~AssimpParser()
 {
@@ -92,13 +108,13 @@ std::string AssimpParser::parse(const std::string& file, Scene& scene)
     loadMaterials();
     
     TransformStack tStack;
-    loadScene(mAiScene->mRootNode, &tStack);
+    loadScene(mAiScene->mRootNode, tStack);
 
     // TODO: Fix this
     return std::string("assimpImage.png");
 }
 
-void AssimpParser::loadLight(const aiLight* light, const TransformStack* tStack)
+void AssimpParser::loadLight(const aiLight* light, const TransformStack& tStack)
 {
     switch (light->mType)
     {
@@ -116,7 +132,7 @@ void AssimpParser::loadLight(const aiLight* light, const TransformStack* tStack)
     }
 }
 
-void AssimpParser::loadCamera(const aiCamera* cam, const TransformStack* tStack)
+void AssimpParser::loadCamera(const aiCamera* cam, const TransformStack& tStack)
 {
     // Convert hfov in radians to vfov / 2 in radians
     float vfov = atanf(tanf(2.f * cam->mHorizontalFOV) / cam->mAspect);
@@ -125,24 +141,42 @@ void AssimpParser::loadCamera(const aiCamera* cam, const TransformStack* tStack)
     vfov *= 2.f;
     
     mScene->setCamera(new Camera(vfov,
-        tStack->transformPoint(toVec3(cam->mPosition)),
-        tStack->transformNormal(toVec3(cam->mLookAt)),
-        tStack->transformNormal(toVec3(cam->mUp)),
+        tStack.transformPoint(toVec3(cam->mPosition)),
+        tStack.transformNormal(toVec3(cam->mLookAt)),
+        tStack.transformNormal(toVec3(cam->mUp)),
         800 /*width TODO: FIX ME!*/,
         cam->mAspect == 0. ? 600 : static_cast<unsigned>(800.f / cam->mAspect)));
 }
 
-void AssimpParser::loadScene(const aiNode* node, TransformStack* tStack)
+void AssimpParser::loadScene(const aiNode* node, TransformStack& tStack)
 {
-    tStack->push();
-    tStack->transform(toMat4(node->mTransformation));
+    tStack.push();
+    tStack.transform(toMat4(node->mTransformation));
     
     for (unsigned meshIdx = 0; meshIdx < node->mNumMeshes; ++meshIdx)
     {
-        const aiMesh* mesh = mAiScene->mMeshes[node->mMeshes[meshIdx]];
-        for (unsigned faceIdx = 0; faceIdx < mesh->mNumFaces; ++faceIdx)
+        const aiMesh* aiMesh = mAiScene->mMeshes[node->mMeshes[meshIdx]];
+        Mesh& mesh = mScene->allocateMesh(aiMesh->mNumVertices);
+
+        for (unsigned i = 0; i < aiMesh->mNumVertices; ++i)
         {
-            const aiFace& face = mesh->mFaces[faceIdx];
+            TP_ASSERT(aiMesh->mNormals);
+            TP_ASSERT(aiMesh->mTextureCoords);
+
+            glm::vec3 position = tStack.transformPoint(toVec3(aiMesh->mVertices[i]));
+            glm::vec3 normal = tStack.transformNormal(toVec3(aiMesh->mNormals[i]));
+            glm::vec2 uv = glm::vec2(0.f);
+            if (aiMesh->mTextureCoords[0])
+            {
+                uv = toVec2(aiMesh->mTextureCoords[0][i]);
+            }
+
+            mesh.addVertex(position, normal, uv);
+        }
+
+        for (unsigned faceIdx = 0; faceIdx < aiMesh->mNumFaces; ++faceIdx)
+        {
+            const aiFace& face = aiMesh->mFaces[faceIdx];
             
             if (face.mNumIndices != 3)
             {
@@ -150,12 +184,9 @@ void AssimpParser::loadScene(const aiNode* node, TransformStack* tStack)
                     << "), skipping face!" << std::endl;
                 continue;
             }
-            
-            mScene->addPrimitive(
-                new Triangle(tStack->transformPoint(toVec3(mesh->mVertices[face.mIndices[0]])),
-                             tStack->transformPoint(toVec3(mesh->mVertices[face.mIndices[1]])),
-                             tStack->transformPoint(toVec3(mesh->mVertices[face.mIndices[2]])),
-                             mMaterials[mesh->mMaterialIndex].get()));
+
+            mesh.addPrimitive(face.mIndices[0], face.mIndices[1], face.mIndices[2],
+                              mMaterials[aiMesh->mMaterialIndex].get());
         }
     }
     
@@ -173,7 +204,7 @@ void AssimpParser::loadScene(const aiNode* node, TransformStack* tStack)
     for (unsigned cIdx = 0; cIdx < node->mNumChildren; ++cIdx)
         loadScene(node->mChildren[cIdx], tStack);
     
-    tStack->pop();
+    tStack.pop();
 }
 
 void AssimpParser::loadMaterials()

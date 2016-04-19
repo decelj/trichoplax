@@ -6,12 +6,12 @@
 
 PointLight::PointLight(const glm::vec3& pos, const glm::vec3& kd, float radius,
                        float bias, float constAtten, float linearAtten, float quadAtten)
-    : ILight(kd, radius, bias, 1)
+    : ILight(kd, radius, bias)
     , mPos(pos)
     , mConstAtten(constAtten)
     , mLinearAtten(linearAtten)
     , mQuadAtten(quadAtten)
-    , mSamplesInfo(1, 2.f * (float)M_PI, 1.f)
+    , mSamplesInfo(radius > 0.f ? 16 : 1, 2.f * (float)M_PI, 1.f)
 {
 }
 

@@ -11,7 +11,7 @@ public:
     explicit Hit(const Ray& r);
 
     glm::vec3 P;
-    glm::vec3 Ng;   // Geometric normal
+    glm::vec3 Ng;   // Interpolated geometric normal
     glm::vec3 N;    // Shading normal (will be flipped Ng if backface hit)
     glm::vec3 V;
     glm::vec3 I;

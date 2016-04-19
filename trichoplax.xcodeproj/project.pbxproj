@@ -19,6 +19,9 @@
 		2B2ABF031C4822C200033C4A /* sampler_info.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2ABF021C4822C200033C4A /* sampler_info.cpp */; settings = {ASSET_TAGS = (); }; };
 		2B2D9E3417164FB10098D2C6 /* point_light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2D9E3317164FB10098D2C6 /* point_light.cpp */; };
 		2B2DA0F7171E63EE0098D2C6 /* direct_light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2DA0F6171E63EE0098D2C6 /* direct_light.cpp */; };
+		2B6D16DB1CC3FA1300DF95A5 /* brdf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B6D16DA1CC3FA1300DF95A5 /* brdf.cpp */; settings = {ASSET_TAGS = (); }; };
+		2B6D16DE1CC4450B00DF95A5 /* mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B6D16DC1CC4450B00DF95A5 /* mesh.cpp */; settings = {ASSET_TAGS = (); }; };
+		2B6D16E11CC4461400DF95A5 /* vertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B6D16DF1CC4461400DF95A5 /* vertex.cpp */; settings = {ASSET_TAGS = (); }; };
 		2B794EFF1B2FF06200F6A919 /* mailboxer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B794EFD1B2FF06200F6A919 /* mailboxer.cpp */; };
 		2B7B648C170FBD0F002C830F /* libfreeimage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B7B648B170FBD0F002C830F /* libfreeimage.a */; };
 		2B7B64A1170FBDE0002C830F /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B6483170FBCBD002C830F /* camera.cpp */; };
@@ -90,6 +93,11 @@
 		2B2DA0F6171E63EE0098D2C6 /* direct_light.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = direct_light.cpp; sourceTree = "<group>"; };
 		2B2DA1A6171FA0D10098D2C6 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
 		2B6D16D91CC2F14300DF95A5 /* glm */ = {isa = PBXFileReference; lastKnownFileType = folder; name = glm; path = include/glm; sourceTree = "<group>"; };
+		2B6D16DA1CC3FA1300DF95A5 /* brdf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = brdf.cpp; sourceTree = "<group>"; };
+		2B6D16DC1CC4450B00DF95A5 /* mesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mesh.cpp; sourceTree = "<group>"; };
+		2B6D16DD1CC4450B00DF95A5 /* mesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mesh.h; sourceTree = "<group>"; };
+		2B6D16DF1CC4461400DF95A5 /* vertex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vertex.cpp; sourceTree = "<group>"; };
+		2B6D16E01CC4461400DF95A5 /* vertex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vertex.h; sourceTree = "<group>"; };
 		2B794EFC1B2FC47000F6A919 /* aligned_allocator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = aligned_allocator.h; sourceTree = "<group>"; };
 		2B794EFD1B2FF06200F6A919 /* mailboxer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mailboxer.cpp; sourceTree = "<group>"; };
 		2B794EFE1B2FF06200F6A919 /* mailboxer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mailboxer.h; sourceTree = "<group>"; };
@@ -195,6 +203,10 @@
 				2B98D7B41C4833E300C73F03 /* spherical_sampler.cpp */,
 				2B98D7B51C4833E300C73F03 /* spherical_sampler.h */,
 				2B98D7B71C494EB900C73F03 /* point_sampler.cpp */,
+				2B6D16DF1CC4461400DF95A5 /* vertex.cpp */,
+				2B6D16E01CC4461400DF95A5 /* vertex.h */,
+				2B6D16DC1CC4450B00DF95A5 /* mesh.cpp */,
+				2B6D16DD1CC4450B00DF95A5 /* mesh.h */,
 				2B98D7B81C494EB900C73F03 /* point_sampler.h */,
 				2BB1AC341738B14D00336221 /* aabbox.cpp */,
 				2BB1AC331738B14D00336221 /* aabbox.h */,
@@ -202,6 +214,7 @@
 				2BAEAF0F1933C192002605AF /* assimp_parser.cpp */,
 				2BAEAF101933C192002605AF /* assimp_parser.h */,
 				2B7B673A17108606002C830F /* brdf.h */,
+				2B6D16DA1CC3FA1300DF95A5 /* brdf.cpp */,
 				2B794F001B31243200F6A919 /* bucket_allocator.h */,
 				2B794F021B31309B00F6A919 /* bucket_pool.h */,
 				2B7B6483170FBCBD002C830F /* camera.cpp */,
@@ -368,6 +381,7 @@
 				2B7B65E7170FC938002C830F /* scene.cpp in Sources */,
 				2B7B65E8170FC938002C830F /* sphere.cpp in Sources */,
 				2B7B6605170FD3CC002C830F /* raytracer.cpp in Sources */,
+				2B6D16DB1CC3FA1300DF95A5 /* brdf.cpp in Sources */,
 				2B16B3921C6FA07E00A4B47C /* LDsequence_utils.cpp in Sources */,
 				2B7B673D171086CE002C830F /* material.cpp in Sources */,
 				2B7B67691710A3DA002C830F /* triangle.cpp in Sources */,
@@ -375,6 +389,7 @@
 				2B16B3861C6F9E8500A4B47C /* isamples_generator.cpp in Sources */,
 				2B7B683A1710D326002C830F /* ray.cpp in Sources */,
 				2B2D9E3417164FB10098D2C6 /* point_light.cpp in Sources */,
+				2B6D16E11CC4461400DF95A5 /* vertex.cpp in Sources */,
 				2B16B38F1C6F9F0F00A4B47C /* halton_generator.cpp in Sources */,
 				2BE7B8F71C34DB58007C3AD6 /* ilight.cpp in Sources */,
 				2B2DA0F7171E63EE0098D2C6 /* direct_light.cpp in Sources */,
@@ -387,6 +402,7 @@
 				2B16B3951C6FA39800A4B47C /* hammersley_generator.cpp in Sources */,
 				2B1BCAEC186A93DC004F0635 /* env_sphere.cpp in Sources */,
 				2BB1AC351738B14D00336221 /* aabbox.cpp in Sources */,
+				2B6D16DE1CC4450B00DF95A5 /* mesh.cpp in Sources */,
 				2B05D3CF18665F57005082A9 /* stats_collector.cpp in Sources */,
 				2B98D7B91C494EB900C73F03 /* point_sampler.cpp in Sources */,
 				2BD9523F17AE089C000576EB /* multi_sample_ray.cpp in Sources */,

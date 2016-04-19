@@ -13,12 +13,12 @@ public:
     explicit Sphere(const glm::vec3& center, const float radius, Material *m, glm::mat4 t);
 
     // IPrimitive
-    bool intersect(Ray& ray) const;
-    glm::vec3 normal(const glm::vec3& p) const;
-    void bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const;
-    bool isCoplaner(const float plane, const unsigned aaAxis) const;
-    bool isOrthognalToAxis(const unsigned axis) const;
-    void aaBoxClip(const float start, const float end, const unsigned aaAxis, float* outStart, float* outEnd) const;
+    bool intersect(Ray& ray) const override;
+    glm::vec3 normal(const glm::vec3& p, const glm::vec2& barycentrics) const override;
+    void bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const override;
+    bool isCoplaner(const float plane, const unsigned aaAxis) const override;
+    bool isOrthognalToAxis(const unsigned axis) const override;
+    void aaBoxClip(float start, float end, unsigned aaAxis, float* outStart, float* outEnd) const override;
     
 private:
     glm::vec3 mCenter, mLL, mUR;
@@ -43,7 +43,7 @@ inline bool Sphere::isOrthognalToAxis(const unsigned axis) const
     return false;
 }
 
-inline void Sphere::aaBoxClip(const float start, const float end, const unsigned aaAxis, float* outStart, float* outEnd) const
+inline void Sphere::aaBoxClip(float start, float end, unsigned aaAxis, float* outStart, float* outEnd) const
 {
     *outStart = std::max(start, mLL[aaAxis]);
     *outEnd = std::min(end, mUR[aaAxis]);

@@ -16,6 +16,7 @@
 #include "stats_collector.h"
 #include "env_sphere.h"
 #include "iprimitive.h"
+#include "mesh.h"
 
 
 namespace {
@@ -59,6 +60,7 @@ Scene::Scene()
     , mEnvSphere(nullptr)
     , mLights()
     , mSettings()
+    , mMeshes()
 {
 }
 
@@ -79,17 +81,17 @@ Scene::~Scene()
     delete mKdTree;
     mKdTree = nullptr;
 
-    for (auto light : mLights)
+    for (ILight* light : mLights)
     {
         delete light;
     }
     mLights.clear();
 
-    for (auto prim : mPrimitives)
+    for (Mesh* mesh : mMeshes)
     {
-        delete prim;
+        delete mesh;
     }
-    mPrimitives.clear();
+    mMeshes.clear();
 }
 
 Scene& Scene::instance()
@@ -118,10 +120,10 @@ void Scene::createBuffer()
     mImgBuffer = new ImageBuffer(mCam->width(), mCam->height());
 }
 
-void Scene::addPrimitive(IPrimitive* prim)
+Mesh& Scene::allocateMesh(unsigned numberOfVerticies)
 {
-    mKdTree->addPrimitive(prim);
-    mPrimitives.push_front(prim);
+    mMeshes.emplace_front(new Mesh(numberOfVerticies));
+    return *mMeshes.front();
 }
 
 void Scene::setImageSize(unsigned width, unsigned height)
@@ -137,6 +139,17 @@ void Scene::setEnvSphereImage(const std::string& file)
         delete mEnvSphere;
     }
     mEnvSphere = new EnvSphere(file);
+}
+
+void Scene::prepareForRendering()
+{
+    for (const Mesh* mesh : mMeshes)
+    {
+        for (const IPrimitive* primitive : *mesh)
+        {
+            mKdTree->addPrimitive(primitive);
+        }
+    }
 }
 
 void Scene::render(const std::string& filename)
@@ -191,8 +204,8 @@ void Scene::render(const std::string& filename)
     cleanupThreads(tracers);
 }
 
-void Scene::setShadowRays(int num)
+void Scene::setShadowRays(unsigned num)
 {
-    for (auto it = mLights.begin(); it != mLights.end(); ++it)
-        (*it)->setShadowRays(num);
+    for (ILight* light : mLights)
+        light->setShadowRays(num);
 }

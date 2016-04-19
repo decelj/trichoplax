@@ -44,7 +44,8 @@ public:
     float ior() const                       { return mIor; }
     TYPE type() const                       { return mType; }
     
-    void hit(const IPrimitive* primitive, float t, bool hitBackFace);
+    void hit(const IPrimitive* primitive, float t,
+             const glm::vec2& barycentrics, bool hitBackFace);
     bool hits(const float t) const { return t < mMaxT && t > mMinT; }
     
     // This method is bad and should go away. Assumes we already know p
@@ -73,17 +74,20 @@ private:
     float               mIor;
     float               mMinT;
     float               mMaxT;
+    glm::vec2           mHitBarycentrics;
     const IPrimitive*   mHitPrim;
     bool                mDidHitBack;
     bool                mShouldHitBack;
 };
 
 
-inline void Ray::hit(const IPrimitive* primitive, float t, bool hitBackFace)
+inline void Ray::hit(const IPrimitive* primitive, float t,
+                     const glm::vec2& barycentrics, bool hitBackFace)
 {
     TP_ASSERT(t <= mMaxT);
 
     mMaxT = t;
+    mHitBarycentrics = barycentrics;
     mHitPrim = primitive;
     mDidHitBack = hitBackFace;
 }

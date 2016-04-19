@@ -23,10 +23,6 @@ public:
     unsigned shadowRays() const override;
     
 private:
-    void randomPointOnDisk(Noise& noise, const glm::vec3& P,
-                           unsigned numSamples, unsigned currentSample,
-                           glm::vec3& result) const;
-    
     glm::vec3                   mPos;
     float                       mConstAtten;
     float                       mLinearAtten;

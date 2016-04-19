@@ -19,9 +19,7 @@ struct aiCamera;
 class AssimpParser : public IParser
 {
 public:
-    AssimpParser() : mScene(nullptr), mAiScene(nullptr), mMaterials(0),
-        mCameraIdx(0) // TODO allow user to select camera
-    { }
+    AssimpParser();
     virtual ~AssimpParser();
     
     virtual std::string parse(const std::string& file, Scene& scene);
@@ -30,14 +28,14 @@ private:
     typedef std::vector<std::unique_ptr<Material> > MaterialVector;
 
     void loadMaterials();
-    void loadLight(const aiLight* light, const TransformStack* tStack);
-    void loadCamera(const aiCamera* cam, const TransformStack* tStack);
-    void loadScene(const aiNode* node, TransformStack* tStack);
+    void loadLight(const aiLight* light, const TransformStack& tStack);
+    void loadCamera(const aiCamera* cam, const TransformStack& tStack);
+    void loadScene(const aiNode* node, TransformStack& tStack);
     
-    Scene* mScene;
-    const aiScene* mAiScene;
-    MaterialVector mMaterials;
-    unsigned mCameraIdx;
+    Scene*          mScene;
+    const aiScene*  mAiScene;
+    MaterialVector  mMaterials;
+    unsigned        mCameraIdx;
 };
 
 #endif /* defined(__trichoplax__assimp_parser__) */

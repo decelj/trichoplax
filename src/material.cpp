@@ -158,8 +158,7 @@ void Material::shadeRay(const Raytracer& tracer, const Ray& r, glm::vec4& result
             --giRay;
         }
 
-        float invNumSamples = 1.f / static_cast<float>(scene.renderSettings().GISamples);
-        giColor *= invNumSamples;
+        giColor *= 1.f / static_cast<float>(scene.renderSettings().GISamples);
         giColor *= mBrdf.Kd();
 
         opaqueColor += giColor;

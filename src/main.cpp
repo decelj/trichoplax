@@ -191,6 +191,7 @@ int main(int argc, char** argv)
 
     applyCLOverrides(clArgs, Scene::instance());
 
+    Scene::instance().prepareForRendering();
     Scene::instance().render(clArgs.outputImage);
     Scene::destroy();
     
