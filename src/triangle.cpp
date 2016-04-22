@@ -70,14 +70,14 @@ bool Triangle::intersect(Ray& ray) const
 glm::vec3 Triangle::normal(const glm::vec3& p, const glm::vec2& barycentrics) const
 {
     // Interpolate the shading normal using the barycentrics
-    glm::vec3 normal = mB->normal * barycentrics.x
-        + mC->normal * barycentrics.y
+    glm::vec3 normal = mC->normal * barycentrics.x
+        + mB->normal * barycentrics.y
         + mA->normal * (1.f - (barycentrics.x + barycentrics.y));
 
     return glm::normalize(normal);
 }
 
-inline void Triangle::bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const
+void Triangle::bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const
 {
     lowerLeft[0] = std::min(std::min(mA->position[0], mB->position[0]), mC->position[0]);
     lowerLeft[1] = std::min(std::min(mA->position[1], mB->position[1]), mC->position[1]);
