@@ -415,15 +415,8 @@ void KdTree::generateEventsForPrimitive(const IPrimitive* primitive, const AABBo
     
     for (unsigned axis = 0; axis < 3; ++axis)
     {
-        if (relEq(clippedBox.ll()[axis], clippedBox.ur()[axis]) ||
-            primitive->isCoplaner(clippedBox.ll()[axis], axis))
+        if (relEq(clippedBoxWHD[axis], 0.f, 1.0e-10f))
         {
-            // Area of the voxel face which is parallel to the clip plane
-            const float area = clippedBoxWHD[(axis + 1) % 3] * clippedBoxWHD[(axis + 2) % 3];
-            TP_UNUSED(area);
-
-            // Check for point/line intersection with voxel
-            TP_ASSERT(!relEq(area,  0.f, 1.0e-15f));
             events.emplace_back(primitive, clippedBox.ll()[axis], axis, PLANAR);
         }
         else
