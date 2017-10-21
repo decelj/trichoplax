@@ -159,18 +159,6 @@ std::string SimpleParser::parse(const std::string& file, Scene& scene)
         {
             tStack.pop();
         }
-        else if (cmd == "sphere")
-        {
-            if (readValues(lineStream, 4, values))
-            {
-                Mesh& sphereMesh = scene.allocateMesh(0);
-                sphereMesh.addSphere(new Sphere(glm::vec3(values[0], values[1], values[2]),
-                                              values[3],
-                                              currMaterial.clone(),
-                                              tStack.top())
-                                     );
-            }
-        }
         else if (cmd == "tri")
         {
             if (readValues(lineStream, 3, values))

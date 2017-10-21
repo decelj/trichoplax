@@ -61,8 +61,8 @@ EnvSphere::~EnvSphere()
 
 void EnvSphere::sample(const Ray& ray, glm::vec4& result) const
 {
-    float u = atan2f(ray.dir().z, ray.dir().x) / (2.f * static_cast<float>(M_PI)) + 0.5f;
-    float v = acosf(-ray.dir().y) / static_cast<float>(M_PI);
+    float u = atan2f(ray.dir().z, ray.dir().x) / TWO_PI + 0.5f;
+    float v = acosf(-ray.dir().y) * INV_PI;
     TP_ASSERT(u <= 1.f && u >= 0.f);
     TP_ASSERT(v <= 1.f && v >= 0.f);
 

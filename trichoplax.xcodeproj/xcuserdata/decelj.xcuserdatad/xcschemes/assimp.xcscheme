@@ -43,8 +43,8 @@
    </TestAction>
    <LaunchAction
       buildConfiguration = "Release"
-      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
-      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      selectedDebuggerIdentifier = ""
+      selectedLauncherIdentifier = "Xcode.IDEFoundation.Launcher.PosixSpawn"
       launchStyle = "0"
       useCustomWorkingDirectory = "YES"
       customWorkingDirectory = "$(SRCROOT)"
@@ -64,31 +64,31 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "$(SRCROOT)/test.dae"
+            argument = "$(SRCROOT)/dragon.fbx"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-giSamples 100"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-giSamples 32"
+            argument = "-env $(SRCROOT)/whiteEnv.tif"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-width 640"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-env $(SRCROOT)/env.tif"
+            argument = "-height 480"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-width 1280"
-            isEnabled = "YES">
+            argument = "$(SRCROOT)/dragon.dae"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-height 720"
-            isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$(SRCROOT)/car.dae"
-            isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-maxDepth 3"
+            argument = "-maxDepth 2"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

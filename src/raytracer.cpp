@@ -3,7 +3,6 @@
 
 #include "raytracer.h"
 #include "ray.h"
-#include "iprimitive.h"
 #include "material.h"
 #include "hit.h"
 #include "stats_collector.h"
@@ -15,6 +14,7 @@
 #include "env_sphere.h"
 #include "noise.h"
 #include "scene.h"
+#include "hit.h"
 
 
 Raytracer::Raytracer(const KdTree* tree, const Camera* cam, const EnvSphere* env,
@@ -39,9 +39,9 @@ Raytracer::~Raytracer()
 {
 }
 
-void Raytracer::registerStatsCollector(StatsCollector* c) const
+void Raytracer::registerStatsCollector(StatsCollector& c) const
 {
-    c->addStats(&mStats);
+    c.addStats(&mStats);
 }
 
 bool Raytracer::start()
@@ -83,6 +83,7 @@ void Raytracer::run() const
         {
             Ray primary(Ray::PRIMARY);
             mCamera->generateRay(*sample, &primary);
+
             glm::vec4 rayColor(0.f, 0.f, 0.f, 0.f);
             traceAndShade(primary, rayColor);
             packetResult += rayColor;
@@ -114,9 +115,9 @@ bool Raytracer::trace(Ray& ray, bool firstHit) const
 {
     if (ray.depth() > mMaxDepth) return false;
     
-    mStats.increment(ray.type());
+    mStats.incrementRayCount(ray.type());
     mMailboxes.IncrementRayId();
-    return mKdTree->trace(ray, firstHit, mTraversalStack, mMailboxes);
+    return mKdTree->trace(ray, firstHit, mTraversalStack, mMailboxes, mStats);
 }
 
 bool Raytracer::traceAndShade(Ray& ray, glm::vec4& result) const
@@ -128,7 +129,7 @@ bool Raytracer::traceAndShade(Ray& ray, glm::vec4& result) const
 
     if (trace(ray))
     {
-        ray.shade(*this, result);
+        result = ray.shade(*this);
         return true;
     }
     

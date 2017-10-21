@@ -17,12 +17,12 @@ inline void mapSquareToDisk(glm::vec2& sample)
     if (a * a > b * b)
     {
         r = a;
-        phi = (float)M_PI_4 * (b / a);
+        phi = QUATER_PI * (b / a);
     }
     else
     {
         r = b;
-        phi = (float)M_PI_2 - (float)M_PI_4 * (a / b);
+        phi = HALF_PI - QUATER_PI * (a / b);
     }
 
     sample.x = r * cosf(phi);

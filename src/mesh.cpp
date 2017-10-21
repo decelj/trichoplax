@@ -5,6 +5,8 @@
 #include "triangle.h"
 #include "vertex.h"
 
+#include <glm/glm.hpp>
+
 Mesh::Mesh(unsigned numberOfVerticies)
     : mVertices(nullptr)
     , mPrimitives()
@@ -19,7 +21,7 @@ Mesh::Mesh(unsigned numberOfVerticies)
 
 Mesh::~Mesh()
 {
-    for (IPrimitive* prim : mPrimitives)
+    for (Triangle* prim : mPrimitives)
     {
         delete prim;
     }
@@ -28,16 +30,32 @@ Mesh::~Mesh()
     mVertices = nullptr;
 }
 
-void Mesh::addSphere(Sphere* sphere)
-{
-    TP_ASSERT(mVertices == nullptr);
-    mPrimitives.emplace_back(sphere);
-}
-
 void Mesh::addPrimitive(unsigned indexA, unsigned indexB, unsigned indexC, Material* material)
 {
-    mPrimitives.emplace_back(
-        new Triangle(&mVertices[indexA], &mVertices[indexB], &mVertices[indexC], material));
+    if (indexA == indexB || indexB == indexC)
+    {
+        return;
+    }
+
+    Triangle* newTri = new Triangle(&mVertices[indexA], &mVertices[indexB], &mVertices[indexC], material);
+
+    glm::vec3 ll;
+    glm::vec3 ur;
+    newTri->bounds(ll, ur);
+
+    unsigned flatCount = 0;
+    for (unsigned i = 0; i < 3; ++i)
+    {
+        if (ll[i] == ur[i]) ++flatCount;
+    }
+
+    if (flatCount > 1)
+    {
+        delete newTri;
+        return;
+    }
+    
+    mPrimitives.emplace_back(newTri);
 }
 
 void Mesh::addVertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& uv)

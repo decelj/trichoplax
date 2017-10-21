@@ -22,6 +22,8 @@ public:
     float bias() const { return mBias; }
     unsigned firstPassShadowRays() const;
     unsigned secondPassShadowRays() const;
+
+    void setBias(float bias) { mBias = bias; }
     
 protected:
     ILight(const glm::vec3& kd, float radius, float bias);

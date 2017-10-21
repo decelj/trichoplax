@@ -16,7 +16,6 @@ class ImageBuffer;
 class Stats;
 class StatsCollector;
 class EnvSphere;
-class IPrimitive;
 
 
 class Raytracer
@@ -27,7 +26,7 @@ public:
                        const unsigned int maxDepth);
 	~Raytracer();
     
-    void registerStatsCollector(StatsCollector* c) const;
+    void registerStatsCollector(StatsCollector& c) const;
     bool start();
     bool join() const;
     void cancel();

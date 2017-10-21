@@ -104,3 +104,35 @@ glm::vec3 Sphere::normal(const glm::vec3& p, const glm::vec2& /*barycentrics*/) 
     // space.
     return glm::normalize(glm::mat3(mTInverseTranspose) * glm::vec3(mTInverse * glm::vec4(p, 1.0f)) - mCenter);
 }
+
+glm::vec2 Sphere::uv(const glm::vec2& /*barycentrics*/) const
+{
+    return glm::vec2(0.f);
+}
+
+void Sphere::positionPartials(const glm::vec3& N, glm::vec3& dPdU, glm::vec3& dPdV) const
+{
+    generateTangents(N, dPdU, dPdV);
+}
+
+void Sphere::bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const
+{
+    lowerLeft = mLL;
+    upperRight = mUR;
+}
+
+bool Sphere::isCoplaner(const float /*plane*/, const unsigned int /*aaAxis*/) const
+{
+    return false;
+}
+
+bool Sphere::isOrthognalToAxis(const unsigned axis) const
+{
+    return false;
+}
+
+void Sphere::aaBoxClip(float start, float end, unsigned aaAxis, float* outStart, float* outEnd) const
+{
+    *outStart = std::max(start, mLL[aaAxis]);
+    *outEnd = std::min(end, mUR[aaAxis]);
+}

@@ -5,7 +5,14 @@
 #include <cassert>
 #include <glm/glm.hpp>
 
-#define EPSILON .000001f
+#define EPSILON         .000001f
+#define PI              3.14159265358979323846264338327950288f
+#define INV_PI          (1.f / PI)
+#define TWO_PI          (2.f * PI)
+#define HALF_PI         (PI / 2.f)
+#define QUATER_PI       (PI / 4.f)
+
+#define DEGREES_TO_RADIANS(d) (((d) * PI) / 180.f)
 #define VEC3_IS_REL_ZERO(v) (v[0] < EPSILON && v[1] < EPSILON && v[2] < EPSILON)
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -17,6 +24,7 @@
 #endif
 
 #define TP_UNUSED(_val) ((void)(_val))
+
 
 inline bool relEq(const float a, const float b, const float tol=EPSILON)
 {
@@ -53,11 +61,11 @@ inline float distanceSquared(const glm::vec3& v)
     return glm::dot(v, v);
 }
 
-inline glm::mat3 generateBasis(const glm::vec3& w)
+inline void generateTangents(const glm::vec3& w, glm::vec3& u, glm::vec3& v)
 {
     TP_ASSERT(relEq(glm::length(w), 1.f));
 
-    glm::vec3 u(0.f);
+    u = glm::vec3(0.f);
     if (fabsf(w.x) > fabsf(w.y))
     {
         float inverseLength = 1.f / sqrtf(w.x * w.x + w.z * w.z);
@@ -71,7 +79,15 @@ inline glm::mat3 generateBasis(const glm::vec3& w)
         u.z = w.y * inverseLength;
     }
 
-    glm::vec3 v = glm::cross(w, u);
+    v = glm::cross(w, u);
+}
+
+inline glm::mat3 generateBasis(const glm::vec3& w)
+{
+    glm::vec3 u;
+    glm::vec3 v;
+    generateTangents(w, u, v);
+
     return glm::mat3(u, v, w);
 }
 

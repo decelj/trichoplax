@@ -1,4 +1,5 @@
 #include "transform_stack.h"
+#include "common.h"
 
 TransformStack::TransformStack()
 {
@@ -58,7 +59,7 @@ void TransformStack::translate(const float x, const float y, const float z)
 
 void TransformStack::rotate(const glm::vec3& axis, const float degrees)
 {
-    float radians = (degrees/180.0f) * static_cast<float>(M_PI);
+    float radians = DEGREES_TO_RADIANS(degrees);
     float cosTheta = cosf(radians);
     float sinTheta = sinf(radians);
     

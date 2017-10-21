@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 47;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -14,6 +14,7 @@
 		2B16B3921C6FA07E00A4B47C /* LDsequence_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B16B3901C6FA07E00A4B47C /* LDsequence_utils.cpp */; settings = {ASSET_TAGS = (); }; };
 		2B16B3951C6FA39800A4B47C /* hammersley_generator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B16B3931C6FA39800A4B47C /* hammersley_generator.cpp */; settings = {ASSET_TAGS = (); }; };
 		2B16B3981C6FA81B00A4B47C /* sampler_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B16B3961C6FA81B00A4B47C /* sampler_utils.cpp */; settings = {ASSET_TAGS = (); }; };
+		2B17D2761F70330300F21BA4 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B17D2751F70330300F21BA4 /* Cocoa.framework */; settings = {ASSET_TAGS = (); }; };
 		2B1BCAEC186A93DC004F0635 /* env_sphere.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B1BCAEA186A93DC004F0635 /* env_sphere.cpp */; };
 		2B1EC8B51B9FE5F700D5E1B7 /* noise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B1EC8B31B9FE5F700D5E1B7 /* noise.cpp */; };
 		2B2ABF031C4822C200033C4A /* sampler_info.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B2ABF021C4822C200033C4A /* sampler_info.cpp */; settings = {ASSET_TAGS = (); }; };
@@ -28,19 +29,17 @@
 		2B7B64A2170FBDE0002C830F /* image_buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B6484170FBCBD002C830F /* image_buffer.cpp */; };
 		2B7B65E6170FC938002C830F /* sampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B65E2170FC938002C830F /* sampler.cpp */; };
 		2B7B65E7170FC938002C830F /* scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B65E3170FC938002C830F /* scene.cpp */; };
-		2B7B65E8170FC938002C830F /* sphere.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B65E4170FC938002C830F /* sphere.cpp */; };
 		2B7B6605170FD3CC002C830F /* raytracer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B6604170FD3CC002C830F /* raytracer.cpp */; };
 		2B7B673D171086CE002C830F /* material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B673C171086CE002C830F /* material.cpp */; };
 		2B7B67691710A3DA002C830F /* triangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B67681710A3DA002C830F /* triangle.cpp */; };
 		2B7B67891710A857002C830F /* transform_stack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B67881710A857002C830F /* transform_stack.cpp */; };
 		2B7B683A1710D326002C830F /* ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7B68391710D326002C830F /* ray.cpp */; };
+		2B82FDEB1CE906D4004361EC /* fbx_importer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B82FDE91CE906D4004361EC /* fbx_importer.cpp */; settings = {ASSET_TAGS = (); }; };
 		2B98D7B31C4832DD00C73F03 /* isampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B98D7B11C4832DD00C73F03 /* isampler.cpp */; settings = {ASSET_TAGS = (); }; };
 		2B98D7B61C4833E300C73F03 /* spherical_sampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B98D7B41C4833E300C73F03 /* spherical_sampler.cpp */; settings = {ASSET_TAGS = (); }; };
 		2B98D7B91C494EB900C73F03 /* point_sampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B98D7B71C494EB900C73F03 /* point_sampler.cpp */; settings = {ASSET_TAGS = (); }; };
 		2BAEAF001933A994002605AF /* parser_factory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BAEAEFE1933A994002605AF /* parser_factory.cpp */; };
 		2BAEAF0B1933AC52002605AF /* simple_parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BAEAF091933AC52002605AF /* simple_parser.cpp */; };
-		2BAEAF111933C192002605AF /* assimp_parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BAEAF0F1933C192002605AF /* assimp_parser.cpp */; };
-		2BAEAF131933C566002605AF /* libassimp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2BAEAF121933C565002605AF /* libassimp.dylib */; };
 		2BB1AC321738AF9A00336221 /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BB1AC311738AF9A00336221 /* kdtree.cpp */; };
 		2BB1AC351738B14D00336221 /* aabbox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BB1AC341738B14D00336221 /* aabbox.cpp */; };
 		2BCF178D17DBAE5B00C35CC3 /* hit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF178C17DBAE5B00C35CC3 /* hit.cpp */; };
@@ -80,6 +79,7 @@
 		2B16B3941C6FA39800A4B47C /* hammersley_generator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hammersley_generator.h; sourceTree = "<group>"; };
 		2B16B3961C6FA81B00A4B47C /* sampler_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sampler_utils.cpp; sourceTree = "<group>"; };
 		2B16B3971C6FA81B00A4B47C /* sampler_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sampler_utils.h; sourceTree = "<group>"; };
+		2B17D2751F70330300F21BA4 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		2B1BCAEA186A93DC004F0635 /* env_sphere.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = env_sphere.cpp; sourceTree = "<group>"; };
 		2B1BCAEB186A93DC004F0635 /* env_sphere.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = env_sphere.h; sourceTree = "<group>"; };
 		2B1EC8B31B9FE5F700D5E1B7 /* noise.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = noise.cpp; sourceTree = "<group>"; };
@@ -107,19 +107,16 @@
 		2B7B647A170FBCBD002C830F /* camera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = camera.h; sourceTree = "<group>"; };
 		2B7B647B170FBCBD002C830F /* hit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hit.h; sourceTree = "<group>"; };
 		2B7B647C170FBCBD002C830F /* image_buffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = image_buffer.h; sourceTree = "<group>"; };
-		2B7B647D170FBCBD002C830F /* iprimitive.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iprimitive.h; sourceTree = "<group>"; };
 		2B7B647E170FBCBD002C830F /* ray.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ray.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		2B7B647F170FBCBD002C830F /* sample.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sample.h; sourceTree = "<group>"; };
 		2B7B6480170FBCBD002C830F /* sampler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sampler.h; sourceTree = "<group>"; };
 		2B7B6481170FBCBD002C830F /* scene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = scene.h; sourceTree = "<group>"; };
-		2B7B6482170FBCBD002C830F /* sphere.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sphere.h; sourceTree = "<group>"; };
 		2B7B6483170FBCBD002C830F /* camera.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = camera.cpp; sourceTree = "<group>"; };
 		2B7B6484170FBCBD002C830F /* image_buffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = image_buffer.cpp; sourceTree = "<group>"; };
 		2B7B648B170FBD0F002C830F /* libfreeimage.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreeimage.a; path = lib/libfreeimage.a; sourceTree = "<group>"; };
 		2B7B648F170FBD29002C830F /* FreeImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FreeImage.h; path = include/FreeImage.h; sourceTree = "<group>"; };
 		2B7B65E2170FC938002C830F /* sampler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sampler.cpp; sourceTree = "<group>"; };
 		2B7B65E3170FC938002C830F /* scene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = scene.cpp; sourceTree = "<group>"; };
-		2B7B65E4170FC938002C830F /* sphere.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sphere.cpp; sourceTree = "<group>"; };
 		2B7B6603170FD3CC002C830F /* raytracer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = raytracer.h; sourceTree = "<group>"; };
 		2B7B6604170FD3CC002C830F /* raytracer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = raytracer.cpp; sourceTree = "<group>"; };
 		2B7B673A17108606002C830F /* brdf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = brdf.h; sourceTree = "<group>"; };
@@ -130,6 +127,8 @@
 		2B7B67871710A857002C830F /* transform_stack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = transform_stack.h; sourceTree = "<group>"; };
 		2B7B67881710A857002C830F /* transform_stack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = transform_stack.cpp; sourceTree = "<group>"; };
 		2B7B68391710D326002C830F /* ray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = ray.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		2B82FDE91CE906D4004361EC /* fbx_importer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fbx_importer.cpp; sourceTree = "<group>"; };
+		2B82FDEA1CE906D4004361EC /* fbx_importer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fbx_importer.h; sourceTree = "<group>"; };
 		2B98D7B11C4832DD00C73F03 /* isampler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = isampler.cpp; sourceTree = "<group>"; };
 		2B98D7B21C4832DD00C73F03 /* isampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = isampler.h; sourceTree = "<group>"; };
 		2B98D7B41C4833E300C73F03 /* spherical_sampler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spherical_sampler.cpp; sourceTree = "<group>"; };
@@ -141,9 +140,6 @@
 		2BAEAF081933AB51002605AF /* iparser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iparser.h; sourceTree = "<group>"; };
 		2BAEAF091933AC52002605AF /* simple_parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = simple_parser.cpp; sourceTree = "<group>"; };
 		2BAEAF0A1933AC52002605AF /* simple_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = simple_parser.h; sourceTree = "<group>"; };
-		2BAEAF0F1933C192002605AF /* assimp_parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = assimp_parser.cpp; sourceTree = "<group>"; };
-		2BAEAF101933C192002605AF /* assimp_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = assimp_parser.h; sourceTree = "<group>"; };
-		2BAEAF121933C565002605AF /* libassimp.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libassimp.dylib; path = /usr/local/lib/libassimp.dylib; sourceTree = "<absolute>"; };
 		2BAEAF16193404BF002605AF /* scoped_lock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scoped_lock.h; sourceTree = "<group>"; };
 		2BB1AC301738AF9A00336221 /* kdtree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kdtree.h; sourceTree = "<group>"; };
 		2BB1AC311738AF9A00336221 /* kdtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kdtree.cpp; sourceTree = "<group>"; };
@@ -162,8 +158,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B17D2761F70330300F21BA4 /* Cocoa.framework in Frameworks */,
 				2B7B648C170FBD0F002C830F /* libfreeimage.a in Frameworks */,
-				2BAEAF131933C566002605AF /* libassimp.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -179,6 +175,7 @@
 				08FB7795FE84155DC02AAC07 /* src */,
 				C6859E8C029090F304C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
+				2B17D2771F70330D00F21BA4 /* Frameworks */,
 			);
 			name = raytracer;
 			sourceTree = "<group>";
@@ -186,6 +183,8 @@
 		08FB7795FE84155DC02AAC07 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				2B82FDE91CE906D4004361EC /* fbx_importer.cpp */,
+				2B82FDEA1CE906D4004361EC /* fbx_importer.h */,
 				2B16B3901C6FA07E00A4B47C /* LDsequence_utils.cpp */,
 				2B16B3911C6FA07E00A4B47C /* LDsequence_utils.h */,
 				2B16B3961C6FA81B00A4B47C /* sampler_utils.cpp */,
@@ -211,8 +210,6 @@
 				2BB1AC341738B14D00336221 /* aabbox.cpp */,
 				2BB1AC331738B14D00336221 /* aabbox.h */,
 				2B794EFC1B2FC47000F6A919 /* aligned_allocator.h */,
-				2BAEAF0F1933C192002605AF /* assimp_parser.cpp */,
-				2BAEAF101933C192002605AF /* assimp_parser.h */,
 				2B7B673A17108606002C830F /* brdf.h */,
 				2B6D16DA1CC3FA1300DF95A5 /* brdf.cpp */,
 				2B794F001B31243200F6A919 /* bucket_allocator.h */,
@@ -231,7 +228,6 @@
 				2B7B6484170FBCBD002C830F /* image_buffer.cpp */,
 				2B7B647C170FBCBD002C830F /* image_buffer.h */,
 				2BAEAF081933AB51002605AF /* iparser.h */,
-				2B7B647D170FBCBD002C830F /* iprimitive.h */,
 				2BB1AC311738AF9A00336221 /* kdtree.cpp */,
 				2BB1AC301738AF9A00336221 /* kdtree.h */,
 				2B794EFD1B2FF06200F6A919 /* mailboxer.cpp */,
@@ -259,8 +255,6 @@
 				2BAEAF16193404BF002605AF /* scoped_lock.h */,
 				2BAEAF091933AC52002605AF /* simple_parser.cpp */,
 				2BAEAF0A1933AC52002605AF /* simple_parser.h */,
-				2B7B65E4170FC938002C830F /* sphere.cpp */,
-				2B7B6482170FBCBD002C830F /* sphere.h */,
 				2B05D3CD18665F57005082A9 /* stats_collector.cpp */,
 				2B05D3CE18665F57005082A9 /* stats_collector.h */,
 				2B05D3CA18665DF2005082A9 /* stats.cpp */,
@@ -283,6 +277,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		2B17D2771F70330D00F21BA4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2B17D2751F70330300F21BA4 /* Cocoa.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		2B7B6485170FBD01002C830F /* lib */ = {
 			isa = PBXGroup;
 			children = (
@@ -303,7 +305,6 @@
 		2BAEAF141933C57B002605AF /* dylibs */ = {
 			isa = PBXGroup;
 			children = (
-				2BAEAF121933C565002605AF /* libassimp.dylib */,
 			);
 			name = dylibs;
 			sourceTree = "<group>";
@@ -347,7 +348,7 @@
 				ORGANIZATIONNAME = com.jdecell;
 			};
 			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "trichoplax" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 6.3";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
@@ -379,7 +380,6 @@
 				2B98D7B31C4832DD00C73F03 /* isampler.cpp in Sources */,
 				2B7B65E6170FC938002C830F /* sampler.cpp in Sources */,
 				2B7B65E7170FC938002C830F /* scene.cpp in Sources */,
-				2B7B65E8170FC938002C830F /* sphere.cpp in Sources */,
 				2B7B6605170FD3CC002C830F /* raytracer.cpp in Sources */,
 				2B6D16DB1CC3FA1300DF95A5 /* brdf.cpp in Sources */,
 				2B16B3921C6FA07E00A4B47C /* LDsequence_utils.cpp in Sources */,
@@ -393,9 +393,9 @@
 				2B16B38F1C6F9F0F00A4B47C /* halton_generator.cpp in Sources */,
 				2BE7B8F71C34DB58007C3AD6 /* ilight.cpp in Sources */,
 				2B2DA0F7171E63EE0098D2C6 /* direct_light.cpp in Sources */,
+				2B82FDEB1CE906D4004361EC /* fbx_importer.cpp in Sources */,
 				2BB1AC321738AF9A00336221 /* kdtree.cpp in Sources */,
 				2B1EC8B51B9FE5F700D5E1B7 /* noise.cpp in Sources */,
-				2BAEAF111933C192002605AF /* assimp_parser.cpp in Sources */,
 				2B2ABF031C4822C200033C4A /* sampler_info.cpp in Sources */,
 				2B16B3981C6FA81B00A4B47C /* sampler_utils.cpp in Sources */,
 				2BAEAF0B1933AC52002605AF /* simple_parser.cpp in Sources */,
@@ -417,26 +417,10 @@
 		1DEB923208733DC60010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"/Library/Frameworks/**",
-					"$(LOCAL_LIBRARY_DIR)/Frameworks",
-				);
-				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GENERATE_PROFILING_CODE = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/include",
-					/usr/local/include,
-				);
-				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
-					"$(SRCROOT)/lib",
 					"$(inherited)",
-					"\"$(SRCROOT)\"",
-					/usr/local/lib,
+					"$(PROJECT_DIR)",
 				);
 				PRODUCT_NAME = trichoplax;
 			};
@@ -445,8 +429,7 @@
 		1DEB923608733DC60010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
@@ -454,9 +437,11 @@
 				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
 				COPY_PHASE_STRIP = NO;
 				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
+				FRAMEWORK_SEARCH_PATHS = (
+					"/Library/Frameworks/**",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
 				GCC_AUTO_VECTORIZATION = NO;
-				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_ENABLE_ASM_KEYWORD = NO;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_ENABLE_SSE41_EXTENSIONS = YES;
@@ -469,9 +454,16 @@
 				GCC_WARN_SHADOW = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				GENERATE_PROFILING_CODE = YES;
+				HEADER_SEARCH_PATHS = (
+					"/Applications/Autodesk/FBX\\ SDK/2018.1.1/include",
+					/usr/local/include,
+					"$(SRCROOT)/include",
+				);
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/lib";
 				LLVM_VECTORIZE_LOOPS = NO;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
+				OTHER_LDFLAGS = "/Applications/Autodesk/FBX\\ SDK/2018.1.1/lib/clang/release/libfbxsdk.a";
 				PREBINDING = NO;
 				SDKROOT = macosx;
 			};
@@ -480,8 +472,7 @@
 		2B2DA13D171E6C930098D2C6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_USE_OPTIMIZATION_PROFILE = NO;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
@@ -489,9 +480,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
 				ENABLE_NS_ASSERTIONS = NO;
-				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
+				FRAMEWORK_SEARCH_PATHS = (
+					"/Library/Frameworks/**",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
 				GCC_AUTO_VECTORIZATION = YES;
-				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_ENABLE_SSE41_EXTENSIONS = YES;
 				GCC_ENABLE_SSE42_EXTENSIONS = YES;
@@ -504,10 +497,17 @@
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
 				GCC_WARN_SHADOW = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"/Applications/Autodesk/FBX\\ SDK/2018.1.1/include",
+					/usr/local/include,
+					"$(SRCROOT)/include",
+				);
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/lib";
 				LLVM_LTO = YES;
 				LLVM_VECTORIZE_LOOPS = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
+				OTHER_LDFLAGS = "/Applications/Autodesk/FBX\\ SDK/2018.1.1/lib/clang/release/libfbxsdk.a";
 				PREBINDING = NO;
 				SDKROOT = macosx;
 			};
@@ -516,29 +516,11 @@
 		2B2DA13E171E6C930098D2C6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"/Library/Frameworks/**",
-					"$(LOCAL_LIBRARY_DIR)/Frameworks",
-				);
-				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
-				GENERATE_PROFILING_CODE = NO;
-				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/include",
-					/usr/local/include,
-				);
-				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
-					"$(SRCROOT)/lib",
 					"$(inherited)",
-					"\"$(SRCROOT)\"",
-					/usr/local/lib,
+					"$(PROJECT_DIR)",
 				);
-				PREBINDING = YES;
 				PRODUCT_NAME = trichoplax;
 			};
 			name = Release;
@@ -546,8 +528,7 @@
 		2BB1AF5C173F594200336221 /* Release Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_USE_OPTIMIZATION_PROFILE = NO;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
@@ -556,14 +537,16 @@
 				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
 				COPY_PHASE_STRIP = NO;
 				ENABLE_NS_ASSERTIONS = NO;
-				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
+				FRAMEWORK_SEARCH_PATHS = (
+					"/Library/Frameworks/**",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
 				GCC_AUTO_VECTORIZATION = YES;
-				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_ENABLE_SSE41_EXTENSIONS = YES;
 				GCC_ENABLE_SSE42_EXTENSIONS = YES;
 				GCC_ENABLE_SUPPLEMENTAL_SSE3_INSTRUCTIONS = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_PPC64 = YES;
 				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_UNROLL_LOOPS = YES;
@@ -572,9 +555,17 @@
 				GCC_WARN_SHADOW = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				GENERATE_PROFILING_CODE = YES;
+				HEADER_SEARCH_PATHS = (
+					"/Applications/Autodesk/FBX\\ SDK/2018.1.1/include",
+					/usr/local/include,
+					"$(SRCROOT)/include",
+				);
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/lib";
+				LLVM_LTO = YES;
 				LLVM_VECTORIZE_LOOPS = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
+				OTHER_LDFLAGS = "/Applications/Autodesk/FBX\\ SDK/2018.1.1/lib/clang/release/libfbxsdk.a";
 				PREBINDING = NO;
 				SDKROOT = macosx;
 			};
@@ -583,31 +574,11 @@
 		2BB1AF5D173F594200336221 /* Release Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"/Library/Frameworks/**",
-					"$(LOCAL_LIBRARY_DIR)/Frameworks",
-				);
-				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
-				GENERATE_PROFILING_CODE = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/include",
-					/usr/local/include,
-				);
-				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
-					"$(SRCROOT)/lib",
 					"$(inherited)",
-					"\"$(SRCROOT)\"",
-					/usr/local/lib,
+					"$(PROJECT_DIR)",
 				);
-				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
-				PREBINDING = YES;
 				PRODUCT_NAME = trichoplax;
 			};
 			name = "Release Profile";

@@ -2,21 +2,22 @@
 #define __STATS_H__
 
 #include "ray.h"
+#include <cstdint>
 
 class Stats
 {
 public:
-    friend class StatsCollector;
-
     explicit Stats();
     
-    void increment(const Ray::TYPE v) { ++mValues[v]; }
-    
+    void incrementRayCount(const Ray::TYPE v) { ++rayCounts[v]; }
+    void accumulate(const Stats& other);
+
+    uint64_t rayCounts[Ray::TYPE_COUNT];
+    uint64_t boxTests;
+    uint64_t primitiveTests;
 private:
     Stats(const Stats&) = delete;
     Stats& operator=(const Stats&) = delete;
-
-    unsigned long long mValues[Ray::TYPE_COUNT];
 };
 
 #endif

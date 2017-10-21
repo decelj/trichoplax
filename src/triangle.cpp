@@ -7,12 +7,12 @@
 #include "vertex.h"
 
 
-Triangle::Triangle(const Vertex* a, const Vertex* b, const Vertex* c, Material* material)
-    : IPrimitive()
+Triangle::Triangle(const Vertex* a, const Vertex* b, const Vertex* c, const Material* material)
+    : mID(0)
     , mA(a)
     , mB(b)
     , mC(c)
-    , mNg(glm::normalize(glm::cross(mA->position - mB->position, mA->position - mC->position)))
+    , mNg(glm::normalize(glm::cross(mB->position - mA->position, mC->position - mA->position)))
 {
     mMaterial = material;
 }
@@ -67,14 +67,40 @@ bool Triangle::intersect(Ray& ray) const
     return true;
 }
 
-glm::vec3 Triangle::normal(const glm::vec3& p, const glm::vec2& barycentrics) const
+glm::vec3 Triangle::interpolateNormal(const glm::vec3& p, const glm::vec2& barycentrics) const
 {
-    // Interpolate the shading normal using the barycentrics
     glm::vec3 normal = mC->normal * barycentrics.x
         + mB->normal * barycentrics.y
         + mA->normal * (1.f - (barycentrics.x + barycentrics.y));
 
     return glm::normalize(normal);
+}
+
+glm::vec2 Triangle::uv(const glm::vec2& barycentrics) const
+{
+    return mC->uv * barycentrics.x
+        + mB->uv * barycentrics.y
+        + mA->uv * (1.f - (barycentrics.x + barycentrics.y));
+}
+
+void Triangle::positionPartials(const glm::vec3& N, glm::vec3& dPdU, glm::vec3& dPdV) const
+{
+    glm::vec2 dUVB = mB->uv - mA->uv;
+    glm::vec2 dUVC = mC->uv - mA->uv;
+    float determinant = dUVB.s * dUVC.t - dUVB.t * dUVC.s;
+    if (relEq(determinant, 0.f))
+    {
+        generateTangents(N, dPdU, dPdV);
+    }
+    else
+    {
+        float inverseDeterminant = 1.f / determinant;
+        glm::vec3 AB = mB->position - mA->position;
+        glm::vec3 AC = mC->position - mA->position;
+
+        dPdU = (dUVC.t * AB - dUVB.t * AC) * inverseDeterminant;
+        dPdV = (-dUVC.s * AB + dUVB.s * AC) * inverseDeterminant;
+    }
 }
 
 void Triangle::bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const

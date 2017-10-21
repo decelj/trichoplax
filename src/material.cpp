@@ -13,34 +13,16 @@
 #include "isampler.h"
 #include "sampler_info.h"
 
-#define GI_ENABLED 1
 
 namespace
 {
 
-template<typename T>
-inline T estimateFresnel(const T& reflectance, float cosTheta, float power=5.f)
-{
-    return reflectance + (1.f - reflectance) * powf(1.f - cosTheta, power);
-}
-
 inline glm::vec3 computeSurfaceLighting(const Ray& ray, const Hit& hit, const BRDF& brdf,
                                         const glm::vec3& lightColor, const float nDotL,
-                                        bool isSpecular)
+                                        bool hasSpecLobe)
 {
-#if 0
-    glm::vec3 specularColor(0.f);
-    if(isSpecular)
-    {
-        const glm::vec3 H = glm::normalize(ray.dir() + hit.V);
-        float nDotH = std::max(glm::dot(hit.N, H), 0.f);
-        float specularPower = powf(nDotH, brdf.Kr);
-        specularColor = brdf.Ks() * specularPower * lightColor;
-    }
-#endif
-
-    glm::vec3 outColor = brdf.Kd() * lightColor * nDotL;
-    return outColor;
+    glm::vec3 result = lightColor * nDotL;
+    return result;
 }
 
 } // anonymous namespace
@@ -64,114 +46,64 @@ Material::Material(const Material& other)
 {
 }
 
-void Material::shadeRay(const Raytracer& tracer, const Ray& r, glm::vec4& result) const
+glm::vec4 Material::shadeRay(const Raytracer& tracer, const Ray& r) const
 {
-    // Ambient and emissive
-    glm::vec3 opaqueColor = mBrdf.Ka() + mBrdf.Ke();
-    
+    glm::vec4 result(0.f);
+
+    if (r.depth() >= tracer.maxDepth())
+    {
+        return result;
+    }
+
     const Scene& scene = Scene::instance();
     const Hit hit(r);
+    Noise& noiseGen = tracer.getNoiseGenerator();
 
-    const float nDotV = glm::dot(hit.N, hit.V);
-    float fresnelFactor = estimateFresnel(mBrdf.Kr(), nDotV);
-    glm::vec3 transmissionColor = (1.f - fresnelFactor) * mBrdf.Kt();
-    float transmissionWeight = luminance(transmissionColor);
-
-    // Transmission
-#if 1
-    if (transmissionWeight > 0.f && r.type() != Ray::GI)
+    glm::vec3 giRadiance(0.f);
+    if (scene.renderSettings().GISamples > 0)
     {
-        Ray refractedRay(Ray::REFRACTED, hit.P, mBrdf.IOR());
-        if (refractedRay.refract(hit, r.ior()))
-        {
-            refractedRay.bias(scene.renderSettings().bias);
-            refractedRay.setDepth(r.depth() + 1);
-
-            glm::vec4 refractionColor(0.f);
-            tracer.traceAndShade(refractedRay, refractionColor);
-
-            // TODO: Beer's law
-            result += refractionColor * glm::vec4(transmissionColor, transmissionWeight);
-        }
-        else
-        {
-            fresnelFactor = 1.f;
-            transmissionWeight = 0.f;
-        }
-    }
-#endif
-
-    float opaqueWeight = 1.f - transmissionWeight;
-
-    // Reflection
-#if 1
-    if (opaqueWeight > 0.f && r.type() != Ray::GI)
-    {
-        Ray reflected(r, Ray::REFLECTED);
-        reflected.reflect(hit, hit.I);
-        reflected.bias(scene.renderSettings().bias);
-        reflected.setDepth(r.depth() + 1);
-        
-        glm::vec4 reflection(0.f);
-        tracer.traceAndShade(reflected, reflection);
-        result += reflection * glm::vec4(glm::vec3(fresnelFactor), 0.f);
-    }
-#endif
-
-    // Diffuse/spec
-    if (opaqueWeight > 0.f)
-    {
-        const bool isSpecular = mBrdf.roughness() < 1.f;
-        for (Scene::ConstLightIter it = scene.lightsBegin(); it != scene.lightsEnd(); ++it)
-        {
-            opaqueColor += sampleLight(**it, hit, tracer, r.depth(), isSpecular);
-        }
-    }
-
-#if GI_ENABLED
-    if (opaqueWeight > 0.f &&
-        scene.renderSettings().GISamples > 0 &&
-        r.depth() < tracer.maxDepth())
-    {
-        Noise& noiseGen = tracer.getNoiseGenerator();
-        glm::vec3 giColor(0.f);
-
-        MultiSampleRay giRay(Ray::GI, scene.renderSettings().GISamples);
-        giRay.setOrigin(hit.P);
-        giRay.shouldHitBackFaces(false);
+        Ray giRay(Ray::GI);
         giRay.setDepth(r.depth() + 1);
+        giRay.setOrigin(hit.P);
         giRay.bias(scene.renderSettings().bias);
+        giRay.shouldHitBackFaces(false);
 
-        const unsigned giSequenceNumber = noiseGen.generateGISequenceNumber();
-        const glm::mat3 toWorld = generateBasis(hit.N);
-        while (giRay.currentSample())
+        const unsigned seqNumber = noiseGen.generateGISequenceNumber();
+        for (unsigned i = 0; i < scene.renderSettings().GISamples; ++i)
         {
-            glm::vec3 cosSample = noiseGen.getGISample(giSequenceNumber, giRay.currentSample() - 1);
-            giRay.setDir(toWorld * cosSample);
+            const glm::vec3& giSample = noiseGen.getGISample(seqNumber, i);
+            giRay.setDir(hit.toWorld(giSample));
             giRay.setMaxDistance(std::numeric_limits<float>::max());
-            TP_ASSERT(glm::dot(hit.N, giRay.dir()) > 0.0);
 
-            glm::vec4 tmp(0.f);
-            tracer.traceAndShade(giRay, tmp);
-            
-            giColor += glm::vec3(tmp);
-            --giRay;
+            glm::vec4 rayResult;
+            tracer.traceAndShade(giRay, rayResult);
+            giRadiance.r += rayResult.r * giSample.z;
+            giRadiance.g += rayResult.g * giSample.z;
+            giRadiance.b += rayResult.b * giSample.z;
         }
-
-        giColor *= 1.f / static_cast<float>(scene.renderSettings().GISamples);
-        giColor *= mBrdf.Kd();
-
-        opaqueColor += giColor;
+        giRadiance = 2.f * (giRadiance / static_cast<float>(scene.renderSettings().GISamples));
     }
-#endif
-    
-    result += glm::vec4(opaqueColor * opaqueWeight, opaqueWeight);
-    result.a = std::min(result.a, 1.f);
+
+    glm::vec3 directLighting(0.f);
+    const bool hasSpecLobe = mBrdf.roughness() < .998f;
+    for (Scene::ConstLightIter it = scene.lightsBegin(); it != scene.lightsEnd(); ++it)
+    {
+        directLighting += sampleLight(**it, hit, tracer, r.depth(), hasSpecLobe);
+    }
+
+    directLighting *= 1.f / PI;
+
+    result += glm::vec4((directLighting + giRadiance) * mBrdf.Kd(), 0.f);
+    result += glm::vec4(mBrdf.Ke(), 0.f);
+
+    result.a = 1.f;
+    return result;
 }
 
 glm::vec3 Material::sampleLight(const ILight& light, const Hit& hit,
                                 const Raytracer& tracer,
-                                unsigned rayDepth, bool isSpecular) const
+                                unsigned rayDepth,
+                                bool hasSpecLobe) const
 {
     glm::vec3 result(0.f);
     glm::vec3 lightColor = light.color();
@@ -179,17 +111,18 @@ glm::vec3 Material::sampleLight(const ILight& light, const Hit& hit,
 
     // Check for zero contribution
     if (VEC3_IS_REL_ZERO(lightColor))
+    {
         return result;
+    }
 
     // TODO: We don't support transparent shadow rays :(
-    MultiSampleRay shadowRay(Ray::SHADOW, light.firstPassShadowRays());
+    MultiSampleRay shadowRay(Ray::SHADOW, light.shadowRays());
     shadowRay.setDepth(rayDepth);
     shadowRay.setOrigin(hit.P);
     shadowRay.bias(light.bias());
     ISampler* lightSampler = light.generateSamplerForPoint(hit.P);
 
-    unsigned lastLitSample = light.firstPassShadowRays();
-    while (shadowRay.currentSample())
+    do
     {
         lightSampler->generateSample(tracer.getNoiseGenerator(), shadowRay);
         --shadowRay;
@@ -205,46 +138,11 @@ glm::vec3 Material::sampleLight(const ILight& light, const Hit& hit,
             continue;
         }
 
-        lastLitSample = shadowRay.currentSample() + 1;
         result += computeSurfaceLighting(
-                shadowRay, hit, mBrdf, lightColor, nDotL, isSpecular);
-    }
-
-    if (lastLitSample == light.firstPassShadowRays())
-    {
-        // First pass shadow sample consistent, early out
-        result /= (float)light.firstPassShadowRays();
-    }
-    else
-    {
-        // Inconsistent samples, must be in penumbra
-        // Finish shooting rays to resolve lighting
-        shadowRay.setNumberOfSamples(light.secondPassShadowRays());
-        while (shadowRay.currentSample())
-        {
-            lightSampler->generateSample(tracer.getNoiseGenerator(), shadowRay);
-            --shadowRay;
-
-            float nDotL = std::max(glm::dot(hit.N, shadowRay.dir()), 0.f);
-            if (nDotL == 0.f)
-            {
-                continue;
-            }
-
-            if (tracer.traceShadow(shadowRay))
-            {
-                continue;
-            }
-
-            result += computeSurfaceLighting(
-                shadowRay, hit, mBrdf, lightColor, nDotL, isSpecular);
-        }
-
-        result /= light.shadowRays();
-    }
+                shadowRay, hit, mBrdf, lightColor, nDotL, hasSpecLobe);
+    } while (shadowRay.currentSample());
 
     delete lightSampler;
-
-    return result;
+    return result / (float)light.shadowRays();
 }
 

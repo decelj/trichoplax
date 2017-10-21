@@ -15,6 +15,8 @@ public:
     // IPrimitive
     bool intersect(Ray& ray) const override;
     glm::vec3 normal(const glm::vec3& p, const glm::vec2& barycentrics) const override;
+    glm::vec2 uv(const glm::vec2& barycentrics) const override;
+    void positionPartials(const glm::vec3& N, glm::vec3& dPdU, glm::vec3& dPdV) const override;
     void bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const override;
     bool isCoplaner(const float plane, const unsigned aaAxis) const override;
     bool isOrthognalToAxis(const unsigned axis) const override;
@@ -26,27 +28,5 @@ private:
     glm::mat4 mT, mTInverse, mTInverseTranspose;
 };
 
-
-inline void Sphere::bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const
-{
-    lowerLeft = mLL;
-    upperRight = mUR;
-}
-
-inline bool Sphere::isCoplaner(const float /*plane*/, const unsigned int /*aaAxis*/) const
-{
-    return false;
-}
-
-inline bool Sphere::isOrthognalToAxis(const unsigned axis) const
-{
-    return false;
-}
-
-inline void Sphere::aaBoxClip(float start, float end, unsigned aaAxis, float* outStart, float* outEnd) const
-{
-    *outStart = std::max(start, mLL[aaAxis]);
-    *outEnd = std::min(end, mUR[aaAxis]);
-}
 
 #endif

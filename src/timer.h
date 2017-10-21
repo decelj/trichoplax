@@ -63,7 +63,8 @@ inline std::string _Timer<std::chrono::high_resolution_clock>::elapsedToString(t
     using namespace std;
 
     ostringstream ss;
-    ss << setw(2) << setfill('0') << duration_cast<seconds>(elapsed).count() << "."
+    ss << setw(2) << setfill('0') << duration_cast<minutes>(elapsed).count() << ":"
+       << setw(2) << setfill('0') << duration_cast<seconds>(elapsed % minutes(1)).count() << "."
        << setw(3) << setfill('0') << duration_cast<milliseconds>(elapsed % seconds(1)).count();
 
     return ss.str();

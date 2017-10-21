@@ -15,8 +15,9 @@
 #include "timer.h"
 #include "stats_collector.h"
 #include "env_sphere.h"
-#include "iprimitive.h"
 #include "mesh.h"
+
+class Triangle;
 
 
 namespace {
@@ -143,11 +144,13 @@ void Scene::setEnvSphereImage(const std::string& file)
 
 void Scene::prepareForRendering()
 {
+    size_t triangleID = 0;
     for (const Mesh* mesh : mMeshes)
     {
-        for (const IPrimitive* primitive : *mesh)
+        for (Triangle* triangle : *mesh)
         {
-            mKdTree->addPrimitive(primitive);
+            triangle->SetID(triangleID++);
+            mKdTree->addPrimitive(triangle);
         }
     }
 }
@@ -180,7 +183,7 @@ void Scene::render(const std::string& filename)
         Raytracer* tracer = new Raytracer(mKdTree, mCam, mEnvSphere, mSampler,
                                           mImgBuffer, mSettings.maxDepth);
         tracers.emplace_back(tracer);
-        tracer->registerStatsCollector(&collector);
+        tracer->registerStatsCollector(collector);
         if (!tracer->start())
         {
             joinThreads(tracers, true /*kill*/);
@@ -195,7 +198,6 @@ void Scene::render(const std::string& filename)
     // Print stats
     std::cout << std::endl;
     collector.print();
-    mKdTree->printTraversalStats(collector.totalRaysCast());
     std::cout << std::endl;
     std::cout << "Render time: " << t.elapsedToString(t.elapsed()) << std::endl;
     

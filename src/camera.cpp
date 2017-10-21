@@ -11,7 +11,7 @@ Camera::Camera(const float fov, const glm::vec3& pos, const glm::vec3& lookAt, c
     , mUp(up)
     , mWidth(0)
     , mHeight(0)
-    , mFov((fov / 180.f) * static_cast<float>(M_PI))
+    , mFov(DEGREES_TO_RADIANS(fov))
 {
     mW = glm::normalize(pos - lookAt);
     mU = glm::normalize(glm::cross(up, mW));
@@ -22,7 +22,7 @@ Camera::Camera(const float fov, const glm::vec3& pos, const glm::vec3& lookAt, c
 
 void Camera::setWidthHeight(unsigned width, unsigned height)
 {
-    mWidth = width;
+    mWidth = width;	
     mHeight = height;
 
     float fovX = 2.f * std::atanf(std::tanf(mFov/2.f)*(width / static_cast<float>(height)));

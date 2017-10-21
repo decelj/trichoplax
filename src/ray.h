@@ -3,16 +3,19 @@
 
 #include <glm/glm.hpp>
 #include "hit.h"
+#include "material.h"
+#include "triangle.h"
 #include "common.h"
 
-class IPrimitive;
+
 class Raytracer;
 
 
 class Ray
 {
 public:
-    enum TYPE {
+    enum TYPE
+    {
         PRIMARY = 0,
         REFLECTED,
         REFRACTED,
@@ -44,7 +47,7 @@ public:
     float ior() const                       { return mIor; }
     TYPE type() const                       { return mType; }
     
-    void hit(const IPrimitive* primitive, float t,
+    void hit(const Triangle* primitive, float t,
              const glm::vec2& barycentrics, bool hitBackFace);
     bool hits(const float t) const { return t < mMaxT && t > mMinT; }
     
@@ -59,7 +62,7 @@ public:
     bool refract(const Hit& hit, float destIOR);
     void reflect(const Hit& hit, const glm::vec3& I);
     
-    void shade(const Raytracer& tracer, glm::vec4& result) const;
+    inline glm::vec4 shade(const Raytracer& tracer) const;
 
     friend class Hit;
 protected:
@@ -75,13 +78,13 @@ private:
     float               mMinT;
     float               mMaxT;
     glm::vec2           mHitBarycentrics;
-    const IPrimitive*   mHitPrim;
+    const Triangle*     mHitPrim;
     bool                mDidHitBack;
     bool                mShouldHitBack;
 };
 
 
-inline void Ray::hit(const IPrimitive* primitive, float t,
+inline void Ray::hit(const Triangle* primitive, float t,
                      const glm::vec2& barycentrics, bool hitBackFace)
 {
     TP_ASSERT(t <= mMaxT);
@@ -105,6 +108,11 @@ inline void Ray::transformed(const glm::mat4& m, Ray& outRay) const
 
     // Apply upper 3x3 rotation to direction
     outRay.setDir(glm::normalize(glm::mat3(m) * mDir));
+}
+
+inline glm::vec4 Ray::shade(const Raytracer& tracer) const
+{
+    return mHitPrim->material().shadeRay(tracer, *this);
 }
 
 #endif

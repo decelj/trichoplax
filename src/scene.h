@@ -23,6 +23,7 @@ private:
 
 public:
     typedef LightVector::const_iterator ConstLightIter;
+    typedef LightVector::iterator       LightIter;
 
     struct RenderSettings
     {
@@ -45,10 +46,15 @@ public:
     void setEnvSphereImage(const std::string& file);
     void setShadowRays(unsigned num);
 
+    bool hasCamera() const { return mCam != nullptr; }
+
     const RenderSettings& renderSettings() const { return mSettings; }
     
     ConstLightIter lightsBegin() const { return mLights.begin(); }
     ConstLightIter lightsEnd() const { return mLights.end(); }
+
+    LightIter lightsBegin() { return mLights.begin(); }
+    LightIter lightsEnd() { return mLights.end(); }
     
     static Scene& instance();
     static void create();

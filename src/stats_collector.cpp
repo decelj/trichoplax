@@ -1,9 +1,32 @@
 #include <iostream>
 #include <iomanip>
+#include <stdint.h>
 
 #include "stats_collector.h"
 #include "ray.h"
 #include "stats.h"
+
+
+namespace
+{
+    const char* RayTypeToName(Ray::TYPE type)
+    {
+#define CASE(_T, _S) case _T: return _S; break
+        switch (type)
+        {
+            CASE(Ray::PRIMARY, "Primary rays");
+            CASE(Ray::REFLECTED, "Reflection rays");
+            CASE(Ray::REFRACTED, "Refraction rays");
+            CASE(Ray::GI, "GI rays");
+            CASE(Ray::SHADOW, "Shadow rays");
+            default: break;
+        }
+#undef CASE
+
+        return "Undefined";
+    }
+}
+
 
 StatsCollector::StatsCollector()
 {
@@ -12,51 +35,38 @@ StatsCollector::StatsCollector()
 
 void StatsCollector::print() const
 {
-    std::cout << "Ray Type Stats:" << std::endl;
+    Stats allThreadStats;
+    for (const Stats* stats : mStats)
+    {
+        allThreadStats.accumulate(*stats);
+    }
 
+    uint64_t totalRaysCast = 0;
+    std::cout << "Ray Type Stats:" << std::endl;
     for (unsigned i = 0; i < Ray::TYPE_COUNT; ++i)
     {
-        size_t sum = 0;
-        for (const Stats* stats : mStats)
-        {
-            sum += stats->mValues[i];
-        }
-        
-        switch (i)
-        {
-            case Ray::PRIMARY:
-                std::cout << std::left << std::setw(20) <<
-                    "  Primary rays: " << sum << std::endl;
-                break;
-            case Ray::REFLECTED:
-                std::cout << std::left << std::setw(20) <<
-                    "  Reflected rays: " << sum << std::endl;
-                break;
-            case Ray::REFRACTED:
-                std::cout << std::left << std::setw(20) <<
-                    "  Refracted rays: " << sum << std::endl;
-                break;
-            case Ray::SHADOW:
-                std::cout << std::left << std::setw(20) <<
-                    "  Shadow rays: " << sum << std::endl;
-                break;
-            case Ray::GI:
-                std::cout << std::left << std::setw(20) <<
-                    "  GI rays: " << sum << std::endl;
-            default:
-                break;
-        }
+        std::cout << "  " << std::left << std::setw(20)
+            << RayTypeToName(static_cast<Ray::TYPE>(i))
+            << allThreadStats.rayCounts[i] << std::endl;
+
+        totalRaysCast += allThreadStats.rayCounts[i];
     }
+
+    std::cout << "\nTraversal Stats:" << std::endl;
+    std::cout << std::left << std::setw(22) << "  Box Tests:" << allThreadStats.boxTests
+        << " (" << (double)allThreadStats.boxTests / (double)totalRaysCast << " per ray)" << std::endl;
+    std::cout << std::left << std::setw(22) << "  Primitive Tests: " << allThreadStats.primitiveTests
+        << " (" << (double)allThreadStats.primitiveTests / (double)totalRaysCast << " per ray)" << std::endl;
 }
 
-unsigned long long StatsCollector::totalRaysCast() const
+uint64_t StatsCollector::totalRaysCast() const
 {
-    unsigned long long count = 0;
+    uint64_t count = 0;
     for (const Stats* stats : mStats)
     {
         for (unsigned i = 0; i < Ray::TYPE_COUNT; ++i)
         {
-            count += stats->mValues[i];
+            count += stats->rayCounts[i];
         }
     }
 

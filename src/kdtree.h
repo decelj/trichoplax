@@ -8,11 +8,12 @@
 #include "aabbox.h"
 #include "common.h"
 
-#include <atomic>
+#include <cstdint>
 
 class Mailboxer;
-class IPrimitive;
+class Triangle;
 class Ray;
+class Stats;
 
 
 class KdTree
@@ -21,40 +22,59 @@ private:
     class Node
     {
     private:
-        typedef std::vector<const IPrimitive*, AlignedAllocator<const IPrimitive*> > PrimitiveVector;
+        using PrimitiveVector = std::vector<const Triangle*, AlignedAllocator<const Triangle*> >;
         
     public:
         typedef PrimitiveVector::const_iterator ConstPrimIterator;
         typedef PrimitiveVector::iterator PrimIterator;
+        static const uint32_t sInvalidNodeIdx;
 
         explicit Node();
         ~Node();
 
-        inline void addPrimitive(const IPrimitive* prim) { mPrims.emplace_back(prim); }
-        inline void clearPrimitves() { mPrims.clear(); }
-        inline bool isEmpty() { return mPrims.empty(); }
+        void addPrimitive(const Triangle* prim) { mPrims.emplace_back(prim); }
+        void clearPrimitves() { mPrims.clear(); }
+        bool isEmpty() { return mPrims.empty(); }
         void updateBounds();
-        void split(const unsigned splitAxis, const float plane);
-        bool pruneEmptyLeafNodes();
 
-        inline Node* left() { return mLeft; }
-        inline Node* right() { return mRight; }
-        inline const Node* left() const { return mLeft; }
-        inline const Node* right() const { return mRight; }
+        void setChildren(uint32_t left, uint32_t right);
+        uint32_t leftIdx() const { return mLeft; }
+        uint32_t rightIdx() const { return mRight; }
 
-        inline bool isLeaf() const { return mLeft == nullptr && mRight == nullptr; }
-        inline const AABBox& bounds() const { return mBBox; }
-        inline size_t primitiveCount() const { return mPrims.size(); }
-        inline bool intersectBounds(const Ray& ray) const { return mBBox.intersect(ray); }
+        bool isLeaf() const { return mLeft == sInvalidNodeIdx && mRight == sInvalidNodeIdx; }
+        size_t primitiveCount() const { return mPrims.size(); }
+        bool intersectBounds(const Ray& ray) const { return bounds.intersect(ray); }
 
-        inline ConstPrimIterator beginPrimitives() const { return mPrims.begin(); }
-        inline ConstPrimIterator endPrimitives() const { return mPrims.end(); }
+        ConstPrimIterator beginPrimitives() const { return mPrims.begin(); }
+        ConstPrimIterator endPrimitives() const { return mPrims.end(); }
+
+        AABBox bounds;           // 24 bytes
+    private:
+        uint32_t mLeft;          // 4 bytes
+        uint32_t mRight;         // 4 bytes
+        PrimitiveVector mPrims;  // 8 bytes
+    };
+    using NodeBuffer = std::vector<Node, AlignedAllocator<Node> >;
+
+    class NodePtr
+    {
+    public:
+        NodePtr(uint32_t nodeIdx, NodeBuffer& nodes)
+        : mNodes(&nodes), mNodeIdx(nodeIdx)
+        { }
+
+        NodePtr()
+        : mNodes(nullptr), mNodeIdx(Node::sInvalidNodeIdx)
+        { }
+
+        operator bool() const { return mNodeIdx != Node::sInvalidNodeIdx; }
+
+        Node* operator->() { return &(*mNodes)[mNodeIdx]; }
+        const Node* operator->() const { return &(*mNodes)[mNodeIdx]; }
 
     private:
-        AABBox mBBox;            // 48 bytes
-        Node* mLeft;             // 8 bytes
-        Node* mRight;            // 8 bytes
-        PrimitiveVector mPrims;  // 8 bytes
+        NodeBuffer* mNodes;
+        const uint32_t mNodeIdx;
     };
     
     enum SHAPlaneEventType
@@ -66,12 +86,12 @@ private:
     
     struct SHAPlaneEvent
     {
-        SHAPlaneEvent(const IPrimitive* _prim, float _plane, unsigned _axis,
+        SHAPlaneEvent(const Triangle* _prim, float _plane, unsigned _axis,
                       SHAPlaneEventType _type);
         
         bool operator<(const SHAPlaneEvent& rhs) const;
         
-        const IPrimitive* primitive;
+        const Triangle* primitive;
         float plane;
         unsigned axis;
         SHAPlaneEventType type;
@@ -91,51 +111,41 @@ private:
         unsigned aaAxis;
         Side side;
     };
-
-    struct TraversalStats
-    {
-        TraversalStats();
-
-        void incrementBoxTests();
-        void incrementPrimitiveTests();
-
-        std::atomic_ullong boxTests;
-        std::atomic_ullong primitiveTests;
-    };
     
 public:
-    typedef std::vector<const Node*, AlignedAllocator<const Node*> > TraversalBuffer;
+    using TraversalBuffer = std::vector<uint32_t, AlignedAllocator<uint32_t> >;
 
     explicit KdTree();
     ~KdTree();
     
     void build();
     
-    bool trace(Ray& ray, bool firstHit, TraversalBuffer& traversalStack, Mailboxer& mailboxes) const;
+    bool trace(Ray& ray, bool firstHit, TraversalBuffer& traversalStack, Mailboxer& mailboxes, Stats& threadStats) const;
     
-    void addPrimitive(const IPrimitive* p);
+    void addPrimitive(const Triangle* p);
     size_t numberOfPrimitives() const { return mTotalNumPrims; }
-    void printTraversalStats(double raysCast) const;
     TraversalBuffer allocateTraversalBuffer() const;
     
 private:
-    void build(Node* node, SHAPlaneEventList& events, unsigned int depth);
+    Node& root() { return mNodes[0]; }
+
+    void build(NodePtr node, SHAPlaneEventList& events, unsigned int depth, uint32_t* nextNodeIdx);
 
     void split(SHAPlaneEventList& outLeftEvents, SHAPlaneEventList& outRightEvents,
-               Node& node, const SHASplitPlane& plane, SHAPlaneEventList& events) const;
+               NodePtr node, const SHASplitPlane& plane, SHAPlaneEventList& events,
+               uint32_t* nextNodeIdx);
     SHASplitPlane findSplitPlane(float* outCost, const AABBox& voxel,
                                  const SHAPlaneEventList& events, unsigned totalNumPrimitives) const;
     void SHACost(float* lowestCostOut, SHASplitPlane::Side* outSide,
                  float plane, unsigned aaAxis, const AABBox& voxel,
                  unsigned numLeftPrims, unsigned numRightPrims, unsigned numPlanarPrims) const;
 
-    void generateEventsForPrimitive(const IPrimitive* primitive, const AABBox& voxel,
+    void generateEventsForPrimitive(const Triangle* primitive, const AABBox& voxel,
                                     SHAPlaneEventList& events) const;
     void DumpSplitEvents(SHAPlaneEventList::const_iterator begin,
                          SHAPlaneEventList::const_iterator end, unsigned aaAxis=4) const;
-    
-    Node*                   mRoot;
-    mutable TraversalStats  mTraversalStats;
+
+    NodeBuffer              mNodes;
     unsigned                mMaxDepth;
     unsigned                mMinDepth;
     size_t                  mLargeNodes;
@@ -146,32 +156,36 @@ private:
 };
 
 
-inline void KdTree::addPrimitive(const IPrimitive* p)
+inline void KdTree::addPrimitive(const Triangle* p)
 {
-    TP_ASSERT(mRoot->left() == nullptr);
-    mRoot->addPrimitive(p);
+    TP_ASSERT(root().isLeaf());
+    root().addPrimitive(p);
+}
+
+inline void KdTree::Node::setChildren(uint32_t left, uint32_t right)
+{
+    TP_ASSERT(left != right);
+    mLeft = left;
+    mRight = right;
 }
 
 inline bool KdTree::SHAPlaneEvent::operator<(const SHAPlaneEvent& rhs) const
 {
     if (plane == rhs.plane)
     {
-        return type < rhs.type;
+        if (axis == rhs.axis)
+        {
+            return type < rhs.type;
+        }
+        else
+        {
+            return axis < rhs.axis;
+        }
     }
     else
     {
         return plane < rhs.plane;
     }
-}
-
-inline void KdTree::TraversalStats::incrementBoxTests()
-{
-    boxTests.fetch_add(1, std::memory_order_relaxed);
-}
-
-inline void KdTree::TraversalStats::incrementPrimitiveTests()
-{
-    primitiveTests.fetch_add(1, std::memory_order_relaxed);
 }
 
 #endif

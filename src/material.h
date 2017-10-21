@@ -28,14 +28,13 @@ public:
     void setRoughness(float roughness);
     void setIor(float Ior);
     
-    void shadeRay(const Raytracer& tracer, const Ray& r, glm::vec4& result) const;
+    glm::vec4 shadeRay(const Raytracer& tracer, const Ray& r) const;
     
 private:
     Material(const Material& other);
 
     glm::vec3 sampleLight(const ILight& light, const Hit& hit,
-                          const Raytracer& tracer, unsigned rayDepth,
-                          bool isSpecular) const;
+                          const Raytracer& tracer, unsigned rayDepth, bool hasSpecLobe) const;
     
     BRDF mBrdf;
 };

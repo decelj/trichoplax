@@ -2,10 +2,6 @@
 #include <limits>
 
 #include "ray.h"
-#include "hit.h"
-#include "iprimitive.h"
-#include "material.h"
-#include "raytracer.h"
 
 Ray::Ray(const TYPE t)
     : mType(t)
@@ -72,7 +68,7 @@ Ray::Ray(const Ray& r, TYPE t)
 bool Ray::refract(const Hit& hit, float inIOR)
 {
     glm::vec3 N = hit.N;
-    float nDotI = glm::dot(hit.I, N);
+    float nDotI = glm::dot(-hit.V, N);
 
     float eta;
     if (hit.hitBackFace)
@@ -93,14 +89,7 @@ bool Ray::refract(const Hit& hit, float inIOR)
         return false;
     }
 
-    setDir(glm::normalize(eta * hit.I - (eta * nDotI + sqrtf(k)) * N));
+    setDir(glm::normalize(eta * -hit.V - (eta * nDotI + sqrtf(k)) * N));
 
     return true;
 }
-
-void Ray::shade(const Raytracer& tracer, glm::vec4& result) const
-{
-    TP_ASSERT(mHitPrim != nullptr);
-    mHitPrim->material()->shadeRay(tracer, *this, result);
-}
-
