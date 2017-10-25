@@ -29,23 +29,23 @@ public:
     explicit Ray(const Ray& r, const TYPE t);
     explicit Ray(const TYPE t, const glm::vec3& origin, const float ior);
     
-    void setDir(const glm::vec3& d)     { mDir = d; mInverseDir = 1.0f / d; }
+    void setDir(const glm::vec3& d)     { mDir = d; }
     void setOrigin(const glm::vec3& o)  { mOrigin = o; }
     void setDepth(unsigned depth)       { mDepth = depth; }
-    void bias(const float bias)         { mMinT = bias; }
+    void bias(float bias)               { mMinT = bias; }
     void setMaxDistance(float dist)     { mMaxT = dist; }
     void shouldHitBackFaces(bool value) { mShouldHitBack = value; }
     void incrementDepth()               { ++mDepth; }
 
     const glm::vec3& origin() const         { return mOrigin; }
     const glm::vec3& dir() const            { return mDir; }
-    const glm::vec3& inverseDir() const     { return mInverseDir; }
     glm::vec3 point(const float t) const    { return mOrigin + mDir * t; }
     unsigned depth() const                  { return mDepth; }
     bool shouldHitBackFaces() const         { return mShouldHitBack; }
     bool didHitBackFace() const             { return mDidHitBack; }
     float ior() const                       { return mIor; }
     TYPE type() const                       { return mType; }
+    const Triangle* hitPrimitive() const    { return mHitPrim; }
     
     void hit(const Triangle* primitive, float t,
              const glm::vec2& barycentrics, bool hitBackFace);
@@ -72,7 +72,6 @@ private:
     const TYPE          mType;
     glm::vec3           mOrigin;
     glm::vec3           mDir;
-    glm::vec3           mInverseDir;
     unsigned            mDepth;
     float               mIor;
     float               mMinT;

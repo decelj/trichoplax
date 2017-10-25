@@ -1,5 +1,5 @@
-#include <iostream>
 #include <limits>
+#include <glm/glm.hpp>
 
 #include "ray.h"
 
@@ -7,7 +7,6 @@ Ray::Ray(const TYPE t)
     : mType(t)
     , mOrigin(0.f)
     , mDir(0.f)
-    , mInverseDir(0.f)
     , mDepth(1)
     , mIor(1.0f)
     , mMinT(0.f)
@@ -22,7 +21,6 @@ Ray::Ray(const TYPE t, const glm::vec3& origin, const float ior)
     : mType(t)
     , mOrigin(origin)
     , mDir(0.f)
-    , mInverseDir(0.f)
     , mDepth(1)
     , mIor(ior)
     , mMinT(0.f)
@@ -38,7 +36,6 @@ Ray::Ray(const Ray& r)
     : mType(r.mType)
     , mOrigin(r.mOrigin)
     , mDir(r.mDir)
-    , mInverseDir(r.mInverseDir)
     , mDepth(r.mDepth)
     , mIor(r.mIor)
     , mMinT(r.mMinT)
@@ -54,7 +51,6 @@ Ray::Ray(const Ray& r, TYPE t)
     : mType(t)
     , mOrigin(r.mOrigin)
     , mDir(r.mDir)
-    , mInverseDir(r.mInverseDir)
     , mDepth(r.mDepth)
     , mIor(r.mIor)
     , mMinT(r.mMinT)

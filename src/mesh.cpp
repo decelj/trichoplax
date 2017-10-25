@@ -39,14 +39,11 @@ void Mesh::addPrimitive(unsigned indexA, unsigned indexB, unsigned indexC, Mater
 
     Triangle* newTri = new Triangle(&mVertices[indexA], &mVertices[indexB], &mVertices[indexC], material);
 
-    glm::vec3 ll;
-    glm::vec3 ur;
-    newTri->bounds(ll, ur);
-
+    const AABBox bounds = newTri->bounds();
     unsigned flatCount = 0;
     for (unsigned i = 0; i < 3; ++i)
     {
-        if (ll[i] == ur[i]) ++flatCount;
+        if (bounds.ll()[i] == bounds.ur()[i]) ++flatCount;
     }
 
     if (flatCount > 1)

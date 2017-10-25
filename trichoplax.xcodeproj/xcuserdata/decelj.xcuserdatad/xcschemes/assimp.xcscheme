@@ -64,7 +64,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "$(SRCROOT)/dragon.fbx"
+            argument = "$(SRCROOT)/sphere.fbx"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

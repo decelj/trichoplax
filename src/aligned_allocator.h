@@ -43,7 +43,7 @@ public:
     {
         void* data;
         posix_memalign(&data, Alignment, count * sizeof(T));
-        return reinterpret_cast<pointer>(data);
+        return new(data) T[count];
     }
     
     inline void deallocate(pointer p, size_type)

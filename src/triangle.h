@@ -7,8 +7,7 @@
 class Ray;
 class Vertex;
 class Material;
-class Raytracer;
-
+class AABBox;
 
 class Triangle
 {
@@ -26,7 +25,7 @@ public:
     glm::vec2 uv(const glm::vec2& barycentrics) const;
     void positionPartials(const glm::vec3& N, glm::vec3& dPdU, glm::vec3& dPdV) const;
 
-    void bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const;
+    AABBox bounds() const;
     bool isCoplaner(const float plane, const unsigned aaAxis) const;
     bool isOrthognalToAxis(const unsigned axis) const;
     void aaBoxClip(float start, float end, unsigned aaAxis, float* outStart, float* outEnd) const;

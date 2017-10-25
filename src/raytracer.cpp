@@ -17,13 +17,13 @@
 #include "hit.h"
 
 
-Raytracer::Raytracer(const KdTree* tree, const Camera* cam, const EnvSphere* env,
+Raytracer::Raytracer(const KdTree& tree, const Camera& cam, const EnvSphere* env,
                      Sampler* const sampler, ImageBuffer* const imgBuffer,
                      const unsigned int maxDepth)
     : mNoiseGen()
-    , mMailboxes(tree->numberOfPrimitives())
+    , mMailboxes(tree.numberOfPrimitives())
     , mKdTree(tree)
-    , mTraversalStack(mKdTree->allocateTraversalBuffer())
+    , mTraversalStack(mKdTree.allocateTraversalBuffer())
     , mCamera(cam)
     , mEnv(env)
     , mImgBuffer(imgBuffer)
@@ -82,7 +82,7 @@ void Raytracer::run() const
         while (!mIsCanceled && packet.nextSample(sample))
         {
             Ray primary(Ray::PRIMARY);
-            mCamera->generateRay(*sample, &primary);
+            mCamera.generateRay(*sample, &primary);
 
             glm::vec4 rayColor(0.f, 0.f, 0.f, 0.f);
             traceAndShade(primary, rayColor);
@@ -111,13 +111,18 @@ void Raytracer::cancel()
     mIsCanceled = true;
 }
 
-bool Raytracer::trace(Ray& ray, bool firstHit) const
+bool Raytracer::trace(Ray& ray, bool visibilityTest) const
 {
     if (ray.depth() > mMaxDepth) return false;
     
     mStats.incrementRayCount(ray.type());
     mMailboxes.IncrementRayId();
-    return mKdTree->trace(ray, firstHit, mTraversalStack, mMailboxes, mStats);
+
+    if (visibilityTest)
+    {
+        return mKdTree.trace<true>(ray, mTraversalStack, mMailboxes, mStats);
+    }
+    return mKdTree.trace<false>(ray, mTraversalStack, mMailboxes, mStats);
 }
 
 bool Raytracer::traceAndShade(Ray& ray, glm::vec4& result) const
@@ -127,7 +132,7 @@ bool Raytracer::traceAndShade(Ray& ray, glm::vec4& result) const
     if (ray.depth() > mMaxDepth)
         return false;
 
-    if (trace(ray))
+    if (trace(ray, false))
     {
         result = ray.shade(*this);
         return true;

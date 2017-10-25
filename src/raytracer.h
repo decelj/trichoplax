@@ -21,7 +21,7 @@ class EnvSphere;
 class Raytracer
 {
 public:
-	explicit Raytracer(const KdTree* tree, const Camera* cam, const EnvSphere* env,
+	explicit Raytracer(const KdTree& tree, const Camera& cam, const EnvSphere* env,
                        Sampler* const sampler, ImageBuffer* const imgBuffer,
                        const unsigned int maxDepth);
 	~Raytracer();
@@ -48,13 +48,13 @@ private:
     static void* _run(void* arg);
     void run() const;
     
-    bool trace(Ray& ray, bool firstHit=false) const;
+    bool trace(Ray& ray, bool visibilityTest) const;
 
     mutable Noise                   mNoiseGen;
     mutable Mailboxer               mMailboxes;
-    const KdTree*                   mKdTree;
+    const KdTree&                   mKdTree;
     mutable KdTree::TraversalBuffer mTraversalStack;
-    const Camera*                   mCamera;
+    const Camera&                   mCamera;
     const EnvSphere*                mEnv;
     ImageBuffer* const              mImgBuffer;
     Sampler* const                  mSampler;

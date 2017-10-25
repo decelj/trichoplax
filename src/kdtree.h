@@ -3,79 +3,92 @@
 
 #include <vector>
 #include <list>
+#include <cstdint>
 
 #include "aligned_allocator.h"
 #include "aabbox.h"
 #include "common.h"
+#include "stats.h"
+#include "mailboxer.h"
 
-#include <cstdint>
 
-class Mailboxer;
 class Triangle;
 class Ray;
-class Stats;
 
 
 class KdTree
 {
 private:
+    using PrimitiveVector = std::vector<const Triangle*, AlignedAllocator<const Triangle*> >;
+
     class Node
     {
     private:
-        using PrimitiveVector = std::vector<const Triangle*, AlignedAllocator<const Triangle*> >;
-        
+        enum Flags : uint32_t
+        {
+            XAXIS = 0x0,
+            YAXIS = 0x1,
+            ZAXIS = 0x2,
+            LEAF = 0x3,
+            MASK = 0x3
+        };
+
     public:
-        typedef PrimitiveVector::const_iterator ConstPrimIterator;
-        typedef PrimitiveVector::iterator PrimIterator;
-        static const uint32_t sInvalidNodeIdx;
+        using ConstPrimIterator = const Triangle* const*;
+        using PrimIterator = const Triangle**;
 
         explicit Node();
         ~Node();
 
-        void addPrimitive(const Triangle* prim) { mPrims.emplace_back(prim); }
-        void clearPrimitves() { mPrims.clear(); }
-        bool isEmpty() { return mPrims.empty(); }
-        void updateBounds();
+        // Don't copy
+        Node(const Node&) = delete;
+        Node& operator=(const Node&) = delete;
 
-        void setChildren(uint32_t left, uint32_t right);
-        uint32_t leftIdx() const { return mLeft; }
-        uint32_t rightIdx() const { return mRight; }
+        // But we can move
+        Node(Node&& rhs);
 
-        bool isLeaf() const { return mLeft == sInvalidNodeIdx && mRight == sInvalidNodeIdx; }
-        size_t primitiveCount() const { return mPrims.size(); }
-        bool intersectBounds(const Ray& ray) const { return bounds.intersect(ray); }
+        void split(uint32_t leftChild, uint32_t rightChild, float position, uint32_t plane);
+        void initLeafNode(uint32_t numPrimitives);
 
-        ConstPrimIterator beginPrimitives() const { return mPrims.begin(); }
-        ConstPrimIterator endPrimitives() const { return mPrims.end(); }
+        bool intersect(const Ray& ray) const;
 
-        AABBox bounds;           // 24 bytes
+        uint32_t splitAxis() const { return (mFlags & MASK); }
+        float splitPlane() const { return mPlanePosition; }
+        uint32_t upperChildIdx() const { return mUpperChild >> 2; }
+        uint32_t lowerChildIdx() const { return mLowerChild; }
+
+        bool isLeaf() const { return (mFlags & MASK) == LEAF; }
+        uint32_t primitiveCount() const { return mPrimCount >> 2; }
+
+        ConstPrimIterator beginPrimitives() const { return mPrimitives; }
+        ConstPrimIterator endPrimitives() const { return mPrimitives + primitiveCount(); }
+
+        PrimIterator beginPrimitives() { return mPrimitives; }
+        PrimIterator endPrimitives() { return mPrimitives + primitiveCount(); }
+
     private:
-        uint32_t mLeft;          // 4 bytes
-        uint32_t mRight;         // 4 bytes
-        PrimitiveVector mPrims;  // 8 bytes
+        union // 4 bytes
+        {
+            uint32_t    mUpperChild;
+            uint32_t    mPrimCount;
+            Flags       mFlags;
+        };
+
+        union // 8 bytes
+        {
+            struct
+            {
+                float    mPlanePosition;
+                uint32_t mLowerChild;
+            };
+
+            struct
+            {
+                const Triangle** mPrimitives;
+            };
+        };
     };
     using NodeBuffer = std::vector<Node, AlignedAllocator<Node> >;
-
-    class NodePtr
-    {
-    public:
-        NodePtr(uint32_t nodeIdx, NodeBuffer& nodes)
-        : mNodes(&nodes), mNodeIdx(nodeIdx)
-        { }
-
-        NodePtr()
-        : mNodes(nullptr), mNodeIdx(Node::sInvalidNodeIdx)
-        { }
-
-        operator bool() const { return mNodeIdx != Node::sInvalidNodeIdx; }
-
-        Node* operator->() { return &(*mNodes)[mNodeIdx]; }
-        const Node* operator->() const { return &(*mNodes)[mNodeIdx]; }
-
-    private:
-        NodeBuffer* mNodes;
-        const uint32_t mNodeIdx;
-    };
     
     enum SHAPlaneEventType
     {
@@ -96,8 +109,7 @@ private:
         unsigned axis;
         SHAPlaneEventType type;
     };
-    
-    typedef std::list<SHAPlaneEvent> SHAPlaneEventList;
+    using SHAPlaneEventList = std::list<SHAPlaneEvent>;
     
     struct SHASplitPlane
     {
@@ -106,67 +118,108 @@ private:
             LEFT = 0,
             RIGHT
         };
-        
+
+        SHASplitPlane();
+
         float plane;
+        float cost;
         unsigned aaAxis;
         Side side;
+        unsigned numPrimitivesRight;
+        unsigned numPrimitivesLeft;
+    };
+
+    struct TraversalState
+    {
+        const Node* node;
+        float minT;
+        float maxT;
     };
     
 public:
-    using TraversalBuffer = std::vector<uint32_t, AlignedAllocator<uint32_t> >;
+    using TraversalBuffer = std::vector<TraversalState, AlignedAllocator<TraversalState> >;
 
     explicit KdTree();
     ~KdTree();
     
     void build();
-    
-    bool trace(Ray& ray, bool firstHit, TraversalBuffer& traversalStack, Mailboxer& mailboxes, Stats& threadStats) const;
+
+    template <bool visibilityTest>
+    bool trace(Ray& ray, TraversalBuffer& traversalStack, Mailboxer& mailboxes, Stats& threadStats) const;
     
     void addPrimitive(const Triangle* p);
-    size_t numberOfPrimitives() const { return mTotalNumPrims; }
+    size_t numberOfPrimitives() const { return mPrimVector.size(); }
     TraversalBuffer allocateTraversalBuffer() const;
     
 private:
-    Node& root() { return mNodes[0]; }
+    uint32_t allocNode(uint32_t* nextNodeIdx);
 
-    void build(NodePtr node, SHAPlaneEventList& events, unsigned int depth, uint32_t* nextNodeIdx);
-
+    void build(uint32_t nodeIdx, const AABBox& bounds, SHAPlaneEventList& events, unsigned numPrimitives, unsigned depth, uint32_t* nextNodeIdx);
     void split(SHAPlaneEventList& outLeftEvents, SHAPlaneEventList& outRightEvents,
-               NodePtr node, const SHASplitPlane& plane, SHAPlaneEventList& events,
-               uint32_t* nextNodeIdx);
-    SHASplitPlane findSplitPlane(float* outCost, const AABBox& voxel,
-                                 const SHAPlaneEventList& events, unsigned totalNumPrimitives) const;
+               const AABBox& leftBounds, const AABBox& rightBounds,
+               const SHASplitPlane& plane, SHAPlaneEventList& events);
+    SHASplitPlane findSplitPlane(const AABBox& voxel, const SHAPlaneEventList& events,
+                                 unsigned totalNumPrimitives) const;
     void SHACost(float* lowestCostOut, SHASplitPlane::Side* outSide,
                  float plane, unsigned aaAxis, const AABBox& voxel,
                  unsigned numLeftPrims, unsigned numRightPrims, unsigned numPlanarPrims) const;
 
     void generateEventsForPrimitive(const Triangle* primitive, const AABBox& voxel,
                                     SHAPlaneEventList& events) const;
-    void DumpSplitEvents(SHAPlaneEventList::const_iterator begin,
-                         SHAPlaneEventList::const_iterator end, unsigned aaAxis=4) const;
 
+    AABBox                  mBounds;
     NodeBuffer              mNodes;
     unsigned                mMaxDepth;
     unsigned                mMinDepth;
-    size_t                  mLargeNodes;
     size_t                  mLeafNodes;
     size_t                  mTotalNodes;
-    size_t                  mMaxPrimsPerNode;
-    size_t                  mTotalNumPrims;
+    uint32_t                mMaxPrimsPerNode;
+    PrimitiveVector         mPrimVector;
 };
 
 
 inline void KdTree::addPrimitive(const Triangle* p)
 {
-    TP_ASSERT(root().isLeaf());
-    root().addPrimitive(p);
+    mPrimVector.emplace_back(p);
 }
 
-inline void KdTree::Node::setChildren(uint32_t left, uint32_t right)
+inline uint32_t KdTree::allocNode(uint32_t* nextNodeIdx)
 {
-    TP_ASSERT(left != right);
-    mLeft = left;
-    mRight = right;
+    uint32_t result = (*nextNodeIdx)++;
+
+    if (result >= mNodes.size())
+    {
+        mNodes.resize(mNodes.size() << 1);
+    }
+
+    ++mTotalNodes;
+    return result;
+}
+
+inline void KdTree::Node::split(uint32_t leftChild, uint32_t rightChild, float position, uint32_t axis)
+{
+    TP_ASSERT(leftChild != rightChild);
+    TP_ASSERT(isLeaf());
+    TP_ASSERT(upperChildIdx() == 0);
+    TP_ASSERT(mPrimitives == nullptr);
+
+    mUpperChild = (rightChild << 2) | (axis & MASK);
+    mLowerChild = leftChild;
+    mPlanePosition = position;
+}
+
+inline void KdTree::Node::initLeafNode(uint32_t numPrimitives)
+{
+    TP_ASSERT(isLeaf());
+    TP_ASSERT(upperChildIdx() == 0);
+    TP_ASSERT(mPrimitives == nullptr);
+
+    mPrimCount |= numPrimitives << 2;
+
+    if (numPrimitives)
+    {
+        mPrimitives = new const Triangle*[numPrimitives];
+    }
 }
 
 inline bool KdTree::SHAPlaneEvent::operator<(const SHAPlaneEvent& rhs) const
@@ -186,6 +239,100 @@ inline bool KdTree::SHAPlaneEvent::operator<(const SHAPlaneEvent& rhs) const
     {
         return plane < rhs.plane;
     }
+}
+
+template <bool visibilityTest>
+bool KdTree::trace(Ray& ray, TraversalBuffer& traversalStack, Mailboxer& mailboxes, Stats& threadStats) const
+{
+    threadStats.boxTests++;
+    if (!mBounds.intersect(ray))
+    {
+        return false;
+    }
+
+    float minT = ray.minT();
+    float maxT = ray.maxT();
+    const glm::vec3 invDir = 1.f / ray.dir();
+    bool hitPrimitive = false;
+    const Node* currentNode = &mNodes[0];
+    int traversalStackIdx = -1;
+
+    while (currentNode && ray.maxT() >= minT)
+    {
+        if (currentNode->isLeaf())
+        {
+            Node::ConstPrimIterator it = currentNode->beginPrimitives();
+            for (; it != currentNode->endPrimitives(); ++it)
+            {
+                if (!mailboxes.Tested((*it)->id()))
+                {
+                    threadStats.primitiveTests++;
+                    if ((*it)->intersect(ray))
+                    {
+                        if (visibilityTest)
+                        {
+                            return true;
+                        }
+
+                        hitPrimitive = true;
+                    }
+
+                    mailboxes.Mark((*it)->id());
+                }
+            }
+
+            // Pop node from traversal stack
+            if (traversalStackIdx >= 0)
+            {
+                TraversalState& state = traversalStack[traversalStackIdx--];
+                currentNode = state.node;
+                minT = state.minT;
+                maxT = state.maxT;
+            }
+            else
+            {
+                currentNode = nullptr;
+            }
+        }
+        else
+        {
+            threadStats.boxTests++;
+
+            const uint32_t axis = currentNode->splitAxis();
+            const float planeT = (currentNode->splitPlane() - ray.origin()[axis]) * invDir[axis];
+
+            const Node* firstChild = &mNodes[currentNode->lowerChildIdx()];
+            const Node* secondChild = &mNodes[currentNode->upperChildIdx()];
+
+            bool belowFirst = ray.origin()[axis] <= currentNode->splitPlane();
+            if (!belowFirst)
+            {
+                std::swap(firstChild, secondChild);
+            }
+
+            if (maxT < planeT || planeT < 0.f)
+            {
+                currentNode = firstChild;
+            }
+            else if (minT > planeT)
+            {
+                currentNode = secondChild;
+            }
+            else
+            {
+                // Hits both sides, enqueue second child in stack
+                TraversalState& state = traversalStack[++traversalStackIdx];
+                state.minT = planeT;
+                state.maxT = maxT;
+                state.node = secondChild;
+
+                maxT = planeT;
+                currentNode = firstChild;
+            }
+        }
+    }
+    
+    return hitPrimitive;
 }
 
 #endif

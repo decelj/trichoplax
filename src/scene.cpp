@@ -180,7 +180,7 @@ void Scene::render(const std::string& filename)
     
     for (unsigned int i = 0; i < numCpus; ++i)
     {
-        Raytracer* tracer = new Raytracer(mKdTree, mCam, mEnvSphere, mSampler,
+        Raytracer* tracer = new Raytracer(*mKdTree, *mCam, mEnvSphere, mSampler,
                                           mImgBuffer, mSettings.maxDepth);
         tracers.emplace_back(tracer);
         tracer->registerStatsCollector(collector);

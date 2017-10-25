@@ -5,7 +5,8 @@
 #include <limits>
 #include "ray.h"
 
-class AABBox {
+class AABBox
+{
 public:
     AABBox();
     AABBox(const glm::vec3& ll, const glm::vec3& ur);
@@ -24,7 +25,10 @@ public:
     void encompass(const glm::vec3& point);
     
     bool intersect(const Ray& ray) const;
+    bool hasZeroVolume() const;
+
     AABBox intersection(const AABBox& other) const;
+    AABBox join(const AABBox& other) const;
     
     short longestAxis() const;
     float split(const unsigned axis) const
@@ -34,6 +38,7 @@ public:
     
     float surfaceArea() const;
     void split(AABBox* outLeft, AABBox* outRight, unsigned axis, float plane) const;
+
 private:
     glm::vec3 mBounds[2];
 };
@@ -45,19 +50,27 @@ inline bool AABBox::isValid() const
         && glm::all(glm::notEqual(ur(), glm::vec3(std::numeric_limits<float>::max())));
 }
 
+inline bool AABBox::hasZeroVolume() const
+{
+    return relEq(ll().x, ur().x) || relEq(ll().y, ur().y) || relEq(ll().z, ur().z);
+}
+
 inline bool AABBox::intersect(const Ray& ray) const
 {
+    const glm::vec3 invDir = 1.f / ray.dir();
     const glm::vec3 llToOrigin = mBounds[0] - ray.origin();
     const glm::vec3 urToOrigin = mBounds[1] - ray.origin();
-    const glm::vec3 nearTs = llToOrigin * ray.inverseDir();
-    const glm::vec3 farTs = urToOrigin * ray.inverseDir();
+    const glm::vec3 nearTs = llToOrigin * invDir;
+    const glm::vec3 farTs = urToOrigin * invDir;
     float tMin = ray.minT();
     float tMax = ray.maxT();
     
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 3; ++i)
+    {
         float nearT = nearTs[i];
         float farT = farTs[i];
-        if (nearT > farT) {
+        if (nearT > farT)
+        {
             float tmp = nearT;
             nearT = farT;
             farT = tmp;
@@ -66,7 +79,9 @@ inline bool AABBox::intersect(const Ray& ray) const
         tMin = std::max(nearT, tMin);
         tMax = std::min(farT, tMax);
         if (tMin > tMax)
+        {
             return false;
+        }
     }
     
     return true;
@@ -107,6 +122,11 @@ inline AABBox AABBox::intersection(const AABBox& other) const
     glm::vec3 outUR = glm::min(ur(), other.ur());
     glm::vec3 outLL = glm::max(ll(), other.ll());
     return AABBox(outLL, outUR);
+}
+
+inline AABBox AABBox::join(const AABBox& other) const
+{
+    return AABBox(glm::min(ll(), other.ll()), glm::max(ur(), other.ur()));
 }
 
 inline void AABBox::encompass(const glm::vec3& point)

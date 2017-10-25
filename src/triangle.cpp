@@ -5,6 +5,7 @@
 #include "ray.h"
 #include "common.h"
 #include "vertex.h"
+#include "aabbox.h"
 
 
 Triangle::Triangle(const Vertex* a, const Vertex* b, const Vertex* c, const Material* material)
@@ -103,15 +104,10 @@ void Triangle::positionPartials(const glm::vec3& N, glm::vec3& dPdU, glm::vec3& 
     }
 }
 
-void Triangle::bounds(glm::vec3& lowerLeft, glm::vec3& upperRight) const
+AABBox Triangle::bounds() const
 {
-    lowerLeft[0] = std::min(std::min(mA->position[0], mB->position[0]), mC->position[0]);
-    lowerLeft[1] = std::min(std::min(mA->position[1], mB->position[1]), mC->position[1]);
-    lowerLeft[2] = std::min(std::min(mA->position[2], mB->position[2]), mC->position[2]);
-
-    upperRight[0] = std::max(std::max(mA->position[0], mB->position[0]), mC->position[0]);
-    upperRight[1] = std::max(std::max(mA->position[1], mB->position[1]), mC->position[1]);
-    upperRight[2] = std::max(std::max(mA->position[2], mB->position[2]), mC->position[2]);
+    return AABBox(glm::min(glm::min(mA->position, mB->position), mC->position),
+                  glm::max(glm::max(mA->position, mB->position), mC->position));
 }
 
 bool Triangle::isCoplaner(const float plane, const unsigned aaAxis) const
@@ -135,7 +131,7 @@ void Triangle::aaBoxClip(float start, float end, unsigned aaAxis, float* outStar
     TP_ASSERT(!isCoplaner(end, aaAxis));
 
     *outStart = std::max(start,
-                         std::min(std::min(mA->position[aaAxis], mB->position[aaAxis]), mC->position[aaAxis]));
+                         std::min({mA->position[aaAxis], mB->position[aaAxis], mC->position[aaAxis]}));
     *outEnd = std::min(end,
-                       std::max(std::max(mA->position[aaAxis], mB->position[aaAxis]), mC->position[aaAxis]));
+                       std::max({mA->position[aaAxis], mB->position[aaAxis], mC->position[aaAxis]}));
 }

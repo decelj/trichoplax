@@ -127,8 +127,8 @@ glm::vec3 Material::sampleLight(const ILight& light, const Hit& hit,
         lightSampler->generateSample(tracer.getNoiseGenerator(), shadowRay);
         --shadowRay;
 
-        float nDotL = std::max(glm::dot(hit.N, shadowRay.dir()), 0.f);
-        if (nDotL == 0.f)
+        float nDotL = glm::dot(hit.N, shadowRay.dir());
+        if (nDotL <= 0.f)
         {
             continue;
         }
