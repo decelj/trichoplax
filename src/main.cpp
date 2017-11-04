@@ -8,6 +8,7 @@
 #include "parser_factory.h"
 #include "iparser.h"
 #include "timer.h"
+#include "cl_args.h"
 
 struct Args
 {
@@ -38,79 +39,37 @@ Args::Args()
 
 Args parseArgs(int argc, char** argv)
 {
+    CLArgs argParser;
     Args args;
 
-    // TODO: Create a nicer CL parser :)
-    for (int i = 1; i < argc; ++i)
+    argParser.RegisterArg("-o", &args.outputImage, args.outputImage);
+    argParser.RegisterArg("-env", &args.envSphere, args.envSphere);
+    argParser.RegisterArg("-width", &args.width, args.width);
+    argParser.RegisterArg("-height", &args.height, args.height);
+    argParser.RegisterArg("-maxDepth", &args.renderSettings.maxDepth, args.renderSettings.maxDepth);
+    argParser.RegisterArg("-giSamples", &args.renderSettings.GISamples, args.renderSettings.GISamples);
+    argParser.RegisterArg("-bias", &args.renderSettings.bias, args.renderSettings.bias);
+    
+    std::vector<std::string> extraArgs;
+    try
     {
-        if (strcmp(argv[i], "-o") == 0)
+        if (!argParser.Parse(argv, argc, &extraArgs))
         {
-            if (i >= argc - 1)
-            {
-                throw std::runtime_error("expected output file");
-            }
-
-            args.outputImage = argv[++i];
+            exit(-1);
         }
-        else if (strcmp(argv[i], "-env") == 0)
+        
+        if (extraArgs.size() > 1)
         {
-            if (i >= argc - 1)
-            {
-                throw std::runtime_error("expected env sphere file");
-            }
-
-            args.envSphere = argv[++i];
-        }
-        else if (strcmp(argv[i], "-width") == 0)
-        {
-            if (i >= argc - 1)
-            {
-                throw std::runtime_error("expected width number");
-            }
-
-            args.width = atoi(argv[++i]);
-        }
-        else if (strcmp(argv[i], "-height") == 0)
-        {
-            if (i >= argc - 1)
-            {
-                throw std::runtime_error("expected height number");
-            }
-
-            args.height = atoi(argv[++i]);
-        }
-        else if (strcmp(argv[i], "-maxDepth") == 0)
-        {
-            if (i >= argc - 1)
-            {
-                throw std::runtime_error("expected max depth number");
-            }
-
-            args.renderSettings.maxDepth = atoi(argv[++i]);
-        }
-        else if (strcmp(argv[i], "-giSamples") == 0)
-        {
-            if (i >= argc - 1)
-            {
-                throw std::runtime_error("expected number of gi samples");
-            }
-
-            args.renderSettings.GISamples = atoi(argv[++i]);
-        }
-        else if (strcmp(argv[i], "-bias") == 0)
-        {
-            if (i >= argc - 1)
-            {
-                throw std::runtime_error("expected bias number");
-            }
-
-            args.renderSettings.bias = (float)atof(argv[++i]);
-        }
-        else
-        {
-            args.sceneFile = argv[i];
+            throw std::invalid_argument(extraArgs[1]);
         }
     }
+    catch (...)
+    {
+        argParser.PrintUsage();
+        throw;
+    }
+    
+    args.sceneFile = extraArgs[0];
 
     return args;
 }
