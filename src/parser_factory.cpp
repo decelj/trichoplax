@@ -1,15 +1,16 @@
 #include <string>
+#include <memory>
 
 #include "parser_factory.h"
 #include "simple_parser.h"
 #include "fbx_importer.h"
 
-IParser* ParserFactory::create(const std::string &file)
+std::unique_ptr<IParser> ParserFactory::create(const std::string &file)
 {
     if (file.compare(file.find_last_of("."), 5, ".test") == 0)
     {
-        return new SimpleParser;
+        return std::make_unique<SimpleParser>();
     }
 
-    return new FBXImporter;
+    return std::make_unique<FBXImporter>();
 }

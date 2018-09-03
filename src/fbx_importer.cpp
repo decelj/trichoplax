@@ -276,7 +276,7 @@ float getScalarMaterialProperty(const fbxsdk::FbxSurfaceMaterial& material,
 
 bool loadMaterials(fbxsdk::FbxNode& node, FBXTPMaterialMap& materialsMap)
 {
-    for (unsigned i = 0; i < node.GetMaterialCount(); ++i)
+    for (unsigned i = 0; i < (unsigned)node.GetMaterialCount(); ++i)
     {
         fbxsdk::FbxSurfaceMaterial* material = node.GetMaterial(i);
         if (materialsMap[material])

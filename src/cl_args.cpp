@@ -64,6 +64,7 @@ void CLArgs::Arg::Print() const
     switch (type)
     {
         case INT: std::cout << *(int*)dest; break;
+        case UNSIGNED: std::cout << *(unsigned*)dest; break;
         case FLOAT: std::cout << *(float*)dest; break;
         case STRING: std::cout << *(std::string*)dest; break;
         case BOOL: std::cout << *(bool*)dest; break;
@@ -78,6 +79,7 @@ bool CLArgs::Arg::Parse(const char* value) const
     switch (type)
     {
         case INT: *(int*)dest = std::atoi(value); break;
+        case UNSIGNED: *(unsigned*)dest = std::atoi(value); break;
         case FLOAT: *(float*)dest = (float)std::atof(value); break;
         case STRING: *(std::string*)dest = value; break;
         case BOOL: *(bool*)dest = true; break;

@@ -44,7 +44,12 @@ inline unsigned ILight::firstPassShadowRays() const
 
 inline unsigned ILight::secondPassShadowRays() const
 {
-    return std::max(shadowRays() - firstPassShadowRays(), 0u);
+    if (shadowRays() < firstPassShadowRays())
+    {
+        return shadowRays() - firstPassShadowRays();
+    }
+
+    return 0u;
 }
 
 #endif

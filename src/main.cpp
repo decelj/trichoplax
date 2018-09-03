@@ -2,6 +2,7 @@
 #include <locale>
 #include <string>
 #include <limits>
+#include <memory>
 
 #include "FreeImage.h"
 #include "scene.h"
@@ -123,7 +124,7 @@ int main(int argc, char** argv)
         HighResTimer loadTimer;
         loadTimer.start();
         
-        IParser* parser = ParserFactory().create(clArgs.sceneFile);
+        std::unique_ptr<IParser> parser = ParserFactory().create(clArgs.sceneFile);
 
         std::string outputImage;
         try
@@ -132,12 +133,9 @@ int main(int argc, char** argv)
         }
         catch (...)
         {
-            delete parser;
             Scene::destroy();
             throw;
         }
-        
-        delete parser;
 
         if (clArgs.outputImage.empty())
         {

@@ -6,6 +6,7 @@
 #include <exception>
 #include <unordered_set>
 #include <vector>
+#include <iostream>
 
 class CLArgs
 {
@@ -24,9 +25,11 @@ private:
         enum Type
         {
             INT,
+            UNSIGNED,
             FLOAT,
             STRING,
-            BOOL
+            BOOL,
+            INVALID
         };
 
         Arg(const std::string& _name, Type _type, void* _dest)
@@ -35,7 +38,7 @@ private:
         }
 
         Arg(const std::string& _name)
-            : name(_name)
+            : name(_name), type(INVALID), dest(nullptr)
         {
         }
 
@@ -53,13 +56,15 @@ private:
                 return std::hash<std::string>{}(a.name);
             }
         };
-        
-        template<class T>
-        struct TypeToEnum {};
 
-        const std::string& name;
-        Type type;
-        void* dest;
+        template<class T>
+        struct TypeToEnum
+        {
+        };
+
+        const std::string name;
+        const Type type;
+        void* const dest;
     };
     using ArgSet = std::unordered_set<Arg, Arg::Hash>;
 
@@ -79,6 +84,19 @@ private:
 };
 
 
+template<class T>
+inline void CLArgs::RegisterArg(const std::string& name, T* dest, const T& defaultValue)
+{
+    Arg::Type typeEnum = Arg::TypeToEnum<T>::value;
+    if (!mArgs.emplace(name, typeEnum, dest).second)
+    {
+        throw std::invalid_argument(StrConcat("Invalid argument ", name, ": already added"));
+    }
+
+    *dest = defaultValue;
+}
+
+
 template<>
 struct CLArgs::Arg::TypeToEnum<int>
 {
@@ -88,7 +106,7 @@ struct CLArgs::Arg::TypeToEnum<int>
 template<>
 struct CLArgs::Arg::TypeToEnum<unsigned>
 {
-    static constexpr Type value = INT;
+    static constexpr Type value = UNSIGNED;
 };
 
 template<>
@@ -108,15 +126,3 @@ struct CLArgs::Arg::TypeToEnum<std::string>
 {
     static constexpr Type value = STRING;
 };
-
-
-template<class T>
-inline void CLArgs::RegisterArg(const std::string& name, T* dest, const T& defaultValue)
-{
-    if (!mArgs.emplace(name, (Arg::Type)Arg::TypeToEnum<T>::value, dest).second)
-    {
-        throw std::invalid_argument(StrConcat("Invalid argument ", name, ": already added"));
-    }
-    
-    *dest = defaultValue;
-}
