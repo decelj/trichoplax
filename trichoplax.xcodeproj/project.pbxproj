@@ -349,18 +349,19 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0940;
+				LastUpgradeCheck = 1020;
 				ORGANIZATIONNAME = com.jdecell;
 			};
 			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "trichoplax" */;
 			compatibilityVersion = "Xcode 9.3";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 1;
 			knownRegions = (
-				English,
-				Japanese,
-				French,
-				German,
+				fr,
+				en,
+				Base,
+				de,
+				ja,
 			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* raytracer */;
 			projectDirPath = "";
@@ -424,7 +425,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -486,8 +486,7 @@
 					"$(SRCROOT)/include",
 				);
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/lib";
-				LLVM_LTO = YES_THIN;
-				LLVM_VECTORIZE_LOOPS = NO;
+				LLVM_LTO = NO;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "/Applications/Autodesk/FBX\\ SDK/2018.1.1/lib/clang/release/libfbxsdk.a";
 				SDKROOT = macosx;
@@ -546,7 +545,6 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/lib";
 				LLVM_LTO = YES_THIN;
-				LLVM_VECTORIZE_LOOPS = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "/Applications/Autodesk/FBX\\ SDK/2018.1.1/lib/clang/release/libfbxsdk.a";
 				SDKROOT = macosx;
@@ -557,7 +555,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -620,7 +617,6 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/lib";
 				LLVM_LTO = YES_THIN;
-				LLVM_VECTORIZE_LOOPS = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "/Applications/Autodesk/FBX\\ SDK/2018.1.1/lib/clang/release/libfbxsdk.a";
 				SDKROOT = macosx;
@@ -631,7 +627,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
