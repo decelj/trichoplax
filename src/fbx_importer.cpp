@@ -327,6 +327,7 @@ void loadLight(fbxsdk::FbxNode& node, Scene& scene)
     fbxLightDir.Normalize();
     const glm::vec3 lightDir = toVec3(fbxLightDir);
     const glm::vec3 lightPos = toVec3(matrix.GetT());
+    const float radius = scene.renderSettings().lightRadius;
 
     switch (light.LightType.Get())
     {
@@ -336,8 +337,8 @@ void loadLight(fbxsdk::FbxNode& node, Scene& scene)
 
         case fbxsdk::FbxLight::ePoint:
             tpLight = new PointLight(lightPos,
-                                     lightColor / (4.f * PI), // normalize, 4PI steradians in sphere
-                                     1.f, // radius
+                                     lightColor / (4.f * PI), // normalize, 4PI steradians in unit sphere
+                                     radius, // radius
                                      0.1f, // bias
                                      0.0f, // constant decay
                                      light.DecayType.Get() == fbxsdk::FbxLight::eLinear ? 1.f : 0.f, // Linear

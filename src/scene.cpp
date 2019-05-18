@@ -40,6 +40,7 @@ Scene::RenderSettings::RenderSettings()
     : maxDepth(1)
     , GISamples(50)
     , bias(0.001f)
+    , lightRadius(0.f)
 {
 }
 

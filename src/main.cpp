@@ -49,6 +49,7 @@ Args parseArgs(int argc, char** argv)
     argParser.RegisterArg("-maxDepth", &args.renderSettings.maxDepth, args.renderSettings.maxDepth);
     argParser.RegisterArg("-giSamples", &args.renderSettings.GISamples, args.renderSettings.GISamples);
     argParser.RegisterArg("-bias", &args.renderSettings.bias, args.renderSettings.bias);
+    argParser.RegisterArg("-lightRadius", &args.renderSettings.lightRadius, args.renderSettings.lightRadius);
     argParser.RegisterArg("-maxThreads", &args.maxThreads, args.maxThreads);
     
     std::vector<std::string> extraArgs;
@@ -75,20 +76,16 @@ Args parseArgs(int argc, char** argv)
     return args;
 }
 
-void applyCLOverrides(const Args& args, Scene& scene)
+void applyCLArgs(const Args& args, Scene& scene)
 {
     scene.setBias(args.renderSettings.bias);
     scene.setNumGISamples(args.renderSettings.GISamples);
     scene.setMaxDepth(args.renderSettings.maxDepth);
+    scene.setLightRadius(args.renderSettings.lightRadius);
 
     if (!args.envSphere.empty())
     {
         scene.setEnvSphereImage(args.envSphere);
-    }
-
-    if (args.width != 0 && args.height != 0)
-    {
-        scene.setImageSize(args.width, args.height);
     }
 }
 
@@ -108,7 +105,8 @@ int main(int argc, char** argv)
 
     FreeImage_Initialise();
     Scene::create();
-    
+    applyCLArgs(clArgs, Scene::instance());
+
     {
         HighResTimer loadTimer;
         loadTimer.start();
@@ -135,7 +133,11 @@ int main(int argc, char** argv)
             << loadTimer.elapsedToString(loadTimer.elapsed()) << std::endl;
     }
 
-    applyCLOverrides(clArgs, Scene::instance());
+    // Override the output image size if set on the CL
+    if (clArgs.width != 0 && clArgs.height != 0)
+    {
+        Scene::instance().setImageSize(clArgs.width, clArgs.height);
+    }
 
     Scene::instance().prepareForRendering();
     Scene::instance().render(clArgs.outputImage, clArgs.maxThreads);

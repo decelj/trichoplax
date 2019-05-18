@@ -44,7 +44,10 @@ inline ISampler* PointLight::generateSamplerForPoint(const glm::vec3& samplePoin
     }
     else
     {
-        return new PointSampler(glm::normalize(mPos - samplePoint));
+        glm::vec3 dir = mPos - samplePoint;
+        float distance = glm::length(dir);
+        dir = dir / distance;
+        return new PointSampler(dir, distance);
     }
 }
 

@@ -32,6 +32,7 @@ public:
         uint32_t maxDepth;
         uint32_t GISamples;
         float bias;
+        float lightRadius;
     };
 
     void prepareForRendering();
@@ -42,6 +43,7 @@ public:
     void setMaxDepth(uint32_t depth) { mSettings.maxDepth = depth; }
     void setNumGISamples(uint32_t numSamples) { mSettings.GISamples = numSamples; }
     void setBias(float bias) { mSettings.bias = bias; }
+    void setLightRadius(float radius) { mSettings.lightRadius = radius; }
     void setImageSize(uint32_t width, uint32_t height);
     void setEnvSphereImage(const std::string& file);
     void setShadowRays(uint32_t num);

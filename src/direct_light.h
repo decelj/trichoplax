@@ -2,6 +2,7 @@
 #define __DIRECT_LIGHT_H__
 
 #include <glm/glm.hpp>
+#include <limits>
 
 #include "multi_sample_ray.h"
 #include "ilight.h"
@@ -38,7 +39,7 @@ inline void DirectLight::attenuate(const glm::vec3& P, glm::vec3& result) const
 
 inline ISampler* DirectLight::generateSamplerForPoint(const glm::vec3& samplePoint) const
 {
-    return new PointSampler(directionToLight(samplePoint));
+    return new PointSampler(directionToLight(samplePoint), std::numeric_limits<float>::max());
 }
 
 inline void DirectLight::setShadowRays(unsigned numRays)

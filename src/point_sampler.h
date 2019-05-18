@@ -12,18 +12,19 @@ class Noise;
 class PointSampler : public ISampler
 {
 public:
-    PointSampler(const glm::vec3& direction);
+    PointSampler(const glm::vec3& direction, float maxDistance);
 
     void generateSample(Noise& noise, MultiSampleRay& outRay) const override;
 
 private:
     glm::vec3       mDirection;
+    float           mMaxDistance;
 };
 
 inline void PointSampler::generateSample(Noise& /*noise*/, MultiSampleRay& outRay) const
 {
     outRay.setDir(mDirection);
-    outRay.setMaxDistance(std::numeric_limits<float>::max());
+    outRay.setMaxDistance(mMaxDistance);
 }
 
 #endif /* point_sampler_hpp */
