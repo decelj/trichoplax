@@ -20,24 +20,18 @@
 class Triangle;
 
 
-namespace {
-void joinThreads(std::vector<Raytracer*>& tracers, bool kill=false)
+namespace
+{
+void joinThreads(std::vector<std::unique_ptr<Raytracer> >& tracers, bool kill=false)
 {
     if (kill)
     {
-        for (auto it = tracers.begin(); it != tracers.end(); ++it)
-            (*it)->cancel();
+        for (auto& tracer : tracers)
+            tracer->cancel();
     }
     
-    for (auto it = tracers.begin(); it != tracers.end(); ++it)
-        (*it)->join();
-}
-    
-void cleanupThreads(std::vector<Raytracer*>& tracers)
-{
-    for (auto it = tracers.begin(); it != tracers.end(); ++it)
-        delete *it;
-    tracers.clear();
+    for (auto& tracer : tracers)
+        tracer->join();
 }
 } // annonymous namespace
 
@@ -121,13 +115,13 @@ void Scene::createBuffer()
     mImgBuffer = new ImageBuffer(mCam->width(), mCam->height());
 }
 
-Mesh& Scene::allocateMesh(unsigned numberOfVerticies)
+Mesh& Scene::allocateMesh(uint32_t numberOfVerticies)
 {
     mMeshes.emplace_front(new Mesh(numberOfVerticies));
     return *mMeshes.front();
 }
 
-void Scene::setImageSize(unsigned width, unsigned height)
+void Scene::setImageSize(uint32_t width, uint32_t height)
 {
     mCam->setWidthHeight(width, height);
 }
@@ -165,7 +159,7 @@ void Scene::render(const std::string& filename)
     StatsCollector collector;
     t.start();
     
-    unsigned int numCpus = sysconf(_SC_NPROCESSORS_ONLN);
+    uint32_t numCpus = (uint32_t)sysconf(_SC_NPROCESSORS_ONLN);
     if (numCpus < 1)
     {
         std::stringstream ss;
@@ -175,19 +169,19 @@ void Scene::render(const std::string& filename)
     
     std::cout << "Using " << numCpus << " CPUs" << std::endl;
     
-    std::vector<Raytracer*> tracers;
+    std::vector<std::unique_ptr<Raytracer> > tracers;
     tracers.reserve(numCpus);
     
-    for (unsigned int i = 0; i < numCpus; ++i)
+    for (uint32_t i = 0; i < numCpus; ++i)
     {
-        Raytracer* tracer = new Raytracer(*mKdTree, *mCam, mEnvSphere, mSampler,
-                                          mImgBuffer, mSettings.maxDepth);
-        tracers.emplace_back(tracer);
+        tracers.emplace_back(
+            std::make_unique<Raytracer>(*mKdTree, *mCam, mEnvSphere, mSampler, mImgBuffer, mSettings.maxDepth));
+
+        std::unique_ptr<Raytracer>& tracer = tracers.back();
         tracer->registerStatsCollector(collector);
         if (!tracer->start())
         {
             joinThreads(tracers, true /*kill*/);
-            cleanupThreads(tracers);
             throw std::runtime_error("Error creating threads!");
         }
     }
@@ -200,13 +194,9 @@ void Scene::render(const std::string& filename)
     collector.print();
     std::cout << std::endl;
     std::cout << "Render time: " << t.elapsedToString(t.elapsed()) << std::endl;
-    
-    // Must cleanup threads after we've printed the collected stats since each
-    // thread object owns it's own stats block.
-    cleanupThreads(tracers);
 }
 
-void Scene::setShadowRays(unsigned num)
+void Scene::setShadowRays(uint32_t num)
 {
     for (ILight* light : mLights)
         light->setShadowRays(num);

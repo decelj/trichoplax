@@ -29,22 +29,22 @@ public:
     {
         RenderSettings();
 
-        unsigned maxDepth;
-        unsigned GISamples;
+        uint32_t maxDepth;
+        uint32_t GISamples;
         float bias;
     };
 
     void prepareForRendering();
     void render(const std::string& filename);
     void setCamera(Camera* cam) { mCam = cam; }
-    Mesh& allocateMesh(unsigned numberOfVerticies);
+    Mesh& allocateMesh(uint32_t numberOfVerticies);
     void addLight(ILight* lgt) { mLights.push_back(lgt); }
-    void setMaxDepth(unsigned depth) { mSettings.maxDepth = depth; }
-    void setNumGISamples(unsigned numSamples) { mSettings.GISamples = numSamples; }
+    void setMaxDepth(uint32_t depth) { mSettings.maxDepth = depth; }
+    void setNumGISamples(uint32_t numSamples) { mSettings.GISamples = numSamples; }
     void setBias(float bias) { mSettings.bias = bias; }
-    void setImageSize(unsigned width, unsigned height);
+    void setImageSize(uint32_t width, uint32_t height);
     void setEnvSphereImage(const std::string& file);
-    void setShadowRays(unsigned num);
+    void setShadowRays(uint32_t num);
 
     bool hasCamera() const { return mCam != nullptr; }
 

@@ -43,13 +43,13 @@ struct TriangleIndicies
     {
     }
 
-    TriangleIndicies(unsigned startIdx, Material* _material)
+    TriangleIndicies(uint32_t startIdx, Material* _material)
         : startVertexIndex(startIdx)
         , material(_material)
     {
     }
 
-    unsigned startVertexIndex;
+    uint32_t startVertexIndex;
     Material* material;
 };
 
@@ -84,8 +84,8 @@ std::string SimpleParser::parse(const std::string& file, Scene& scene)
     float quadAtten = 0.0f;
     float bias = 0.001f;
     float pointLgtRadius = 0.0f;
-    unsigned w = 0;
-    unsigned h = 0;
+    uint32_t w = 0;
+    uint32_t h = 0;
     
     do
     {
@@ -105,8 +105,8 @@ std::string SimpleParser::parse(const std::string& file, Scene& scene)
         {
             if (readValues(lineStream, 2, values))
             {
-                w = static_cast<unsigned>(values[0]);
-                h = static_cast<unsigned>(values[1]);
+                w = static_cast<uint32_t>(values[0]);
+                h = static_cast<uint32_t>(values[1]);
             }
         }
         else if (cmd == "output")
@@ -116,12 +116,12 @@ std::string SimpleParser::parse(const std::string& file, Scene& scene)
         else if (cmd == "maxdepth")
         {
             if (readValues(lineStream, 1, values))
-                scene.setMaxDepth(static_cast<unsigned>(values[0]));
+                scene.setMaxDepth(static_cast<uint32_t>(values[0]));
         }
         else if (cmd == "shdwrays")
         {
             if (readValues(lineStream, 1, values))
-                scene.setShadowRays(static_cast<unsigned>(values[0]));
+                scene.setShadowRays(static_cast<uint32_t>(values[0]));
         }
         else if (cmd == "camera")
         {
@@ -286,7 +286,7 @@ std::string SimpleParser::parse(const std::string& file, Scene& scene)
         {
             if (readValues(lineStream, 1, values))
             {
-                scene.setNumGISamples(static_cast<unsigned>(values[0]));
+                scene.setNumGISamples(static_cast<uint32_t>(values[0]));
             }
         }
         else
@@ -297,9 +297,9 @@ std::string SimpleParser::parse(const std::string& file, Scene& scene)
 
     // Now that we know how many transformed verts we have, actually put
     // the verticies and triangles in the mesh.
-    Mesh& triangleMesh = scene.allocateMesh(transformedVerticies.size());
+    Mesh& triangleMesh = scene.allocateMesh((uint32_t)transformedVerticies.size());
 
-    unsigned vertexIndex = 0;
+    uint32_t vertexIndex = 0;
     for (const TriangleIndicies& ti : triangleIndicies)
     {
         // Assumes each triangle has a unique set of vertices

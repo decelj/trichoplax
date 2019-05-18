@@ -18,7 +18,7 @@ EnvSphere::EnvSphere(const std::string& file)
         format = FreeImage_GetFIFFromFilename(file.c_str());
     }
 
-    FIBITMAP* fiImage;
+    FIBITMAP* fiImage = nullptr;
     if (format != FIF_UNKNOWN && FreeImage_FIFSupportsReading(format))
     {
         fiImage = FreeImage_Load(format, file.c_str());
