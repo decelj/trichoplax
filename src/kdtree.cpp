@@ -21,7 +21,7 @@
 
 namespace
 {
-inline float calculateSplitCost(float probabilityHitLeft, float probabilityHitRight, unsigned numPrimsLeft, unsigned numPrimsRight)
+inline float calculateSplitCost(float probabilityHitLeft, float probabilityHitRight, uint32_t numPrimsLeft, uint32_t numPrimsRight)
 {
     // TODO: This causes infinite recursion trying to create empty nodes with zero volume. Fix me.
     //float modifer = numPrimsLeft == 0 || numPrimsRight == 0 ? .8f : 1.f;
@@ -36,7 +36,7 @@ inline float calculateSplitCost(float probabilityHitLeft, float probabilityHitRi
 KdTree::KdTree()
     : mNodes(2)
     , mMaxDepth(0)
-    , mMinDepth(std::numeric_limits<unsigned>::max())
+    , mMinDepth(std::numeric_limits<uint32_t>::max())
     , mLeafNodes(0)
     , mTotalNodes(0)
     , mMaxPrimsPerNode(0)
@@ -71,7 +71,7 @@ void KdTree::build()
     initialEvents.sort();
 
     uint32_t nextNodeIdx = 1; // idx 0 is root node
-    build(0, mBounds, initialEvents, mPrimVector.size(), 0, &nextNodeIdx);
+    build(0, mBounds, initialEvents, (uint32_t)mPrimVector.size(), 0, &nextNodeIdx);
     mNodes.shrink_to_fit();
 
     std::cout << "KdTree Build Stats:" << std::endl;
@@ -84,7 +84,7 @@ void KdTree::build()
     std::cout << std::left << std::setw(30) << "  Build time:" << t.elapsedToString(t.elapsed()) << std::endl;
 }
 
-void KdTree::build(uint32_t nodeIdx, const AABBox& bounds, SHAPlaneEventList& events, unsigned numPrimitives, unsigned depth, uint32_t* nextNodeIdx)
+void KdTree::build(uint32_t nodeIdx, const AABBox& bounds, SHAPlaneEventList& events, uint32_t numPrimitives, uint32_t depth, uint32_t* nextNodeIdx)
 {
     TP_ASSERT(events.size() <= numPrimitives * 2 * 3);
     TP_ASSERT(events.size() >= numPrimitives);
@@ -255,7 +255,7 @@ void KdTree::generateEventsForPrimitive(const Triangle* primitive, const AABBox&
     // Clipped box width, height, depth
     const glm::vec3 clippedBoxWHD = clippedBox.ur() - clippedBox.ll();
     
-    for (unsigned axis = 0; axis < 3; ++axis)
+    for (uint32_t axis = 0; axis < 3; ++axis)
     {
         if (relEq(clippedBoxWHD[axis], 0.f, 1.0e-10f))
         {
@@ -279,25 +279,25 @@ void KdTree::generateEventsForPrimitive(const Triangle* primitive, const AABBox&
 
 KdTree::SHASplitPlane KdTree::findSplitPlane(
     const AABBox& voxel, const SHAPlaneEventList& events,
-    unsigned totalNumPrimitives) const
+    uint32_t totalNumPrimitives) const
 {
     SHASplitPlane bestSplitPlane;
-    unsigned numLeft[3] = {0, 0, 0};
-    unsigned numPlanar[3] = {0, 0, 0};
-    unsigned numRight[3] = {totalNumPrimitives, totalNumPrimitives, totalNumPrimitives};
+    uint32_t numLeft[3] = {0, 0, 0};
+    uint32_t numPlanar[3] = {0, 0, 0};
+    uint32_t numRight[3] = {totalNumPrimitives, totalNumPrimitives, totalNumPrimitives};
 
 #if DEBUG
-    unsigned lowestCounts[3] = {0, 0, 0};
+    uint32_t lowestCounts[3] = {0, 0, 0};
 #endif
     
     SHAPlaneEventList::const_iterator it = events.begin();
     while (it != events.end())
     {
         float plane = it->plane;
-        unsigned aaAxis = it->axis;
-        unsigned startingAtPlane = 0;
-        unsigned planar = 0;
-        unsigned endingAtPlane = 0;
+        uint32_t aaAxis = it->axis;
+        uint32_t startingAtPlane = 0;
+        uint32_t planar = 0;
+        uint32_t endingAtPlane = 0;
         
         while (it != events.end() && it->axis == aaAxis && it->plane == plane && it->type == END)
         {
@@ -350,7 +350,7 @@ KdTree::SHASplitPlane KdTree::findSplitPlane(
     return bestSplitPlane;
 }
 
-void KdTree::SHACost(float* outCost, SHASplitPlane::Side* outSide, float plane, unsigned aaAxis, const AABBox& voxel, unsigned numLeftPrims, unsigned numRightPrims, unsigned numPlanarPrims) const
+void KdTree::SHACost(float* outCost, SHASplitPlane::Side* outSide, float plane, uint32_t aaAxis, const AABBox& voxel, uint32_t numLeftPrims, uint32_t numRightPrims, uint32_t numPlanarPrims) const
 {
     *outCost = std::numeric_limits<float>::max();
     *outSide = SHASplitPlane::RIGHT;
@@ -412,7 +412,7 @@ KdTree::Node::~Node()
 }
 
 
-KdTree::SHAPlaneEvent::SHAPlaneEvent(const Triangle* _prim, float _plane, unsigned _axis, SHAPlaneEventType _type)
+KdTree::SHAPlaneEvent::SHAPlaneEvent(const Triangle* _prim, float _plane, uint32_t _axis, SHAPlaneEventType _type)
     : primitive(_prim)
     , plane(_plane)
     , axis(_axis)

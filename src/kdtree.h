@@ -326,7 +326,7 @@ bool KdTree::trace(Ray& ray, TraversalBuffer& traversalStack, Mailboxer& mailbox
                 state.maxT = maxT;
                 state.node = secondChild;
 
-                maxT = planeT;
+                maxT = planeT > 0.f ? planeT : maxT;
                 currentNode = firstChild;
             }
         }
