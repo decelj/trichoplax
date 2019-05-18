@@ -19,8 +19,9 @@ struct Args
     std::string outputImage;
     std::string envSphere;
 
-    unsigned width;
-    unsigned height;
+    uint32_t width;
+    uint32_t height;
+    uint32_t maxThreads;
 
     Scene::RenderSettings renderSettings;
 };
@@ -31,11 +32,9 @@ Args::Args()
     , envSphere()
     , width(0)
     , height(0)
+    , maxThreads(std::numeric_limits<uint32_t>::max())
     , renderSettings()
 {
-    renderSettings.maxDepth = std::numeric_limits<unsigned>::max();
-    renderSettings.GISamples = std::numeric_limits<unsigned>::max();
-    renderSettings.bias = -1.f;
 }
 
 Args parseArgs(int argc, char** argv)
@@ -50,6 +49,7 @@ Args parseArgs(int argc, char** argv)
     argParser.RegisterArg("-maxDepth", &args.renderSettings.maxDepth, args.renderSettings.maxDepth);
     argParser.RegisterArg("-giSamples", &args.renderSettings.GISamples, args.renderSettings.GISamples);
     argParser.RegisterArg("-bias", &args.renderSettings.bias, args.renderSettings.bias);
+    argParser.RegisterArg("-maxThreads", &args.maxThreads, args.maxThreads);
     
     std::vector<std::string> extraArgs;
     try
@@ -77,20 +77,9 @@ Args parseArgs(int argc, char** argv)
 
 void applyCLOverrides(const Args& args, Scene& scene)
 {
-    if (args.renderSettings.bias != -1.f)
-    {
-        scene.setBias(args.renderSettings.bias);
-    }
-
-    if (args.renderSettings.GISamples != std::numeric_limits<unsigned>::max())
-    {
-        scene.setNumGISamples(args.renderSettings.GISamples);
-    }
-
-    if (args.renderSettings.maxDepth != std::numeric_limits<unsigned>::max())
-    {
-        scene.setMaxDepth(args.renderSettings.maxDepth);
-    }
+    scene.setBias(args.renderSettings.bias);
+    scene.setNumGISamples(args.renderSettings.GISamples);
+    scene.setMaxDepth(args.renderSettings.maxDepth);
 
     if (!args.envSphere.empty())
     {
@@ -149,7 +138,7 @@ int main(int argc, char** argv)
     applyCLOverrides(clArgs, Scene::instance());
 
     Scene::instance().prepareForRendering();
-    Scene::instance().render(clArgs.outputImage);
+    Scene::instance().render(clArgs.outputImage, clArgs.maxThreads);
     Scene::destroy();
     
     FreeImage_DeInitialise();

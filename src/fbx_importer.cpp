@@ -9,9 +9,9 @@
 #include <glm/glm.hpp>
 #include <cmath>
 
-#include "Mesh.h"
-#include "Material.h"
-#include "Scene.h"
+#include "mesh.h"
+#include "material.h"
+#include "scene.h"
 #include "ilight.h"
 #include "direct_light.h"
 #include "point_light.h"

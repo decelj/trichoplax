@@ -35,7 +35,7 @@ public:
     };
 
     void prepareForRendering();
-    void render(const std::string& filename);
+    void render(const std::string& filename, uint32_t maxThreads);
     void setCamera(Camera* cam) { mCam = cam; }
     Mesh& allocateMesh(uint32_t numberOfVerticies);
     void addLight(ILight* lgt) { mLights.push_back(lgt); }

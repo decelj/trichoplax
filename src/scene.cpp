@@ -38,7 +38,7 @@ void joinThreads(std::vector<std::unique_ptr<Raytracer> >& tracers, bool kill=fa
 
 Scene::RenderSettings::RenderSettings()
     : maxDepth(1)
-    , GISamples(0)
+    , GISamples(50)
     , bias(0.001f)
 {
 }
@@ -147,9 +147,14 @@ void Scene::prepareForRendering()
             mKdTree->addPrimitive(triangle);
         }
     }
+
+    for (ILight* light : mLights)
+    {
+        light->setBias(mSettings.bias);
+    }
 }
 
-void Scene::render(const std::string& filename)
+void Scene::render(const std::string& filename, uint32_t maxThreads)
 {
     TP_ASSERT(mCam != nullptr);
     createBuffer();
@@ -166,7 +171,8 @@ void Scene::render(const std::string& filename)
         ss << "Error getting number of CPUs: " << strerror(numCpus);
         throw std::runtime_error(ss.str());
     }
-    
+
+    numCpus = std::min(numCpus, maxThreads);
     std::cout << "Using " << numCpus << " CPUs" << std::endl;
     
     std::vector<std::unique_ptr<Raytracer> > tracers;
