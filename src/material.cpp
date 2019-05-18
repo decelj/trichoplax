@@ -50,24 +50,30 @@ glm::vec4 Material::shadeRay(const Raytracer& tracer, const Ray& r) const
 {
     glm::vec4 result(0.f);
 
-    if (r.depth() >= tracer.maxDepth())
-    {
-        return result;
-    }
-
     const Scene& scene = Scene::instance();
     const Hit hit(r);
-    Noise& noiseGen = tracer.getNoiseGenerator();
 
-    glm::vec3 giRadiance(0.f);
-    if (scene.renderSettings().GISamples > 0)
+    glm::vec3 directLighting(0.f);
+    const bool hasSpecLobe = mBrdf.roughness() < .998f;
+    for (Scene::ConstLightIter it = scene.lightsBegin(); it != scene.lightsEnd(); ++it)
     {
+        directLighting += sampleLight(**it, hit, tracer, r.depth(), hasSpecLobe);
+    }
+
+    directLighting *= 1.f / PI;
+    result += glm::vec4(directLighting * mBrdf.Kd(), 0.f);
+
+    if (r.depth() < tracer.maxDepth() && scene.renderSettings().GISamples > 0)
+    {
+        glm::vec3 giRadiance(0.f);
+
         Ray giRay(Ray::GI);
         giRay.setDepth(r.depth() + 1);
         giRay.setOrigin(hit.P);
         giRay.bias(scene.renderSettings().bias);
         giRay.shouldHitBackFaces(false);
 
+        Noise& noiseGen = tracer.getNoiseGenerator();
         const unsigned seqNumber = noiseGen.generateGISequenceNumber();
         for (unsigned i = 0; i < scene.renderSettings().GISamples; ++i)
         {
@@ -81,21 +87,12 @@ glm::vec4 Material::shadeRay(const Raytracer& tracer, const Ray& r) const
             giRadiance.g += rayResult.g * giSample.z;
             giRadiance.b += rayResult.b * giSample.z;
         }
-        giRadiance = 2.f * (giRadiance / static_cast<float>(scene.renderSettings().GISamples));
+        giRadiance = giRadiance / static_cast<float>(scene.renderSettings().GISamples);
+
+        result += glm::vec4(giRadiance * mBrdf.Kd(), 0.f);
     }
 
-    glm::vec3 directLighting(0.f);
-    const bool hasSpecLobe = mBrdf.roughness() < .998f;
-    for (Scene::ConstLightIter it = scene.lightsBegin(); it != scene.lightsEnd(); ++it)
-    {
-        directLighting += sampleLight(**it, hit, tracer, r.depth(), hasSpecLobe);
-    }
-
-    directLighting *= 1.f / PI;
-
-    result += glm::vec4((directLighting + giRadiance) * mBrdf.Kd(), 0.f);
     result += glm::vec4(mBrdf.Ke(), 0.f);
-
     result.a = 1.f;
     return result;
 }
