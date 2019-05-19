@@ -99,14 +99,14 @@ private:
     
     struct SHAPlaneEvent
     {
-        SHAPlaneEvent(const Triangle* _prim, float _plane, unsigned _axis,
+        SHAPlaneEvent(const Triangle* _prim, float _plane, uint32_t _axis,
                       SHAPlaneEventType _type);
         
         bool operator<(const SHAPlaneEvent& rhs) const;
         
         const Triangle* primitive;
         float plane;
-        unsigned axis;
+        uint32_t axis;
         SHAPlaneEventType type;
     };
     using SHAPlaneEventList = std::list<SHAPlaneEvent>;
@@ -123,15 +123,15 @@ private:
 
         float plane;
         float cost;
-        unsigned aaAxis;
+        uint32_t aaAxis;
         Side side;
-        unsigned numPrimitivesRight;
-        unsigned numPrimitivesLeft;
+        uint32_t numPrimitivesRight;
+        uint32_t numPrimitivesLeft;
     };
 
     struct TraversalState
     {
-        const Node* node;
+        uint32_t nodeIdx;
         float minT;
         float maxT;
     };
@@ -154,23 +154,23 @@ public:
 private:
     uint32_t allocNode(uint32_t* nextNodeIdx);
 
-    void build(uint32_t nodeIdx, const AABBox& bounds, SHAPlaneEventList& events, unsigned numPrimitives, unsigned depth, uint32_t* nextNodeIdx);
+    void build(uint32_t nodeIdx, const AABBox& bounds, SHAPlaneEventList& events, uint32_t numPrimitives, uint32_t depth, uint32_t* nextNodeIdx);
     void split(SHAPlaneEventList& outLeftEvents, SHAPlaneEventList& outRightEvents,
                const AABBox& leftBounds, const AABBox& rightBounds,
                const SHASplitPlane& plane, SHAPlaneEventList& events);
     SHASplitPlane findSplitPlane(const AABBox& voxel, const SHAPlaneEventList& events,
-                                 unsigned totalNumPrimitives) const;
+                                 uint32_t totalNumPrimitives) const;
     void SHACost(float* lowestCostOut, SHASplitPlane::Side* outSide,
-                 float plane, unsigned aaAxis, const AABBox& voxel,
-                 unsigned numLeftPrims, unsigned numRightPrims, unsigned numPlanarPrims) const;
+                 float plane, uint32_t aaAxis, const AABBox& voxel,
+                 uint32_t numLeftPrims, uint32_t numRightPrims, uint32_t numPlanarPrims) const;
 
     void generateEventsForPrimitive(const Triangle* primitive, const AABBox& voxel,
                                     SHAPlaneEventList& events) const;
 
     AABBox                  mBounds;
     NodeBuffer              mNodes;
-    unsigned                mMaxDepth;
-    unsigned                mMinDepth;
+    uint32_t                mMaxDepth;
+    uint32_t                mMinDepth;
     size_t                  mLeafNodes;
     size_t                  mTotalNodes;
     uint32_t                mMaxPrimsPerNode;
@@ -253,11 +253,12 @@ bool KdTree::trace(Ray& ray, TraversalBuffer& traversalStack, Mailboxer& mailbox
     float minT = ray.minT();
     float maxT = ray.maxT();
     const glm::vec3 invDir = 1.f / ray.dir();
+    const glm::vec3 rayOrigin = ray.origin();
     bool hitPrimitive = false;
     const Node* currentNode = &mNodes[0];
     int traversalStackIdx = -1;
 
-    while (currentNode && ray.maxT() >= minT)
+    do
     {
         if (currentNode->isLeaf())
         {
@@ -285,13 +286,13 @@ bool KdTree::trace(Ray& ray, TraversalBuffer& traversalStack, Mailboxer& mailbox
             if (traversalStackIdx >= 0)
             {
                 TraversalState& state = traversalStack[traversalStackIdx--];
-                currentNode = state.node;
+                currentNode = &mNodes[state.nodeIdx];
                 minT = state.minT;
                 maxT = state.maxT;
             }
             else
             {
-                currentNode = nullptr;
+                break;
             }
         }
         else
@@ -299,12 +300,12 @@ bool KdTree::trace(Ray& ray, TraversalBuffer& traversalStack, Mailboxer& mailbox
             threadStats.boxTests++;
 
             const uint32_t axis = currentNode->splitAxis();
-            const float planeT = (currentNode->splitPlane() - ray.origin()[axis]) * invDir[axis];
+            const float planeT = (currentNode->splitPlane() - rayOrigin[axis]) * invDir[axis];
 
-            const Node* firstChild = &mNodes[currentNode->lowerChildIdx()];
-            const Node* secondChild = &mNodes[currentNode->upperChildIdx()];
+            uint32_t firstChild = currentNode->lowerChildIdx();
+            uint32_t secondChild = currentNode->upperChildIdx();
 
-            bool belowFirst = ray.origin()[axis] <= currentNode->splitPlane();
+            bool belowFirst = rayOrigin[axis] <= currentNode->splitPlane();
             if (!belowFirst)
             {
                 std::swap(firstChild, secondChild);
@@ -312,11 +313,11 @@ bool KdTree::trace(Ray& ray, TraversalBuffer& traversalStack, Mailboxer& mailbox
 
             if (maxT < planeT || planeT < 0.f)
             {
-                currentNode = firstChild;
+                currentNode = &mNodes[firstChild];
             }
             else if (minT > planeT)
             {
-                currentNode = secondChild;
+                currentNode = &mNodes[secondChild];
             }
             else
             {
@@ -324,13 +325,13 @@ bool KdTree::trace(Ray& ray, TraversalBuffer& traversalStack, Mailboxer& mailbox
                 TraversalState& state = traversalStack[++traversalStackIdx];
                 state.minT = planeT;
                 state.maxT = maxT;
-                state.node = secondChild;
+                state.nodeIdx = secondChild;
 
                 maxT = planeT > 0.f ? planeT : maxT;
-                currentNode = firstChild;
+                currentNode = &mNodes[firstChild];
             }
         }
-    }
+    } while (ray.maxT() >= minT);
     
     return hitPrimitive;
 }
