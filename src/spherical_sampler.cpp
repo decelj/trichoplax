@@ -25,6 +25,7 @@ SphericalSampler::SphericalSampler(const glm::vec3& position,
     {
         mSampleToWorld = generateBasis(centerVector / mDistanceToSample);
         mCosThetaMax = std::sqrtf(1.f - (mRadius * mRadius) / mDistanceSquaredToSample);
+        mDistanceToSample -= mRadius;
     }
     else
     {
